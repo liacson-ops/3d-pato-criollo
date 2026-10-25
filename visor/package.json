@@ -3,10 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "construir": "node construir.mjs",
+    "construir": "node construir.mjs && node construir_sim.mjs",
     "capturas": "node capturas.mjs"
   },
   "devDependencies": {
+    "@mujoco/mujoco": "3.17.0",
     "esbuild": "0.20.2",
     "three": "0.160.0"
   }

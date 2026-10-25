@@ -36,34 +36,43 @@ TPU = 1.21e-3
 # ---------------------------------------------------------------------------
 # Medidas principales (mm)
 # ---------------------------------------------------------------------------
-Y_PATA = 38.0          # eje de cada pata respecto del centro
-Z_TOBILLO = 34.0
-Z_RODILLA = Z_TOBILLO + 45.0     # canilla de 45 mm (original: 42)
-Z_CADERA = Z_RODILLA + 45.0      # muslo de 45 mm (original: 42)
+Y_PATA = 42.0          # eje de cada pata respecto del centro
+# Servos de rodilla, tobillo y cadera pitch acostados: eje lateral, cuerpo hacia atrás.
+# Así cada segmento mide 32 mm en vez de 45.
+Z_TOBILLO = 24.0
+SEGMENTO = 32.0
+Z_RODILLA = Z_TOBILLO + SEGMENTO
+Z_CADERA = Z_RODILLA + SEGMENTO
 Z_ROLL = Z_CADERA + 30.0
-Z_PISO = (178.0, 186.0)
+Z_PISO = (Z_ROLL + 24.0, Z_ROLL + 32.0)
 # Tronco: cajita redondeada, como el original (la electrónica va en estantes adentro).
-TRONCO_X = (-50.0, 66.0)
-TRONCO_Y = (-46.0, 46.0)
-TRONCO_Z = (187.0, 284.0)
+TRONCO_X = (-54.0, 70.0)
+TRONCO_Y = (-50.0, 50.0)
+TRONCO_Z = (Z_PISO[1] + 1.0, Z_PISO[1] + 71.0)
 TRONCO_R = 12.0
-Z_CORTE_TRONCO = 232.0
+Z_CORTE_TRONCO = TRONCO_Z[0] + 38.0
+X_CUELLO = 40.0
+Z_YAW_TAPA = TRONCO_Z[1] - 3.0        # tapa del servo yaw del cuello (el horn asoma arriba)
+Z_PITCH = Z_YAW_TAPA + 27.0
 # Cabeza: cúpula tipo "pan" con el piso plano y pico ancho que abre como una tapa.
+# Se modela en el marco de referencia viejo (pitch en z=295) y se baja al final.
 CAB_X = (-15.0, 115.0)
 CAB_Y = (-52.0, 52.0)
 Z_CAB = (305.0, 365.0)
 R_CAB_ARRIBA, R_CAB_ABAJO = 26.0, 10.0
-X_CUELLO = 40.0
-Z_PITCH = 295.0
 BISAGRA_BOCA = (-5.0, 312.0)       # (x, z) del eje del pico inferior, atrás de la cabeza
 PARED = 1.6
 
-# Servos de eje lateral (pitch, rodilla, tobillo): tapa hacia afuera en y = 50.
-Y_TAPA = 50.0
-Y_FONDO = Y_TAPA - MG996R.alto                   # 13.2
-Y_HORN = Y_TAPA + MG996R.alto_horn               # 58.5
-PLACA_EXT = (Y_HORN, Y_HORN + 3.0)
-PLACA_INT = (Y_FONDO - 4.0, Y_FONDO - 1.0)
+# Servos de eje lateral: tapa hacia afuera, horn afuera; pivote impreso del lado de adentro.
+Y_TAPA = Y_PATA + 12.0                            # 54
+Y_FONDO = Y_TAPA - MG996R.alto                    # 17.2
+Y_HORN = Y_TAPA + MG996R.alto_horn                # 62.5
+PLACA_EXT = (Y_HORN, Y_HORN + 3.0)                # placa exterior del eslabón de abajo, sobre el horn
+PLACA_PIV = (9.7, 12.7)                           # placa interior del eslabón de abajo, sobre el pin
+Y_CUNA_INT = (13.7, 16.7)                         # placa interior de la cuna (0,5 mm del cuerpo)
+Y_PAD = (Y_TAPA - MG996R.orejas_desde_tapa - MG996R.espesor_orejas - 2.9,
+         Y_TAPA - MG996R.orejas_desde_tapa - MG996R.espesor_orejas)   # apoyo de las orejas
+PARED_CUNA = (10.2, 14.0)                         # paredes arriba/abajo del cuerpo, desde el eje
 
 COLORES = {
     'pla': '#e9e6df', 'carcasa': '#fbfaf7', 'naranja': '#f3c118', 'amarillo_claro': '#f9dd7a', 'tpu': '#d9822b',
@@ -198,6 +207,32 @@ PASOS = {
 }
 
 
+def cuna(zs, z_sup=None):
+    """Cuna impresa de un servo MG996R acostado (eje lateral en z = zs, cuerpo hacia atrás),
+    con las placas que cuelgan de la articulación de arriba (z_sup): la exterior va
+    atornillada al horn y la interior pivota en el pin del eslabón de arriba. Abajo lleva
+    el pin para el eslabón siguiente. Es el mismo bloque para cadera, muslo y canilla."""
+    a, b = PARED_CUNA
+    y_int, y_tapa = Y_CUNA_INT[0], Y_TAPA
+    m = caja(-38, 18, y_int, y_tapa, zs + a, zs + b)                       # pared de arriba
+    m += caja(-38, 18, y_tapa, PLACA_EXT[1], zs + 12.5, zs + b)             # escalón hasta la placa exterior
+    m += caja(-38, 18, y_int, y_tapa, zs - b, zs - a)                       # pared de abajo
+    m += caja(-38, 18, Y_CUNA_INT[0], Y_CUNA_INT[1], zs - b, zs + b)        # placa interior
+    m += caja(10.2, 17.1, Y_PAD[0], Y_PAD[1], zs - a, zs + a)               # apoyos de las orejas
+    m += caja(-37.4, -30.5, Y_PAD[0], Y_PAD[1], zs - a, zs + a)
+    m += cil((0, Y_CUNA_INT[0], zs), (0, PLACA_PIV[0], zs), 3.5)            # pin del eslabón de abajo
+    if z_sup is not None:
+        m += placa_y(*PLACA_EXT, [(0, z_sup, 11.5)], [(-10, 10, zs + 12.5, z_sup)])
+        m += (placa_y(*PLACA_PIV, [(0, z_sup, 10)], [(-8, 8, zs + b, z_sup)])
+              - cil((0, PLACA_PIV[0] - 1, z_sup), (0, PLACA_PIV[1] + 1, z_sup), 3.8))
+        m += caja(-10, 10, PLACA_PIV[0], Y_CUNA_INT[1], zs + b, zs + b + 2.5)   # puente a la placa interior
+    return m
+
+
+def servo_acostado(zs):
+    return servo_en(MG996R, (0, Y_TAPA, zs), (0, 1, 0), (-1, 0, 0))
+
+
 def pata(r: Robot, lado: str):
     """Construye la pata izquierda y, para la derecha, la espeja en Y."""
     s = 1 if lado == 'izq' else -1
@@ -209,82 +244,67 @@ def pata(r: Robot, lado: str):
         r.agregar(Pieza(f'{nombre}_{lado}', nombres[eslabon], espejo(malla), color, tipo, paso, **kw))
 
     # Pie (paso 1)
-    talon, dedos = (-22, y, 15), [(48, y - 22, 8), (55, y, 8), (48, y + 22, 8)]
+    talon, dedos = (-20, y, 13), [(42, y - 20, 7), (48, y, 7), (42, y + 20, 7)]
     contorno = Manifold.batch_hull([cil((px, py, 0), (px, py, 1), pr) for px, py, pr in [talon, *dedos]])
-    muescas = [cil((62, y + d, -1), (62, y + d, 20), 6) for d in (-11, 11)]
+    muescas = [cil((54, y + d, -1), (54, y + d, 20), 5) for d in (-10, 10)]
     paleta = contorno - muescas[0] - muescas[1]
     add('suela', 'pie', paleta.scale([1, 1, 2]), COLORES['tpu'], 'tpu', 1, relleno=0.5,
         descripcion='Suela de TPU')
     add('paleta_pie', 'pie', paleta.scale([1, 1, 5]).translate([0, 0, 2]), COLORES['naranja'], 'impresa', 1,
         relleno=0.5, descripcion='Pie de pato (paleta)')
-    oreja_ext = placa_y(*PLACA_EXT, [(0, Z_TOBILLO, 13)], [(-14, 14, 7, 9)])
-    oreja_int = placa_y(*PLACA_INT, [(0, Z_TOBILLO, 10)], [(-14, 14, 7, 9)])
-    pivote = cil((0, PLACA_INT[1], Z_TOBILLO), (0, Y_FONDO, Z_TOBILLO), 3.5)
-    add('orejas_tobillo', 'pie', oreja_ext + oreja_int + pivote, COLORES['pla'], 'impresa', 1,
-        descripcion='Orejas del tobillo (horn afuera, pivote adentro)')
+    orejas = (placa_y(*PLACA_EXT, [(0, Z_TOBILLO, 11.5)], [(-10, 10, 7, Z_TOBILLO)])
+              + placa_y(*PLACA_PIV, [(0, Z_TOBILLO, 10)], [(-8, 8, 7, Z_TOBILLO)])
+              - cil((0, PLACA_PIV[0] - 1, Z_TOBILLO), (0, PLACA_PIV[1] + 1, Z_TOBILLO), 3.8))
+    add('orejas_tobillo', 'pie', orejas, COLORES['pla'], 'impresa', 1,
+        descripcion='Orejas del tobillo (horn afuera, pin adentro)')
 
-    # Canilla con servo de tobillo (paso 2)
-    caja_t, horn_t = servo_en(MG996R, (0, Y_TAPA, Z_TOBILLO), (0, 1, 0), (0, 0, 1), 'eje')
+    # Canilla: cuna del servo del tobillo, cuelga de la rodilla (paso 2)
+    caja_t, horn_t = servo_acostado(Z_TOBILLO)
     add('servo_tobillo', 'canilla', caja_t, COLORES['mg996r'], 'comprada', 2, masa=MG996R.masa,
-        descripcion='MG996R tobillo')
+        descripcion='MG996R tobillo (acostado)')
     add('horn_tobillo', 'pie', horn_t, COLORES['horn'], 'comprada', 2, masa=2.0)
-    mx = MG996R.ancho / 2 + 0.3
-    paredes = (caja(mx, mx + 2.5, Y_FONDO, Y_TAPA, 21, 67.5) + caja(-mx - 2.5, -mx, Y_FONDO, Y_TAPA, 21, 67.5))
-    puente_ext = caja(-mx - 2.5, mx + 2.5, Y_TAPA, PLACA_EXT[1], 65, 67.5)
-    puente_int = caja(-mx - 2.5, mx + 2.5, PLACA_INT[0], Y_FONDO, 65, 67.5)
-    placa_ext = placa_y(*PLACA_EXT, [(0, Z_RODILLA, 13)], [(-mx - 2.5, mx + 2.5, 65, 67.5)])
-    placa_int = placa_y(*PLACA_INT, [(0, Z_RODILLA, 10)], [(-mx - 2.5, mx + 2.5, 65, 67.5)])
-    piv = cil((0, PLACA_INT[1], Z_RODILLA), (0, Y_FONDO, Z_RODILLA), 3.5)
-    add('soporte_canilla', 'canilla', paredes + puente_ext + puente_int + placa_ext + placa_int + piv,
-        COLORES['pla'], 'impresa', 2, descripcion='Canilla: aloja el servo del tobillo')
+    add('soporte_canilla', 'canilla', cuna(Z_TOBILLO, Z_RODILLA), COLORES['pla'], 'impresa', 2,
+        descripcion='Canilla: cuna del servo del tobillo')
 
-    # Muslo con servo de rodilla (paso 3)
-    caja_r, horn_r = servo_en(MG996R, (0, Y_TAPA, Z_RODILLA), (0, 1, 0), (0, 0, 1), 'ninguna')
+    # Muslo: cuna del servo de la rodilla, cuelga de la cadera (paso 3)
+    caja_r, horn_r = servo_acostado(Z_RODILLA)
     add('servo_rodilla', 'muslo', caja_r, COLORES['mg996r'], 'comprada', 3, masa=MG996R.masa,
-        descripcion='MG996R rodilla')
+        descripcion='MG996R rodilla (acostado)')
     add('horn_rodilla', 'canilla', horn_r, COLORES['horn'], 'comprada', 3, masa=2.0)
-    z0, z1 = 68.5, 112.5
-    paredes = caja(mx, mx + 2.5, Y_FONDO, Y_TAPA, z0, z1) + caja(-mx - 2.5, -mx, Y_FONDO, Y_TAPA, z0, z1)
-    puente_ext = caja(-mx - 2.5, mx + 2.5, Y_TAPA, PLACA_EXT[1], 110, z1)
-    puente_int = caja(-mx - 2.5, mx + 2.5, PLACA_INT[0], Y_FONDO, 110, z1)
-    placa_ext = placa_y(*PLACA_EXT, [(0, Z_CADERA, 13)], [(-mx - 2.5, mx + 2.5, 110, z1)])
-    placa_int = placa_y(*PLACA_INT, [(0, Z_CADERA, 10)], [(-mx - 2.5, mx + 2.5, 110, z1)])
-    piv = cil((0, PLACA_INT[1], Z_CADERA), (0, Y_FONDO, Z_CADERA), 3.5)
-    add('soporte_muslo', 'muslo', paredes + puente_ext + puente_int + placa_ext + placa_int + piv,
-        COLORES['pla'], 'impresa', 3, descripcion='Muslo: aloja el servo de la rodilla')
+    add('soporte_muslo', 'muslo', cuna(Z_RODILLA, Z_CADERA), COLORES['pla'], 'impresa', 3,
+        descripcion='Muslo: cuna del servo de la rodilla')
 
-    # Soporte U con servo pitch (paso 4)
-    caja_p, horn_p = servo_en(MG996R, (0, Y_TAPA, Z_CADERA), (0, 1, 0), (-1, 0, 0))
+    # Soporte U: cuna del servo pitch de cadera, cuelga del servo roll (paso 4)
+    caja_p, horn_p = servo_acostado(Z_CADERA)
     add('servo_cadera_pitch', 'cadera_roll', caja_p, COLORES['mg996r'], 'comprada', 4, masa=MG996R.masa,
-        descripcion='MG996R cadera pitch')
+        descripcion='MG996R cadera pitch (acostado)')
     add('horn_cadera_pitch', 'muslo', horn_p, COLORES['horn'], 'comprada', 4, masa=2.0)
     roll_tapa = 12.0
-    x_front = roll_tapa + MG996R.alto_horn       # 20.5
-    rects = [(13.5, 52, 112, 136)]
-    u_front = placa_x(x_front, x_front + 3, [(y, Z_ROLL, 13)], rects)
-    u_back = placa_x(-41.0, -38.0, [(y, Z_ROLL, 10)], rects)
-    sobra = (MG996R.largo_orejas - MG996R.largo) / 2
-    separ_f = caja(MG996R.eje_desde_punta + sobra, x_front, 16, 48, 116, 132)
-    separ_b = caja(-38.0, -30.5 - sobra, 16, 48, 116, 132)
-    piv = cil((-38.0, y, Z_ROLL), (roll_tapa - MG996R.alto, y, Z_ROLL), 3.5)
-    add('soporte_u', 'cadera_roll', u_front + u_back + separ_f + separ_b + piv, COLORES['pla'],
-        'impresa', 4, descripcion='Soporte U de cadera (roll → pitch)')
+    x_front = roll_tapa + MG996R.alto_horn                      # 20.5
+    a, b = PARED_CUNA
+    u = cuna(Z_CADERA)
+    u += placa_x(x_front, x_front + 3, [(y, Z_ROLL, 13)], [(y - 14, y + 14, Z_CADERA + 12.5, Z_CADERA + b)])
+    u += caja(17, x_front + 3, y - 14, y + 14, Z_CADERA + a, Z_CADERA + b)
+    u += placa_x(-42, -39, [(y, Z_ROLL, 10)], [(y - 14, y + 14, Z_CADERA + 12.5, Z_CADERA + b)])
+    u += caja(-42, -37, y - 14, y + 14, Z_CADERA + a, Z_CADERA + b)
+    u += cil((-45.5, y, Z_ROLL), (-26, y, Z_ROLL), 3.5)        # pin trasero del eje roll
+    add('soporte_u', 'cadera_roll', u, COLORES['pla'], 'impresa', 4,
+        descripcion='Soporte U de cadera: cuna del servo pitch, cuelga del servo roll')
 
     # Servo roll, placa yaw y eje (paso 5)
-    caja_ro, horn_ro = servo_en(MG996R, (roll_tapa, y, Z_ROLL), (1, 0, 0), (0, -1, 0), 'eje')
+    caja_ro, horn_ro = servo_en(MG996R, (roll_tapa, y, Z_ROLL), (1, 0, 0), (0, -1, 0))
     add('servo_cadera_roll', 'cadera_yaw', caja_ro, COLORES['mg996r'], 'comprada', 5, masa=MG996R.masa,
         descripcion='MG996R cadera roll')
     add('horn_cadera_roll', 'cadera_roll', horn_ro, COLORES['horn'], 'comprada', 5, masa=2.0)
-    xr0 = roll_tapa - MG996R.alto
-    tope_roll = Z_ROLL + MG996R.ancho / 2
-    placa = caja(-26, 14, 8, 52, 165, 171)
-    oreja_x = roll_tapa - MG996R.orejas_desde_tapa
-    abraz = (caja(xr0, roll_tapa, y - 30.5 - 3, y - 30.5, tope_roll - 20, 171)
-             + caja(oreja_x, roll_tapa - 0.5, y + 12.5, y + 10.2 + (MG996R.largo_orejas - MG996R.largo) / 2,
-                    Z_ROLL - 4, 171))
-    eje = cil((0, y, 171), (0, y, Z_PISO[1] + 0.5), 4.0) + cil((0, y, Z_PISO[1] - 0.5), (0, y, Z_PISO[1] + 0.5), 7)
-    add('placa_yaw', 'cadera_yaw', placa + abraz + eje, COLORES['pla'], 'impresa', 5,
-        descripcion='Placa yaw con abrazaderas del servo roll y eje al rulemán')
+    x_tab = roll_tapa - MG996R.orejas_desde_tapa - MG996R.espesor_orejas   # cara interior de las orejas
+    placa = caja(-45.5, 14, y - 37.4, y + 17.1, Z_ROLL + 10.2, Z_ROLL + 13.2)
+    placa += caja(x_tab - 2.5, x_tab, y + 10.2, y + 17.1, Z_ROLL - 10.2, Z_ROLL + 10.2)
+    placa += caja(x_tab - 2.5, x_tab, y - 37.4, y - 30.5, Z_ROLL - 10.2, Z_ROLL + 10.2)
+    placa += caja(-45.5, -42, y - 7, y + 7, Z_ROLL - 7, Z_ROLL + 10.2) - cil((-46, y, Z_ROLL), (-41, y, Z_ROLL), 4)
+    eje = (cil((0, y, Z_ROLL + 13.2), (0, y, Z_PISO[1] + 0.5), 4.0)
+           + cil((0, y, Z_PISO[1] - 0.5), (0, y, Z_PISO[1] + 0.5), 7))
+    add('placa_yaw', 'cadera_yaw', placa + eje, COLORES['pla'], 'impresa', 5,
+        descripcion='Placa yaw: sostiene el servo roll por las orejas y sube al rulemán')
 
     # Servo yaw de cadera y rulemán (paso 6), en el tronco
     tapa_yaw = Z_PISO[1] + 0.5 + MG90S.alto_horn
@@ -302,17 +322,17 @@ def pata(r: Robot, lado: str):
     def eje_lado(e):
         e = np.array(e, float)
         return e if s == 1 else -np.array([e[0], -e[1], e[2]])
-    a = lambda z: np.array([0.0, s * y, z])
+    anc = lambda z: np.array([0.0, s * y, z])
     r.articulaciones += [
-        Articulacion(f'cadera_yaw_{lado}', 'tronco', nombres['cadera_yaw'], a(Z_PISO[1]), eje_lado((0, 0, 1)),
+        Articulacion(f'cadera_yaw_{lado}', 'tronco', nombres['cadera_yaw'], anc(Z_PISO[1]), eje_lado((0, 0, 1)),
                      (-0.4, 0.4), MG90S),
-        Articulacion(f'cadera_roll_{lado}', nombres['cadera_yaw'], nombres['cadera_roll'], a(Z_ROLL),
+        Articulacion(f'cadera_roll_{lado}', nombres['cadera_yaw'], nombres['cadera_roll'], anc(Z_ROLL),
                      eje_lado((1, 0, 0)), (-0.4, 0.4), MG996R),
-        Articulacion(f'cadera_pitch_{lado}', nombres['cadera_roll'], nombres['muslo'], a(Z_CADERA),
+        Articulacion(f'cadera_pitch_{lado}', nombres['cadera_roll'], nombres['muslo'], anc(Z_CADERA),
                      eje_lado((0, 1, 0)), (-1.6, 1.0), MG996R, parado=-0.35),
-        Articulacion(f'rodilla_{lado}', nombres['muslo'], nombres['canilla'], a(Z_RODILLA),
+        Articulacion(f'rodilla_{lado}', nombres['muslo'], nombres['canilla'], anc(Z_RODILLA),
                      eje_lado((0, 1, 0)), (-0.1, 2.2), MG996R, parado=0.70),
-        Articulacion(f'tobillo_{lado}', nombres['canilla'], nombres['pie'], a(Z_TOBILLO),
+        Articulacion(f'tobillo_{lado}', nombres['canilla'], nombres['pie'], anc(Z_TOBILLO),
                      eje_lado((0, 1, 0)), (-1.2, 1.2), MG996R, parado=-0.35),
     ]
     for art in r.articulaciones[-5:]:
@@ -323,62 +343,65 @@ def pata(r: Robot, lado: str):
 
 
 def tronco(r: Robot):
-    r.anclas['tronco'] = np.array([0.0, 0.0, 220.0])
+    r.anclas['tronco'] = np.array([0.0, 0.0, (TRONCO_Z[0] + TRONCO_Z[1]) / 2])
     r.padres['tronco'] = None
     t = 'tronco'
+    zb = TRONCO_Z[0]
+    inx = (TRONCO_X[0] + 3.5, TRONCO_X[1] - 3.5)
+    iny = (TRONCO_Y[0] + 3.5, TRONCO_Y[1] - 3.5)
     # Piso con alojamientos de rulemanes (paso 6)
-    piso = placa_redondeada((TRONCO_X[0], TRONCO_X[1]), (-50, 50), Z_PISO, 10)
+    piso = placa_redondeada(TRONCO_X, (-54, 54), Z_PISO, 10)
     for s in (1, -1):
         piso -= cil((0, s * Y_PATA, Z_PISO[0] + 0.5), (0, s * Y_PATA, Z_PISO[1] + 1), 11.1)
         piso -= cil((0, s * Y_PATA, Z_PISO[0] - 1), (0, s * Y_PATA, Z_PISO[1] + 1), 6)
     r.agregar(Pieza('piso_tronco', t, piso, COLORES['pla'], 'impresa', 6, relleno=0.4,
                     descripcion='Piso del tronco con alojamientos 608'))
-    # Batería, IMU y estante A (paso 7)
+    # Batería y estante A (paso 7)
     lx, ly, lz, lm = LIPO_2S_1500
-    r.agregar(Pieza('lipo_2s_1500', t, caja(-lx / 2, lx / 2, -ly / 2, ly / 2, 186, 186 + lz), COLORES['lipo'],
+    r.agregar(Pieza('lipo_2s_1500', t, caja(-lx / 2, lx / 2, -ly / 2, ly / 2, zb, zb + lz), COLORES['lipo'],
                     'comprada', 7, masa=lm, descripcion='LiPo 2S 1500 mAh'))
-    r.agregar(Pieza('tapa_bateria', t, caja(-lx / 2 - 2, lx / 2 + 2, -ly / 2 - 2, ly / 2 + 2, 201, 202.5),
+    r.agregar(Pieza('tapa_bateria', t, caja(-lx / 2 - 2, lx / 2 + 2, -ly / 2 - 2, ly / 2 + 2, zb + lz, zb + lz + 1.5),
                     COLORES['pla'], 'impresa', 7, relleno=0.5, descripcion='Tapa y traba de la batería'))
-    gx, gy, gz, gm = GY521
-    r.agregar(Pieza('imu_gy521', t, caja(-gx / 2, gx / 2, -gy / 2, gy / 2, 202.5, 202.5 + gz),
-                    COLORES['pcb_azul'], 'comprada', 7, masa=gm, descripcion='IMU MPU-6050 (GY-521)'))
-    estante_a = placa_redondeada((TRONCO_X[0] + 3.5, TRONCO_X[1] - 3.5), (TRONCO_Y[0] + 3.5, TRONCO_Y[1] - 3.5), (218, 221), 9)
+    za = zb + lz + 2.0
+    estante_a = placa_redondeada(inx, iny, (za, za + 3), 9)
     for s in (1, -1):  # paso de los servos yaw de cadera
-        estante_a -= caja(-8, 19, s * Y_PATA - 8, s * Y_PATA + 8, 210, 230)
+        estante_a -= caja(-8, 19, s * Y_PATA - 8, s * Y_PATA + 8, za - 5, za + 8)
     r.agregar(Pieza('estante_a', t, estante_a, COLORES['pla'], 'impresa', 7, relleno=0.4,
                     descripcion='Estante A'))
-    xl, xw, xh, xm = XL4016
-    for i, s in enumerate((1, -1)):
-        y0, y1 = sorted((s * 1, s * (1 + xw)))
-        r.agregar(Pieza(f'xl4016_{"izq" if s > 0 else "der"}', t, caja(-xl / 2, xl / 2, y0, y1, 221, 221 + xh),
+    xl, xw, xh, xm = XL4016   # girados: el largo va a lo ancho del tronco, uno detrás del otro
+    for nombre, x0 in (('izq', -50), ('der', -6)):
+        r.agregar(Pieza(f'xl4016_{nombre}', t, caja(x0, x0 + xw, -xl / 2, xl / 2, za + 3, za + 3 + xh),
                         COLORES['pcb_azul'], 'comprada', 7, masa=xm,
-                        descripcion=f'Regulador XL4016 6,0 V (pata {"izquierda" if s > 0 else "derecha"})'))
+                        descripcion=f'Regulador XL4016 6,0 V (pata {"izquierda" if nombre == "izq" else "derecha"})'))
     mx_, my_, mz_, mm_ = PLACA_MCP3008
-    r.agregar(Pieza('placa_mcp3008', t, caja(33, 33 + my_, -mx_ / 2, mx_ / 2, 221, 221 + mz_),
+    r.agregar(Pieza('placa_mcp3008', t, caja(38, 38 + my_, -mx_ / 2, mx_ / 2, za + 3, za + 3 + mz_),
                     COLORES['pcb_verde'], 'comprada', 7, masa=mm_, descripcion='2× MCP3008 + divisores'))
-    # Estante B (paso 8)
-    estante_b = (placa_redondeada((TRONCO_X[0] + 3.5, TRONCO_X[1] - 3.5), (TRONCO_Y[0] + 3.5, TRONCO_Y[1] - 3.5), (244, 247), 9)
-                 - caja(20, 50, -9, 9, 240, 250))
+    # Estante B: Pi, PCA9685, Mini560 e IMU (paso 8)
+    zB = za + 3 + xh + 2.0
+    estante_b = placa_redondeada(inx, iny, (zB, zB + 3), 9) - caja(20, 50, -9, 9, zB - 5, zB + 8)
     r.agregar(Pieza('estante_b', t, estante_b, COLORES['pla'], 'impresa', 8, relleno=0.4,
                     descripcion='Estante B'))
     px, py, pz, pm = PI_ZERO_2W
-    r.agregar(Pieza('pi_zero_2w', t, caja(-14, -14 + py, -px / 2, px / 2, 247, 247 + pz), COLORES['pcb_verde'],
+    r.agregar(Pieza('pi_zero_2w', t, caja(-14, -14 + py, -px / 2, px / 2, zB + 3, zB + 3 + pz), COLORES['pcb_verde'],
                     'comprada', 8, masa=pm + 3, descripcion='Raspberry Pi Zero 2 W'))
     cx_, cy_, cz_, cm_ = PCA9685
-    r.agregar(Pieza('pca9685', t, caja(-44, -44 + cy_, -cx_ / 2, cx_ / 2, 247, 247 + cz_),
+    r.agregar(Pieza('pca9685', t, caja(-44, -44 + cy_, -cx_ / 2, cx_ / 2, zB + 3, zB + 3 + cz_),
                     COLORES['pcb_azul'], 'comprada', 8, masa=cm_, descripcion='PCA9685 (16 PWM)'))
     nx, ny, nz, nm = MINI560
-    r.agregar(Pieza('mini560_5v', t, caja(20, 20 + nx, 12, 12 + ny, 247, 247 + nz), COLORES['pcb_violeta'],
+    r.agregar(Pieza('mini560_5v', t, caja(20, 20 + nx, 12, 12 + ny, zB + 3, zB + 3 + nz), COLORES['pcb_violeta'],
                     'comprada', 8, masa=nm, descripcion='Mini560 5 V (Pi)'))
+    gx, gy, gz, gm = GY521
+    r.agregar(Pieza('imu_gy521', t, caja(20, 20 + gx, -30, -30 + gy, zB + 3, zB + 3 + gz),
+                    COLORES['pcb_azul'], 'comprada', 8, masa=gm, descripcion='IMU MPU-6050 (GY-521)'))
     # Servo yaw del cuello (paso 9)
-    caja_c, _ = servo_en(MG90S, (X_CUELLO, 0, 268), (0, 0, 1), (-1, 0, 0), 'lejos')
+    caja_c, _ = servo_en(MG90S, (X_CUELLO, 0, Z_YAW_TAPA), (0, 0, 1), (-1, 0, 0), 'lejos')
     r.agregar(Pieza('servo_cuello_yaw', t, caja_c, COLORES['mg90s'], 'comprada', 9, masa=MG90S.masa,
                     descripcion='MG90S cuello yaw'))
     # Carcasa (paso 11): cajita redondeada abierta abajo (apoya sobre el piso del tronco)
     cuerpo = (caja_redondeada(TRONCO_X, TRONCO_Y, TRONCO_Z, TRONCO_R)
               - caja_redondeada(TRONCO_X, TRONCO_Y, (TRONCO_Z[0] - 5, TRONCO_Z[1]), TRONCO_R, encoger=PARED))
     cuerpo -= caja(-200, 200, -200, 200, 0, TRONCO_Z[0] + 0.01)
-    cuerpo -= cil((X_CUELLO, 0, 260), (X_CUELLO, 0, 300), 17)        # paso del cuello
+    cuerpo -= cil((X_CUELLO, 0, Z_YAW_TAPA - 10), (X_CUELLO, 0, Z_YAW_TAPA + 40), 17)   # paso del cuello
     inferior = cuerpo - caja(-200, 200, -200, 200, Z_CORTE_TRONCO, 400)
     superior = cuerpo - caja(-200, 200, -200, 200, 0, Z_CORTE_TRONCO)
     r.agregar(Pieza('cuerpo_inferior', t, inferior, COLORES['carcasa'], 'impresa', 11, relleno=1.0,
@@ -390,12 +413,13 @@ def tronco(r: Robot):
 
 def cuello_y_cabeza(r: Robot):
     x = X_CUELLO
+    ZP0 = 295.0   # marco viejo; al final se baja todo a Z_PITCH
     # Cuello (paso 9): dos servos a la vista entre el tronco y la cabeza, como el original
     r.anclas['cuello'] = np.array([x, 0, 272.0])
     r.padres['cuello'] = 'tronco'
     _, horn_cy = servo_en(MG90S, (x, 0, 268), (0, 0, 1), (-1, 0, 0), 'lejos')
     r.agregar(Pieza('horn_cuello_yaw', 'cuello', horn_cy, COLORES['horn'], 'comprada', 9, masa=1.0))
-    caja_cp, horn_cp = servo_en(MG90S, (x, 8.7, Z_PITCH), (0, 1, 0), (0, 0, -1), 'eje')
+    caja_cp, horn_cp = servo_en(MG90S, (x, 8.7, ZP0), (0, 1, 0), (0, 0, -1), 'eje')
     r.agregar(Pieza('servo_cuello_pitch', 'cuello', caja_cp, COLORES['mg90s'], 'comprada', 9, masa=MG90S.masa,
                     descripcion='MG90S cuello pitch'))
     base = cil((x, 0, 275.8), (x, 0, 278), 14)
@@ -404,7 +428,7 @@ def cuello_y_cabeza(r: Robot):
                     descripcion='Soporte del cuello (yaw → pitch)'))
 
     # Cabeza (paso 10)
-    r.anclas['cabeza'] = np.array([x, 0, Z_PITCH])
+    r.anclas['cabeza'] = np.array([x, 0, ZP0])
     r.padres['cabeza'] = 'cuello'
     r.agregar(Pieza('horn_cuello_pitch', 'cabeza', horn_cp, COLORES['horn'], 'comprada', 9, masa=1.0))
     z0, z1 = Z_CAB
@@ -418,9 +442,9 @@ def cuello_y_cabeza(r: Robot):
     # Base estructural dentro de la cúpula: sostiene el servo de la boca y se une al cuello
     base_cab = placa_redondeada((0, CAB_X[1] - 12), (-44, 44), (302, 305), 8)
     base_cab -= caja(x - 10, x + 20, -22, 22, 300, 306)                        # paso del servo pitch
-    soporte = (placa_y(16.5, 19.5, [(x, Z_PITCH, 9)], [(x - 6, x + 10, 302, 305)])
-               + placa_y(-18, -15, [(x, Z_PITCH, 7)], [(x - 6, x + 10, 302, 305)])
-               + cil((x, -15, Z_PITCH), (x, -14, Z_PITCH), 3))
+    soporte = (placa_y(16.5, 19.5, [(x, ZP0, 9)], [(x - 6, x + 10, 302, 305)])
+               + placa_y(-18, -15, [(x, ZP0, 7)], [(x - 6, x + 10, 302, 305)])
+               + cil((x, -15, ZP0), (x, -14, ZP0), 3))
     bx, bz = BISAGRA_BOCA
     soporte_bisagra = caja(bx - 4, bx + 4, -16.5, -14, 302, bz + 4) + cil((bx, -16.5, bz), (bx, -19, bz), 2)
     r.agregar(Pieza('base_cabeza', 'cabeza', base_cab + soporte + soporte_bisagra, COLORES['pla'], 'impresa', 10,
@@ -459,7 +483,7 @@ def cuello_y_cabeza(r: Robot):
     mand = placa_redondeada((-12, CAB_X[1] - 12), (-50, 50), (296, 301), 10)
     mand -= caja(x - 12, x + 22, -22, 22, 290, 310)                             # paso del cuello
     brazo_h = placa_y(16.8, 18.8, [(bx, bz, 6)], [(bx - 3, bx + 3, 296, bz)])
-    brazo_p = placa_y(-18.8, -16.8, [(bx, bz, 6)], [(bx - 3, bx + 3, 296, bz)])
+    brazo_p = placa_y(-18.8, -16.8, [(bx, bz, 6)], [(bx - 3, bx + 3, 296, bz)]) - cil((bx, -20, bz), (bx, -15, bz), 2.3)
     r.agregar(Pieza('mandibula', 'pico_inferior', mand + brazo_h + brazo_p, COLORES['carcasa'], 'impresa', 10,
                     relleno=0.4, descripcion='Mandíbula: piso de la cabeza, la mueve el servo de la boca'))
     pico_inf = placa_redondeada((CAB_X[1] - 12, CAB_X[1] + 22), (-46, 46), (296, 301), 12)
@@ -472,6 +496,15 @@ def cuello_y_cabeza(r: Robot):
         Articulacion('boca', 'cabeza', 'pico_inferior', r.anclas['pico_inferior'], np.array([0, 1.0, 0]),
                      (0.0, 0.55), MG90S),
     ]
+    # Todo lo anterior está en el marco viejo (pitch en z = 295): bajarlo al cuello real.
+    dz = Z_PITCH - 295.0
+    for esl in ('cuello', 'cabeza', 'pico_inferior'):
+        r.anclas[esl] = r.anclas[esl] + np.array([0, 0, dz])
+    for p in r.piezas:
+        if p.eslabon in ('cuello', 'cabeza', 'pico_inferior'):
+            p.malla = p.malla.translate([0, 0, dz])
+    for art in r.articulaciones[-3:]:
+        art.ancla = art.ancla + np.array([0, 0, dz])
 
 
 def construir() -> Robot:
@@ -530,6 +563,105 @@ def propiedades_eslabon(r: Robot, eslabon, mallas):
     return total, com, inercia
 
 
+def orden_mjcf(r: Robot, hijos):
+    """Orden de los cuerpos tal como quedan en el XML (recorrido en profundidad)."""
+    out = []
+
+    def visitar(esl):
+        out.append(esl)
+        for a in hijos[esl]:
+            visitar(a.hijo)
+    visitar('tronco')
+    return out
+
+
+# Piezas que definen la caja de choque de cada eslabón en el simulador. Los pies usan
+# solo la paleta (caja chata) y el tronco la carcasa; el resto, todas sus piezas.
+CHOQUE = {'pie': ('suela', 'paleta_pie'), 'tronco': ('cuerpo_inferior', 'cuerpo_superior', 'piso_tronco'),
+          'cabeza': ('cupula', 'pico_superior'), 'pico_inferior': ('mandibula', 'pico_inferior')}
+
+
+def mjcf(r: Robot, mallas, props, hijos, modo):
+    lineas = []
+
+    def geoms(esl, sp):
+        if modo == 'mallas':
+            for p in r.piezas:
+                if p.eslabon == esl:
+                    rgba = ' '.join(f'{v / 255:.3f}' for v in color_rgba(p.color))
+                    clase = 'suela' if p.nombre.startswith('suela') else 'visual'
+                    lineas.append(f'{sp}  <geom mesh="{p.nombre}" class="{clase}" rgba="{rgba}"/>')
+            return
+        clave = next((k for k in CHOQUE if esl == k or esl.startswith(k + '_')), None)
+        piezas = [p for p in r.piezas if p.eslabon == esl
+                  and (clave is None or any(p.nombre == n or p.nombre.startswith(n + '_') for n in CHOQUE[clave]))]
+        pts = np.vstack([mallas[p.nombre].bounds for p in piezas])
+        lo, hi = pts.min(0), pts.max(0)
+        c = ((lo + hi) / 2 - r.anclas[esl]) / 1000.0
+        h = (hi - lo) / 2000.0
+        lineas.append(f'{sp}  <geom name="caja_{esl}" type="box" class="choque" pos="{c[0]:.4f} {c[1]:.4f} {c[2]:.4f}" '
+                      f'size="{h[0]:.4f} {h[1]:.4f} {h[2]:.4f}"/>')
+
+    def cuerpo(esl, art, sangria):
+        sp = ' ' * sangria
+        if art is None:
+            pos = r.anclas[esl] / 1000.0
+            lineas.append(f'{sp}<body name="{esl}" pos="{pos[0]:.5f} {pos[1]:.5f} {pos[2]:.5f}">')
+            lineas.append(f'{sp}  <freejoint name="base"/>')
+        else:
+            rel = (r.anclas[esl] - r.anclas[art.padre]) / 1000.0
+            lineas.append(f'{sp}<body name="{esl}" pos="{rel[0]:.5f} {rel[1]:.5f} {rel[2]:.5f}">')
+            e = art.eje
+            lineas.append(f'{sp}  <joint name="{art.nombre}" axis="{e[0]:g} {e[1]:g} {e[2]:g}" '
+                          f'range="{art.rango[0]} {art.rango[1]}" class="{art.servo.nombre.lower()}"/>')
+        m, com, ii = props[esl]
+        lineas.append(f'{sp}  <inertial pos="{com[0]:.5f} {com[1]:.5f} {com[2]:.5f}" mass="{m:.5f}" '
+                      f'fullinertia="{ii[0,0]:.3e} {ii[1,1]:.3e} {ii[2,2]:.3e} {ii[0,1]:.3e} {ii[0,2]:.3e} {ii[1,2]:.3e}"/>')
+        geoms(esl, sp)
+        for a in hijos[esl]:
+            cuerpo(a.hijo, a, sangria + 2)
+        lineas.append(f'{sp}</body>')
+
+    cuerpo('tronco', None, 4)
+    nm = lambda s: 9.81 * s.stall_kgcm_6v / 100.0
+    actuadores = '\n'.join(f'    <position name="{a.nombre}" joint="{a.nombre}" class="{a.servo.nombre.lower()}"/>'
+                           for a in r.articulaciones)
+    parado = ' '.join(f'{a.parado:g}' for a in r.articulaciones)
+    assets = ''
+    if modo == 'mallas':
+        assets = '  <asset>\n' + '\n'.join(f'    <mesh name="{p.nombre}" file="mallas/{p.nombre}.stl"/>' for p in r.piezas) + '\n  </asset>\n'
+    return f'''<mujoco model="pato_criollo_v0">
+  <compiler angle="radian" meshdir="."/>
+  <option timestep="0.002" integrator="implicitfast"/>
+  <default>
+    <geom contype="0" conaffinity="0" density="0"/>
+    <default class="visual"><geom group="2"/></default>
+    <default class="suela"><geom contype="1" conaffinity="0" friction="0.9 0.02 0.01" group="2"/></default>
+    <default class="choque"><geom contype="1" conaffinity="0" friction="0.9 0.02 0.01" group="3" rgba="0.9 0.5 0.2 0.3"/></default>
+    <default class="mg996r">
+      <joint damping="0.08" frictionloss="0.02" armature="0.002"/>
+      <position kp="15" forcerange="-{nm(MG996R):.3f} {nm(MG996R):.3f}"/>
+    </default>
+    <default class="mg90s">
+      <joint damping="0.01" frictionloss="0.005" armature="0.0005"/>
+      <position kp="4" forcerange="-{nm(MG90S):.3f} {nm(MG90S):.3f}"/>
+    </default>
+  </default>
+{assets}  <worldbody>
+    <light pos="0 0 2" dir="0 0 -1" directional="true"/>
+    <geom name="suelo" type="plane" size="0 0 0.05" rgba="0.75 0.78 0.8 1" contype="1" conaffinity="1" friction="0.9 0.02 0.01"/>
+{chr(10).join(lineas)}
+  </worldbody>
+  <actuator>
+{actuadores}
+  </actuator>
+  <keyframe>
+    <key name="parado" qpos="0 0 {r.anclas['tronco'][2] / 1000.0:.4f} 1 0 0 0 {parado}" ctrl="{parado}"/>
+  </keyframe>
+</mujoco>
+'''
+
+
 def exportar(r: Robot):
     SALIDA.mkdir(parents=True, exist_ok=True)
     (SALIDA / 'piezas_impresas').mkdir(exist_ok=True)
@@ -576,76 +708,18 @@ def exportar(r: Robot):
     }
     (SALIDA / 'robot.json').write_text(json.dumps(datos, ensure_ascii=False, indent=1))
 
-    # MJCF
+    # MJCF: pato.xml con las mallas (visual) y pato_sim.xml con cajas de choque (simulador web)
     props = {e: propiedades_eslabon(r, e, mallas) for e in orden}
     hijos = {e: [a for a in r.articulaciones if a.padre == e] for e in orden}
-    assets, lineas = [], []
     for p in r.piezas:
         mt = mallas[p.nombre].copy()
         mt.apply_translation(-r.anclas[p.eslabon])
         mt.apply_scale(1 / 1000.0)
         mt.export(SALIDA / 'mjcf' / 'mallas' / f'{p.nombre}.stl')
-        assets.append(f'    <mesh name="{p.nombre}" file="mallas/{p.nombre}.stl"/>')
-
-    def cuerpo(esl, art, sangria):
-        sp = ' ' * sangria
-        if art is None:
-            pos = r.anclas[esl] / 1000.0
-            lineas.append(f'{sp}<body name="{esl}" pos="{pos[0]:.5f} {pos[1]:.5f} {pos[2]:.5f}">')
-            lineas.append(f'{sp}  <freejoint name="base"/>')
-        else:
-            rel = (r.anclas[esl] - r.anclas[art.padre]) / 1000.0
-            lineas.append(f'{sp}<body name="{esl}" pos="{rel[0]:.5f} {rel[1]:.5f} {rel[2]:.5f}">')
-            e = art.eje
-            lineas.append(f'{sp}  <joint name="{art.nombre}" axis="{e[0]:g} {e[1]:g} {e[2]:g}" '
-                          f'range="{art.rango[0]} {art.rango[1]}" class="{art.servo.nombre.lower()}"/>')
-        m, com, ii = props[esl]
-        lineas.append(f'{sp}  <inertial pos="{com[0]:.5f} {com[1]:.5f} {com[2]:.5f}" mass="{m:.5f}" '
-                      f'fullinertia="{ii[0,0]:.3e} {ii[1,1]:.3e} {ii[2,2]:.3e} {ii[0,1]:.3e} {ii[0,2]:.3e} {ii[1,2]:.3e}"/>')
-        for p in r.piezas:
-            if p.eslabon == esl:
-                c = color_rgba(p.color)
-                rgba = ' '.join(f'{v / 255:.3f}' for v in c)
-                clase = 'suela' if p.nombre.startswith('suela') else 'visual'
-                lineas.append(f'{sp}  <geom mesh="{p.nombre}" class="{clase}" rgba="{rgba}"/>')
-        for a in hijos[esl]:
-            cuerpo(a.hijo, a, sangria + 2)
-        lineas.append(f'{sp}</body>')
-
-    cuerpo('tronco', None, 4)
-    nm = lambda s: 9.81 * s.stall_kgcm_6v / 100.0
-    actuadores = '\n'.join(f'    <position name="{a.nombre}" joint="{a.nombre}" class="{a.servo.nombre.lower()}"/>'
-                           for a in r.articulaciones)
-    xml = f'''<mujoco model="pato_criollo_v0">
-  <compiler angle="radian" meshdir="."/>
-  <option timestep="0.002"/>
-  <default>
-    <geom contype="0" conaffinity="0" density="0"/>
-    <default class="visual"><geom group="2"/></default>
-    <default class="suela"><geom contype="1" conaffinity="1" friction="0.8 0.02 0.01" group="2"/></default>
-    <default class="mg996r">
-      <joint damping="0.05" frictionloss="0.02" armature="0.002"/>
-      <position kp="8" forcerange="-{nm(MG996R):.3f} {nm(MG996R):.3f}"/>
-    </default>
-    <default class="mg90s">
-      <joint damping="0.01" frictionloss="0.005" armature="0.0005"/>
-      <position kp="2" forcerange="-{nm(MG90S):.3f} {nm(MG90S):.3f}"/>
-    </default>
-  </default>
-  <asset>
-{chr(10).join(assets)}
-  </asset>
-  <worldbody>
-    <light pos="0 0 2" dir="0 0 -1" directional="true"/>
-    <geom name="suelo" type="plane" size="0 0 0.05" rgba="0.75 0.78 0.8 1" contype="1" conaffinity="1"/>
-{chr(10).join(lineas)}
-  </worldbody>
-  <actuator>
-{actuadores}
-  </actuator>
-</mujoco>
-'''
-    (SALIDA / 'mjcf' / 'pato.xml').write_text(xml)
+    (SALIDA / 'mjcf' / 'pato.xml').write_text(mjcf(r, mallas, props, hijos, 'mallas'))
+    (SALIDA / 'mjcf' / 'pato_sim.xml').write_text(mjcf(r, mallas, props, hijos, 'cajas'))
+    datos['orden_mjcf'] = orden_mjcf(r, hijos)
+    (SALIDA / 'robot.json').write_text(json.dumps(datos, ensure_ascii=False, indent=1))
 
     # Resumen de masas
     filas = sorted(r.piezas, key=lambda p: (p.paso, p.nombre))

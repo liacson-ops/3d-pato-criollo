@@ -95,5 +95,5 @@ PCA9685 = (62.5, 25.4, 12.0, 9.0)        # con los pines de los servos
 XL4016 = (62.0, 42.0, 22.0, 35.0)        # con disipadores
 MINI560 = (23.0, 18.0, 5.0, 2.0)
 GY521 = (21.0, 16.0, 3.0, 2.0)
-PLACA_MCP3008 = (50.0, 30.0, 10.0, 12.0)  # 2× MCP3008 + divisores en placa perforada
+PLACA_MCP3008 = (40.0, 28.0, 10.0, 10.0)  # 2× MCP3008 + divisores en placa perforada
 RULEMAN_608 = (22.0, 8.0, 7.0, 12.0)      # diámetro exterior, interior, ancho, masa

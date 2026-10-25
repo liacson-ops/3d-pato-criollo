@@ -1,0 +1,110 @@
+<mujoco model="pato_criollo_v0">
+  <compiler angle="radian" meshdir="."/>
+  <option timestep="0.002" integrator="implicitfast"/>
+  <default>
+    <geom contype="0" conaffinity="0" density="0"/>
+    <default class="visual"><geom group="2"/></default>
+    <default class="suela"><geom contype="1" conaffinity="0" friction="0.9 0.02 0.01" group="2"/></default>
+    <default class="choque"><geom contype="1" conaffinity="0" friction="0.9 0.02 0.01" group="3" rgba="0.9 0.5 0.2 0.3"/></default>
+    <default class="mg996r">
+      <joint damping="0.08" frictionloss="0.02" armature="0.002"/>
+      <position kp="15" forcerange="-1.079 1.079"/>
+    </default>
+    <default class="mg90s">
+      <joint damping="0.01" frictionloss="0.005" armature="0.0005"/>
+      <position kp="4" forcerange="-0.216 0.216"/>
+    </default>
+  </default>
+  <worldbody>
+    <light pos="0 0 2" dir="0 0 -1" directional="true"/>
+    <geom name="suelo" type="plane" size="0 0 0.05" rgba="0.75 0.78 0.8 1" contype="1" conaffinity="1" friction="0.9 0.02 0.01"/>
+    <body name="tronco" pos="0.00000 0.00000 0.18600">
+      <freejoint name="base"/>
+      <inertial pos="0.00399 -0.00000 -0.01180" mass="0.44757" fullinertia="4.955e-04 6.019e-04 6.981e-04 1.102e-08 -6.990e-06 8.591e-09"/>
+      <geom name="caja_tronco" type="box" class="choque" pos="0.0080 0.0000 -0.0045" size="0.0620 0.0540 0.0395"/>
+      <body name="cadera_yaw_izq" pos="0.00000 0.04200 -0.03600">
+        <joint name="cadera_yaw_izq" axis="0 0 1" range="-0.4 0.4" class="mg90s"/>
+        <inertial pos="-0.00702 -0.00964 -0.02988" mass="0.06805" fullinertia="1.454e-05 1.413e-05 2.046e-05 -1.447e-07 4.078e-07 -4.736e-07"/>
+        <geom name="caja_cadera_yaw_izq" type="box" class="choque" pos="-0.0147 -0.0102 -0.0189" size="0.0307 0.0272 0.0232"/>
+        <body name="cadera_roll_izq" pos="0.00000 0.00000 -0.03200">
+          <joint name="cadera_roll_izq" axis="1 0 0" range="-0.4 0.4" class="mg996r"/>
+          <inertial pos="-0.00916 -0.00622 -0.02787" mass="0.08075" fullinertia="1.832e-05 2.602e-05 2.834e-05 -5.559e-07 -1.716e-06 -1.200e-06"/>
+          <geom name="caja_cadera_roll_izq" type="box" class="choque" pos="-0.0110 -0.0044 -0.0155" size="0.0345 0.0279 0.0285"/>
+          <body name="muslo_izq" pos="0.00000 0.00000 -0.03000">
+            <joint name="cadera_pitch_izq" axis="0 1 0" range="-1.6 1.0" class="mg996r"/>
+            <inertial pos="-0.00938 -0.00592 -0.03017" mass="0.07922" fullinertia="2.052e-05 2.089e-05 2.606e-05 -7.558e-07 -1.215e-06 -2.155e-06"/>
+            <geom name="caja_muslo_izq" type="box" class="choque" pos="-0.0100 -0.0044 -0.0170" size="0.0280 0.0279 0.0290"/>
+            <body name="canilla_izq" pos="0.00000 0.00000 -0.03200">
+              <joint name="rodilla_izq" axis="0 1 0" range="-0.1 2.2" class="mg996r"/>
+              <inertial pos="-0.00938 -0.00592 -0.03017" mass="0.07922" fullinertia="2.052e-05 2.089e-05 2.606e-05 -7.558e-07 -1.215e-06 -2.155e-06"/>
+              <geom name="caja_canilla_izq" type="box" class="choque" pos="-0.0100 -0.0044 -0.0170" size="0.0280 0.0279 0.0290"/>
+              <body name="pie_izq" pos="0.00000 0.00000 -0.03200">
+                <joint name="tobillo_izq" axis="0 1 0" range="-1.2 1.2" class="mg996r"/>
+                <inertial pos="0.01199 0.00208 -0.01619" mass="0.02107" fullinertia="5.587e-06 9.419e-06 1.227e-05 4.517e-07 9.308e-07 -6.371e-07"/>
+                <geom name="caja_pie_izq" type="box" class="choque" pos="0.0110 0.0000 -0.0205" size="0.0440 0.0270 0.0035"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="cadera_yaw_der" pos="0.00000 -0.04200 -0.03600">
+        <joint name="cadera_yaw_der" axis="-0 0 -1" range="-0.4 0.4" class="mg90s"/>
+        <inertial pos="-0.00702 0.00964 -0.02988" mass="0.06805" fullinertia="1.454e-05 1.413e-05 2.046e-05 1.447e-07 4.078e-07 4.736e-07"/>
+        <geom name="caja_cadera_yaw_der" type="box" class="choque" pos="-0.0147 0.0102 -0.0189" size="0.0307 0.0272 0.0232"/>
+        <body name="cadera_roll_der" pos="0.00000 0.00000 -0.03200">
+          <joint name="cadera_roll_der" axis="-1 0 -0" range="-0.4 0.4" class="mg996r"/>
+          <inertial pos="-0.00916 0.00622 -0.02787" mass="0.08075" fullinertia="1.832e-05 2.602e-05 2.834e-05 5.559e-07 -1.716e-06 1.200e-06"/>
+          <geom name="caja_cadera_roll_der" type="box" class="choque" pos="-0.0110 0.0044 -0.0155" size="0.0345 0.0279 0.0285"/>
+          <body name="muslo_der" pos="0.00000 0.00000 -0.03000">
+            <joint name="cadera_pitch_der" axis="-0 1 -0" range="-1.6 1.0" class="mg996r"/>
+            <inertial pos="-0.00938 0.00592 -0.03017" mass="0.07922" fullinertia="2.052e-05 2.089e-05 2.606e-05 7.558e-07 -1.215e-06 2.155e-06"/>
+            <geom name="caja_muslo_der" type="box" class="choque" pos="-0.0100 0.0044 -0.0170" size="0.0280 0.0279 0.0290"/>
+            <body name="canilla_der" pos="0.00000 0.00000 -0.03200">
+              <joint name="rodilla_der" axis="-0 1 -0" range="-0.1 2.2" class="mg996r"/>
+              <inertial pos="-0.00938 0.00592 -0.03017" mass="0.07922" fullinertia="2.052e-05 2.089e-05 2.606e-05 7.558e-07 -1.215e-06 2.155e-06"/>
+              <geom name="caja_canilla_der" type="box" class="choque" pos="-0.0100 0.0044 -0.0170" size="0.0280 0.0279 0.0290"/>
+              <body name="pie_der" pos="0.00000 0.00000 -0.03200">
+                <joint name="tobillo_der" axis="-0 1 -0" range="-1.2 1.2" class="mg996r"/>
+                <inertial pos="0.01199 -0.00208 -0.01619" mass="0.02107" fullinertia="5.587e-06 9.419e-06 1.227e-05 -4.517e-07 9.308e-07 6.371e-07"/>
+                <geom name="caja_pie_der" type="box" class="choque" pos="0.0110 0.0000 -0.0205" size="0.0440 0.0270 0.0035"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="cuello" pos="0.04000 0.00000 0.03600">
+        <joint name="cuello_yaw" axis="0 0 1" range="-1.5 1.5" class="mg90s"/>
+        <inertial pos="-0.00000 -0.00162 0.01634" mass="0.01704" fullinertia="1.855e-06 1.360e-06 1.125e-06 8.198e-17 -1.552e-16 -2.265e-08"/>
+        <geom name="caja_cuello" type="box" class="choque" pos="0.0000 0.0000 0.0169" size="0.0140 0.0140 0.0169"/>
+        <body name="cabeza" pos="0.00000 0.00000 0.02300">
+          <joint name="cuello_pitch" axis="0 1 0" range="-0.8 0.8" class="mg90s"/>
+          <inertial pos="0.01160 -0.00004 0.03382" mass="0.10992" fullinertia="1.639e-04 2.803e-04 3.360e-04 -9.233e-07 1.370e-06 2.391e-07"/>
+          <geom name="caja_cabeza" type="box" class="choque" pos="0.0220 0.0000 0.0385" size="0.0770 0.0520 0.0315"/>
+          <body name="pico_inferior" pos="-0.04500 0.00000 0.01700">
+            <joint name="boca" axis="0 1 0" range="0.0 0.55" class="mg90s"/>
+            <inertial pos="0.06619 0.00025 -0.01319" mass="0.03286" fullinertia="2.799e-05 6.663e-05 9.421e-05 5.369e-07 6.727e-07 -1.070e-07"/>
+            <geom name="caja_pico_inferior" type="box" class="choque" pos="0.0675 0.0000 -0.0050" size="0.0745 0.0500 0.0110"/>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  <actuator>
+    <position name="cadera_yaw_izq" joint="cadera_yaw_izq" class="mg90s"/>
+    <position name="cadera_roll_izq" joint="cadera_roll_izq" class="mg996r"/>
+    <position name="cadera_pitch_izq" joint="cadera_pitch_izq" class="mg996r"/>
+    <position name="rodilla_izq" joint="rodilla_izq" class="mg996r"/>
+    <position name="tobillo_izq" joint="tobillo_izq" class="mg996r"/>
+    <position name="cadera_yaw_der" joint="cadera_yaw_der" class="mg90s"/>
+    <position name="cadera_roll_der" joint="cadera_roll_der" class="mg996r"/>
+    <position name="cadera_pitch_der" joint="cadera_pitch_der" class="mg996r"/>
+    <position name="rodilla_der" joint="rodilla_der" class="mg996r"/>
+    <position name="tobillo_der" joint="tobillo_der" class="mg996r"/>
+    <position name="cuello_yaw" joint="cuello_yaw" class="mg90s"/>
+    <position name="cuello_pitch" joint="cuello_pitch" class="mg90s"/>
+    <position name="boca" joint="boca" class="mg90s"/>
+  </actuator>
+  <keyframe>
+    <key name="parado" qpos="0 0 0.1860 1 0 0 0 0 0 -0.35 0.7 -0.35 0 0 -0.35 0.7 -0.35 0 0 0" ctrl="0 0 -0.35 0.7 -0.35 0 0 -0.35 0.7 -0.35 0 0 0"/>
+  </keyframe>
+</mujoco>

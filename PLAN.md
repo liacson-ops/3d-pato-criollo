@@ -15,7 +15,9 @@ Una versión del XGO-Duck (nombre provisorio) **hecha con piezas de MercadoLibre
   - orejas de servo cortadas donde chocan;
   - cuello de 2 articulaciones;
   - cámara en la frente;
-  - masa estimada **1,22 kg** (cabeza al estilo del original: cúpula, ojo amarillo y pico ancho que abre como tapa).
+  - masa estimada **1,26 kg**, altura **31,5 cm** (cabeza al estilo del original: cúpula, ojo amarillo y pico ancho que abre como tapa).
+  - **Rediseño de patas:** los servos de cadera pitch, rodilla y tobillo van acostados en una cuna impresa única; muslo y canilla de 32 mm. El robot pasó de 38 a 31,5 cm.
+- **Simulador en el navegador** (`salida/simulador.html`, MuJoCo WebAssembly): se queda parado, camina con la marcha a mano y aguanta empujones de 6 N. Mostró que **los MG90S de cadera yaw saturan al caminar**: para la v1 hay que trabar el yaw, pasarlo a MG996R o descargarlo con un tope.
 - **Torques del modelo nuevo (MuJoCo):** parado, el tobillo usa el 18 % del máximo del MG996R. En el peor caso (una pata, sin desplazar el cuerpo), la **cadera roll llega al 40 %**. Es la articulación a vigilar en la fase 0 y en el entrenamiento.
 
 ---

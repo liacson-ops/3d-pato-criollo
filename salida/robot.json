@@ -5,87 +5,87 @@
    "ancla_mm": [
     0.0,
     0.0,
-    220.0
+    186.0
    ]
   },
   "cadera_yaw_izq": {
    "padre": "tronco",
    "ancla_mm": [
     0.0,
-    38.0,
-    186.0
+    42.0,
+    150.0
    ]
   },
   "cadera_roll_izq": {
    "padre": "cadera_yaw_izq",
    "ancla_mm": [
     0.0,
-    38.0,
-    154.0
+    42.0,
+    118.0
    ]
   },
   "muslo_izq": {
    "padre": "cadera_roll_izq",
    "ancla_mm": [
     0.0,
-    38.0,
-    124.0
+    42.0,
+    88.0
    ]
   },
   "canilla_izq": {
    "padre": "muslo_izq",
    "ancla_mm": [
     0.0,
-    38.0,
-    79.0
+    42.0,
+    56.0
    ]
   },
   "pie_izq": {
    "padre": "canilla_izq",
    "ancla_mm": [
     0.0,
-    38.0,
-    34.0
+    42.0,
+    24.0
    ]
   },
   "cadera_yaw_der": {
    "padre": "tronco",
    "ancla_mm": [
     0.0,
-    -38.0,
-    186.0
+    -42.0,
+    150.0
    ]
   },
   "cadera_roll_der": {
    "padre": "cadera_yaw_der",
    "ancla_mm": [
     0.0,
-    -38.0,
-    154.0
+    -42.0,
+    118.0
    ]
   },
   "muslo_der": {
    "padre": "cadera_roll_der",
    "ancla_mm": [
     0.0,
-    -38.0,
-    124.0
+    -42.0,
+    88.0
    ]
   },
   "canilla_der": {
    "padre": "muslo_der",
    "ancla_mm": [
     0.0,
-    -38.0,
-    79.0
+    -42.0,
+    56.0
    ]
   },
   "pie_der": {
    "padre": "canilla_der",
    "ancla_mm": [
     0.0,
-    -38.0,
-    34.0
+    -42.0,
+    24.0
    ]
   },
   "cuello": {
@@ -93,7 +93,7 @@
    "ancla_mm": [
     40.0,
     0.0,
-    272.0
+    222.0
    ]
   },
   "cabeza": {
@@ -101,7 +101,7 @@
    "ancla_mm": [
     40.0,
     0.0,
-    295.0
+    245.0
    ]
   },
   "pico_inferior": {
@@ -109,7 +109,7 @@
    "ancla_mm": [
     -5.0,
     0.0,
-    312.0
+    262.0
    ]
   }
  },
@@ -120,8 +120,8 @@
    "hijo": "cadera_yaw_izq",
    "ancla_mm": [
     0.0,
-    38.0,
-    186.0
+    42.0,
+    150.0
    ],
    "eje": [
     0.0,
@@ -141,8 +141,8 @@
    "hijo": "cadera_roll_izq",
    "ancla_mm": [
     0.0,
-    38.0,
-    154.0
+    42.0,
+    118.0
    ],
    "eje": [
     1.0,
@@ -162,8 +162,8 @@
    "hijo": "muslo_izq",
    "ancla_mm": [
     0.0,
-    38.0,
-    124.0
+    42.0,
+    88.0
    ],
    "eje": [
     0.0,
@@ -183,8 +183,8 @@
    "hijo": "canilla_izq",
    "ancla_mm": [
     0.0,
-    38.0,
-    79.0
+    42.0,
+    56.0
    ],
    "eje": [
     0.0,
@@ -204,8 +204,8 @@
    "hijo": "pie_izq",
    "ancla_mm": [
     0.0,
-    38.0,
-    34.0
+    42.0,
+    24.0
    ],
    "eje": [
     0.0,
@@ -225,8 +225,8 @@
    "hijo": "cadera_yaw_der",
    "ancla_mm": [
     0.0,
-    -38.0,
-    186.0
+    -42.0,
+    150.0
    ],
    "eje": [
     -0.0,
@@ -246,8 +246,8 @@
    "hijo": "cadera_roll_der",
    "ancla_mm": [
     0.0,
-    -38.0,
-    154.0
+    -42.0,
+    118.0
    ],
    "eje": [
     -1.0,
@@ -267,8 +267,8 @@
    "hijo": "muslo_der",
    "ancla_mm": [
     0.0,
-    -38.0,
-    124.0
+    -42.0,
+    88.0
    ],
    "eje": [
     -0.0,
@@ -288,8 +288,8 @@
    "hijo": "canilla_der",
    "ancla_mm": [
     0.0,
-    -38.0,
-    79.0
+    -42.0,
+    56.0
    ],
    "eje": [
     -0.0,
@@ -309,8 +309,8 @@
    "hijo": "pie_der",
    "ancla_mm": [
     0.0,
-    -38.0,
-    34.0
+    -42.0,
+    24.0
    ],
    "eje": [
     -0.0,
@@ -331,7 +331,7 @@
    "ancla_mm": [
     40.0,
     0.0,
-    272.0
+    222.0
    ],
    "eje": [
     0.0,
@@ -352,7 +352,7 @@
    "ancla_mm": [
     40.0,
     0.0,
-    295.0
+    245.0
    ],
    "eje": [
     0.0,
@@ -373,7 +373,7 @@
    "ancla_mm": [
     -5.0,
     0.0,
-    312.0
+    262.0
    ],
    "eje": [
     0.0,
@@ -395,7 +395,7 @@
    "tipo": "impresa",
    "paso": 6,
    "color": "#e9e6df",
-   "masa_g": 42.8,
+   "masa_g": 49.9,
    "descripcion": "Piso del tronco con alojamientos 608"
   },
   {
@@ -417,21 +417,12 @@
    "descripcion": "Tapa y traba de la batería"
   },
   {
-   "nombre": "imu_gy521",
-   "eslabon": "tronco",
-   "tipo": "comprada",
-   "paso": 7,
-   "color": "#1f4fa0",
-   "masa_g": 2.0,
-   "descripcion": "IMU MPU-6050 (GY-521)"
-  },
-  {
    "nombre": "estante_a",
    "eslabon": "tronco",
    "tipo": "impresa",
    "paso": 7,
    "color": "#e9e6df",
-   "masa_g": 12.7,
+   "masa_g": 15.1,
    "descripcion": "Estante A"
   },
   {
@@ -458,7 +449,7 @@
    "tipo": "comprada",
    "paso": 7,
    "color": "#1f7a3a",
-   "masa_g": 12.0,
+   "masa_g": 10.0,
    "descripcion": "2× MCP3008 + divisores"
   },
   {
@@ -467,7 +458,7 @@
    "tipo": "impresa",
    "paso": 8,
    "color": "#e9e6df",
-   "masa_g": 12.9,
+   "masa_g": 15.3,
    "descripcion": "Estante B"
   },
   {
@@ -498,6 +489,15 @@
    "descripcion": "Mini560 5 V (Pi)"
   },
   {
+   "nombre": "imu_gy521",
+   "eslabon": "tronco",
+   "tipo": "comprada",
+   "paso": 8,
+   "color": "#1f4fa0",
+   "masa_g": 2.0,
+   "descripcion": "IMU MPU-6050 (GY-521)"
+  },
+  {
    "nombre": "servo_cuello_yaw",
    "eslabon": "tronco",
    "tipo": "comprada",
@@ -512,7 +512,7 @@
    "tipo": "impresa",
    "paso": 11,
    "color": "#fbfaf7",
-   "masa_g": 28.6,
+   "masa_g": 25.1,
    "descripcion": "Carcasa del cuerpo, mitad inferior"
   },
   {
@@ -521,7 +521,7 @@
    "tipo": "impresa",
    "paso": 11,
    "color": "#fbfaf7",
-   "masa_g": 54.3,
+   "masa_g": 43.8,
    "descripcion": "Carcasa del cuerpo, mitad superior"
   },
   {
@@ -530,7 +530,7 @@
    "tipo": "tpu",
    "paso": 1,
    "color": "#d9822b",
-   "masa_g": 5.0,
+   "masa_g": 3.9,
    "descripcion": "Suela de TPU"
   },
   {
@@ -539,7 +539,7 @@
    "tipo": "impresa",
    "paso": 1,
    "color": "#f3c118",
-   "masa_g": 12.7,
+   "masa_g": 10.0,
    "descripcion": "Pie de pato (paleta)"
   },
   {
@@ -548,8 +548,8 @@
    "tipo": "impresa",
    "paso": 1,
    "color": "#e9e6df",
-   "masa_g": 4.1,
-   "descripcion": "Orejas del tobillo (horn afuera, pivote adentro)"
+   "masa_g": 2.2,
+   "descripcion": "Orejas del tobillo (horn afuera, pin adentro)"
   },
   {
    "nombre": "servo_tobillo_izq",
@@ -558,7 +558,7 @@
    "paso": 2,
    "color": "#26282c",
    "masa_g": 55.0,
-   "descripcion": "MG996R tobillo"
+   "descripcion": "MG996R tobillo (acostado)"
   },
   {
    "nombre": "horn_tobillo_izq",
@@ -575,8 +575,8 @@
    "tipo": "impresa",
    "paso": 2,
    "color": "#e9e6df",
-   "masa_g": 9.3,
-   "descripcion": "Canilla: aloja el servo del tobillo"
+   "masa_g": 19.2,
+   "descripcion": "Canilla: cuna del servo del tobillo"
   },
   {
    "nombre": "servo_rodilla_izq",
@@ -585,7 +585,7 @@
    "paso": 3,
    "color": "#26282c",
    "masa_g": 55.0,
-   "descripcion": "MG996R rodilla"
+   "descripcion": "MG996R rodilla (acostado)"
   },
   {
    "nombre": "horn_rodilla_izq",
@@ -602,8 +602,8 @@
    "tipo": "impresa",
    "paso": 3,
    "color": "#e9e6df",
-   "masa_g": 9.0,
-   "descripcion": "Muslo: aloja el servo de la rodilla"
+   "masa_g": 19.2,
+   "descripcion": "Muslo: cuna del servo de la rodilla"
   },
   {
    "nombre": "servo_cadera_pitch_izq",
@@ -612,7 +612,7 @@
    "paso": 4,
    "color": "#26282c",
    "masa_g": 55.0,
-   "descripcion": "MG996R cadera pitch"
+   "descripcion": "MG996R cadera pitch (acostado)"
   },
   {
    "nombre": "horn_cadera_pitch_izq",
@@ -629,8 +629,8 @@
    "tipo": "impresa",
    "paso": 4,
    "color": "#e9e6df",
-   "masa_g": 9.5,
-   "descripcion": "Soporte U de cadera (roll → pitch)"
+   "masa_g": 20.8,
+   "descripcion": "Soporte U de cadera: cuna del servo pitch, cuelga del servo roll"
   },
   {
    "nombre": "servo_cadera_roll_izq",
@@ -656,8 +656,8 @@
    "tipo": "impresa",
    "paso": 5,
    "color": "#e9e6df",
-   "masa_g": 11.2,
-   "descripcion": "Placa yaw con abrazaderas del servo roll y eje al rulemán"
+   "masa_g": 9.1,
+   "descripcion": "Placa yaw: sostiene el servo roll por las orejas y sube al rulemán"
   },
   {
    "nombre": "servo_cadera_yaw_izq",
@@ -692,7 +692,7 @@
    "tipo": "tpu",
    "paso": 1,
    "color": "#d9822b",
-   "masa_g": 5.0,
+   "masa_g": 3.9,
    "descripcion": "Suela de TPU"
   },
   {
@@ -701,7 +701,7 @@
    "tipo": "impresa",
    "paso": 1,
    "color": "#f3c118",
-   "masa_g": 12.7,
+   "masa_g": 10.0,
    "descripcion": "Pie de pato (paleta)"
   },
   {
@@ -710,8 +710,8 @@
    "tipo": "impresa",
    "paso": 1,
    "color": "#e9e6df",
-   "masa_g": 4.1,
-   "descripcion": "Orejas del tobillo (horn afuera, pivote adentro)"
+   "masa_g": 2.2,
+   "descripcion": "Orejas del tobillo (horn afuera, pin adentro)"
   },
   {
    "nombre": "servo_tobillo_der",
@@ -720,7 +720,7 @@
    "paso": 2,
    "color": "#26282c",
    "masa_g": 55.0,
-   "descripcion": "MG996R tobillo"
+   "descripcion": "MG996R tobillo (acostado)"
   },
   {
    "nombre": "horn_tobillo_der",
@@ -737,8 +737,8 @@
    "tipo": "impresa",
    "paso": 2,
    "color": "#e9e6df",
-   "masa_g": 9.3,
-   "descripcion": "Canilla: aloja el servo del tobillo"
+   "masa_g": 19.2,
+   "descripcion": "Canilla: cuna del servo del tobillo"
   },
   {
    "nombre": "servo_rodilla_der",
@@ -747,7 +747,7 @@
    "paso": 3,
    "color": "#26282c",
    "masa_g": 55.0,
-   "descripcion": "MG996R rodilla"
+   "descripcion": "MG996R rodilla (acostado)"
   },
   {
    "nombre": "horn_rodilla_der",
@@ -764,8 +764,8 @@
    "tipo": "impresa",
    "paso": 3,
    "color": "#e9e6df",
-   "masa_g": 9.0,
-   "descripcion": "Muslo: aloja el servo de la rodilla"
+   "masa_g": 19.2,
+   "descripcion": "Muslo: cuna del servo de la rodilla"
   },
   {
    "nombre": "servo_cadera_pitch_der",
@@ -774,7 +774,7 @@
    "paso": 4,
    "color": "#26282c",
    "masa_g": 55.0,
-   "descripcion": "MG996R cadera pitch"
+   "descripcion": "MG996R cadera pitch (acostado)"
   },
   {
    "nombre": "horn_cadera_pitch_der",
@@ -791,8 +791,8 @@
    "tipo": "impresa",
    "paso": 4,
    "color": "#e9e6df",
-   "masa_g": 9.5,
-   "descripcion": "Soporte U de cadera (roll → pitch)"
+   "masa_g": 20.8,
+   "descripcion": "Soporte U de cadera: cuna del servo pitch, cuelga del servo roll"
   },
   {
    "nombre": "servo_cadera_roll_der",
@@ -818,8 +818,8 @@
    "tipo": "impresa",
    "paso": 5,
    "color": "#e9e6df",
-   "masa_g": 11.2,
-   "descripcion": "Placa yaw con abrazaderas del servo roll y eje al rulemán"
+   "masa_g": 9.1,
+   "descripcion": "Placa yaw: sostiene el servo roll por las orejas y sube al rulemán"
   },
   {
    "nombre": "servo_cadera_yaw_der",
@@ -1023,5 +1023,21 @@
   "9": "Cuello: servo yaw y servo pitch",
   "10": "Cabeza: cúpula, base, servo de la boca, cámara, ojos y pico",
   "11": "Carcasa del cuerpo (dos mitades)"
- }
+ },
+ "orden_mjcf": [
+  "tronco",
+  "cadera_yaw_izq",
+  "cadera_roll_izq",
+  "muslo_izq",
+  "canilla_izq",
+  "pie_izq",
+  "cadera_yaw_der",
+  "cadera_roll_der",
+  "muslo_der",
+  "canilla_der",
+  "pie_der",
+  "cuello",
+  "cabeza",
+  "pico_inferior"
+ ]
 }
