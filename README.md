@@ -4,6 +4,8 @@ Robot pato bípedo **hecho con piezas que se consiguen en MercadoLibre Argentina
 
 Este repo tiene el **modelo 3D v0**: paramétrico, con las medidas reales de cada componente, masas calculadas y un modelo de simulación para MuJoCo. Sirve para ver cómo queda, validar proporciones y torques, y planificar el armado. **Las piezas definitivas para imprimir salen después de la fase 0**, cuando midamos los servos reales (ver [PLAN.md](PLAN.md)).
 
+El aspecto sigue al pato original para que se reconozca enseguida: cabeza en forma de pan con un ojo redondo amarillo a cada lado, pico ancho y chato que abre como una tapa desde atrás, tronco cajita blanco y los servos del cuello y de las patas a la vista.
+
 ![Pato Criollo, vista ¾](docs/img/pato_tres_cuartos.png)
 
 | Rayos X | Explotado | Saludo |
@@ -24,22 +26,22 @@ Desde el visor podés:
 
 | | |
 | --- | --- |
-| Altura | ~38 cm (cabeza incluida) |
-| Masa estimada | **1,18 kg** (29 piezas impresas que suman 358 g) |
+| Altura | ~37 cm (cabeza incluida) |
+| Masa estimada | **1,22 kg** (31 piezas impresas que suman 402 g; la cabeza completa pesa 146 g) |
 | Servos | **8× MG996R** (cadera roll, cadera pitch, rodilla y tobillo de cada pata) y **5× MG90S** (cadera yaw ×2, cuello yaw, cuello pitch, boca) |
 | Patas | 5 articulaciones cada una. Muslo y canilla de 45 mm (el original tiene 42 mm) |
 | Control | Raspberry Pi Zero 2 W a bordo, PCA9685 (PWM), 2× MCP3008 (lectura de los potenciómetros), MPU-6050 (IMU) |
-| Cámara | Cámara de la Pi en la frente, entre los ojos |
+| Cámara | Cámara de la Pi en la frente, con el lente justo arriba del pico |
 | Energía | LiPo 2S de 1500 mAh, 2× XL4016 a 6,0 V (uno por pata), Mini560 de 5 V para la Pi |
 
 ### Torques (simulación MuJoCo, [`sim/torques.py`](sim/torques.py))
 
 | Pose | Articulación más exigida | Uso del torque máximo |
 | --- | --- | ---: |
-| Parado (rodillas a 40°) | tobillo, 1,95 kg·cm | 18 % |
-| Cuclillas (rodillas a 90°) | tobillo, 1,92 kg·cm | 18 % |
-| En una pata, sin desplazar el cuerpo (peor caso) | cadera roll, 4,41 kg·cm | **40 %** |
-| Cabeza (cualquier pose) | cuello pitch, 0,46 kg·cm | 21 % (MG90S) |
+| Parado (rodillas a 40°) | cadera pitch, 1,33 kg·cm | 12 % |
+| Cuclillas (rodillas a 90°) | cadera pitch, 1,24 kg·cm | 11 % |
+| En una pata, sin desplazar el cuerpo (peor caso) | cadera roll, 4,61 kg·cm | **42 %** |
+| Cabeza (cualquier pose) | cuello pitch, 0,48 kg·cm | 22 % (MG90S) |
 
 Al caminar, los picos suelen ser 2 a 3 veces el valor estático. **La cadera roll es el punto a vigilar.** Un paso normal desplaza el cuerpo sobre el pie de apoyo, así que exige menos que el peor caso. Tabla completa: [`salida/torques.md`](salida/torques.md).
 
@@ -61,8 +63,8 @@ Así no chocan entre sí, y la carcasa impresa los sujeta.
 | ![Paso 3](docs/img/armado_paso_03.png) **3. Muslo** con el servo de la rodilla. Se une a la canilla. | ![Paso 4](docs/img/armado_paso_04.png) **4. Soporte U** de cadera con el servo pitch. Se une al muslo. |
 | ![Paso 5](docs/img/armado_paso_05.png) **5. Servo roll** de cadera, placa yaw y eje. | ![Paso 6](docs/img/armado_paso_06.png) **6. Piso del tronco:** rulemanes 608 y servos yaw. Se cuelgan las patas. |
 | ![Paso 7](docs/img/armado_paso_07.png) **7. Batería, IMU y estante A:** reguladores XL4016 y placa de los MCP3008. | ![Paso 8](docs/img/armado_paso_08.png) **8. Estante B:** Pi Zero 2 W, PCA9685 y regulador de 5 V. |
-| ![Paso 9](docs/img/armado_paso_09.png) **9. Cuello:** servo yaw y servo pitch. | ![Paso 10](docs/img/armado_paso_10.png) **10. Cabeza:** servo de la boca, cámara, ojos y pico. |
-| ![Paso 11](docs/img/armado_paso_11.png) **11. Carcasa** del cuerpo (dos mitades) y cola. | ![Frente](docs/img/pato_frente.png) **Listo.** |
+| ![Paso 9](docs/img/armado_paso_09.png) **9. Cuello:** servo yaw y servo pitch. | ![Paso 10](docs/img/armado_paso_10.png) **10. Cabeza:** base, servo de la boca, mandíbula con el pico inferior, cámara, ojos, pico superior y cúpula. |
+| ![Paso 11](docs/img/armado_paso_11.png) **11. Carcasa** del cuerpo (dos mitades). | ![Frente](docs/img/pato_frente.png) **Listo.** |
 
 ## Archivos
 
@@ -73,7 +75,7 @@ sim/torques.py            torques estáticos en MuJoCo contra el torque máximo 
 visor/                    visor 3D (three.js) y capturas automáticas (Playwright)
 salida/pato.html          visor autocontenido (se abre con doble clic)
 salida/pato.glb           modelo 3D con colores (sirve en Blender o en https://gltf-viewer.donmccurdy.com)
-salida/piezas_impresas/   STL de las 29 piezas impresas (v0, todavía no para imprimir)
+salida/piezas_impresas/   STL de las 31 piezas impresas (v0, todavía no para imprimir)
 salida/mjcf/pato.xml      modelo MuJoCo con masas e inercias
 salida/resumen.md         masa de cada pieza
 docs/img/                 imágenes de este README

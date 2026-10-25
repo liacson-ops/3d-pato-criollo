@@ -12,7 +12,7 @@ const POSES = {
   cero: {},
   parado: { cadera_pitch: -0.35, rodilla: 0.7, tobillo: -0.35 },
   cuclillas: { cadera_pitch: -0.78, rodilla: 1.57, tobillo: -0.78 },
-  saludo: { cadera_pitch: -0.35, rodilla: 0.7, tobillo: -0.35, cuello_yaw: 0.6, cuello_pitch: -0.3, boca: -0.45 },
+  saludo: { cadera_pitch: -0.35, rodilla: 0.7, tobillo: -0.35, cuello_yaw: 0.6, cuello_pitch: -0.3, boca: 0.45 },
 };
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -131,10 +131,10 @@ function aplicar() {
     p.obj.visible = visible;
     let opacidad = 1;
     if (estado.modo === 'rayos' && p.info.descripcion.startsWith('Carcasa')) opacidad = 0.12;
-    if (estado.modo === 'rayos' && p.info.nombre.startsWith('cabeza_')) opacidad = 0.15;
+    if (estado.modo === 'rayos' && p.info.nombre === 'cupula') opacidad = 0.15;
     if (enPasos && p.info.paso < estado.paso) opacidad = 0.28;
     // En el paso a paso, las carcasas nuevas se ven translúcidas para mostrar lo que va adentro.
-    if (enPasos && p.info.paso === estado.paso && estado.paso < 11 && /^(cabeza|cuerpo)_(inferior|superior)$/.test(p.info.nombre))
+    if (enPasos && p.info.paso === estado.paso && estado.paso < 11 && /^(cupula|cuerpo_(inferior|superior))$/.test(p.info.nombre))
       opacidad = 0.3;
     m.opacity = opacidad;
     m.depthWrite = opacidad > 0.5;

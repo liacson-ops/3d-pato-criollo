@@ -42,10 +42,20 @@ Z_RODILLA = Z_TOBILLO + 45.0     # canilla de 45 mm (original: 42)
 Z_CADERA = Z_RODILLA + 45.0      # muslo de 45 mm (original: 42)
 Z_ROLL = Z_CADERA + 30.0
 Z_PISO = (178.0, 186.0)
-CUERPO_C = np.array([0.0, 0.0, 220.0])
-CUERPO_R = np.array([80.0, 75.0, 60.0])
-CABEZA_C = np.array([52.0, 0.0, 340.0])
-CABEZA_R = np.array([42.0, 36.0, 36.0])
+# Tronco: cajita redondeada, como el original (la electrónica va en estantes adentro).
+TRONCO_X = (-50.0, 66.0)
+TRONCO_Y = (-46.0, 46.0)
+TRONCO_Z = (187.0, 284.0)
+TRONCO_R = 12.0
+Z_CORTE_TRONCO = 232.0
+# Cabeza: cúpula tipo "pan" con el piso plano y pico ancho que abre como una tapa.
+CAB_X = (-15.0, 115.0)
+CAB_Y = (-52.0, 52.0)
+Z_CAB = (305.0, 365.0)
+R_CAB_ARRIBA, R_CAB_ABAJO = 26.0, 10.0
+X_CUELLO = 40.0
+Z_PITCH = 295.0
+BISAGRA_BOCA = (-5.0, 312.0)       # (x, z) del eje del pico inferior, atrás de la cabeza
 PARED = 1.6
 
 # Servos de eje lateral (pitch, rodilla, tobillo): tapa hacia afuera en y = 50.
@@ -56,7 +66,7 @@ PLACA_EXT = (Y_HORN, Y_HORN + 3.0)
 PLACA_INT = (Y_FONDO - 4.0, Y_FONDO - 1.0)
 
 COLORES = {
-    'pla': '#e9e6df', 'carcasa': '#fbfaf7', 'naranja': '#f5a623', 'tpu': '#d9822b',
+    'pla': '#e9e6df', 'carcasa': '#fbfaf7', 'naranja': '#f3c118', 'amarillo_claro': '#f9dd7a', 'tpu': '#d9822b',
     'mg996r': '#26282c', 'mg90s': '#2c5aa0', 'horn': '#f2f2f2', 'pcb_verde': '#1f7a3a',
     'pcb_azul': '#1f4fa0', 'pcb_violeta': '#5b3a8a', 'lipo': '#2b6cb0', 'aluminio': '#a9b0b7',
     'negro': '#111111', 'blanco': '#ffffff', 'acero': '#8c939a',
@@ -82,6 +92,25 @@ def elipsoide(c, r, seg=SEG):
 
 def cascara(c, r, pared):
     return elipsoide(c, r, 64) - elipsoide(c, np.asarray(r) - pared, 64)
+
+
+def caja_redondeada(x, y, z, r, r_abajo=None, encoger=0.0):
+    """Envolvente de esferas en las esquinas: caja con todas las aristas redondeadas.
+    r_abajo permite otro radio en las 4 esquinas de abajo (cúpula). encoger reduce
+    los radios para obtener la cara interior de una cáscara."""
+    r_abajo = r if r_abajo is None else r_abajo
+    esferas = []
+    for zc, rc in ((z[1] - r, r), (z[0] + r_abajo, r_abajo)):
+        for xc in (x[0] + rc, x[1] - rc):
+            for yc in (y[0] + rc, y[1] - rc):
+                esferas.append(Manifold.sphere(rc - encoger, 48).translate([xc, yc, zc]))
+    return Manifold.batch_hull(esferas)
+
+
+def placa_redondeada(x, y, z, r):
+    """Placa plana con esquinas redondeadas (eje Z)."""
+    return Manifold.batch_hull([cil((xc, yc, z[0]), (xc, yc, z[1]), r)
+                                for xc in (x[0] + r, x[1] - r) for yc in (y[0] + r, y[1] - r)])
 
 
 def placa_y(y0, y1, discos, rects=()):
@@ -164,8 +193,8 @@ PASOS = {
     7: 'Batería, IMU y estante A (reguladores XL4016 y placa de los MCP3008)',
     8: 'Estante B: Pi Zero 2 W, PCA9685 y regulador de 5 V',
     9: 'Cuello: servo yaw y servo pitch',
-    10: 'Cabeza: servo de la boca, cámara, ojos y pico',
-    11: 'Carcasa del cuerpo (dos mitades) y cola',
+    10: 'Cabeza: cúpula, base, servo de la boca, cámara, ojos y pico',
+    11: 'Carcasa del cuerpo (dos mitades)',
 }
 
 
@@ -294,11 +323,11 @@ def pata(r: Robot, lado: str):
 
 
 def tronco(r: Robot):
-    r.anclas['tronco'] = CUERPO_C.copy()
+    r.anclas['tronco'] = np.array([0.0, 0.0, 220.0])
     r.padres['tronco'] = None
     t = 'tronco'
     # Piso con alojamientos de rulemanes (paso 6)
-    piso = elipse_z(CUERPO_C, 53, 50.5, *Z_PISO)
+    piso = placa_redondeada((TRONCO_X[0], TRONCO_X[1]), (-50, 50), Z_PISO, 10)
     for s in (1, -1):
         piso -= cil((0, s * Y_PATA, Z_PISO[0] + 0.5), (0, s * Y_PATA, Z_PISO[1] + 1), 11.1)
         piso -= cil((0, s * Y_PATA, Z_PISO[0] - 1), (0, s * Y_PATA, Z_PISO[1] + 1), 6)
@@ -313,7 +342,7 @@ def tronco(r: Robot):
     gx, gy, gz, gm = GY521
     r.agregar(Pieza('imu_gy521', t, caja(-gx / 2, gx / 2, -gy / 2, gy / 2, 202.5, 202.5 + gz),
                     COLORES['pcb_azul'], 'comprada', 7, masa=gm, descripcion='IMU MPU-6050 (GY-521)'))
-    estante_a = elipse_z(CUERPO_C, 75, 70, 218, 221)
+    estante_a = placa_redondeada((TRONCO_X[0] + 3.5, TRONCO_X[1] - 3.5), (TRONCO_Y[0] + 3.5, TRONCO_Y[1] - 3.5), (218, 221), 9)
     for s in (1, -1):  # paso de los servos yaw de cadera
         estante_a -= caja(-8, 19, s * Y_PATA - 8, s * Y_PATA + 8, 210, 230)
     r.agregar(Pieza('estante_a', t, estante_a, COLORES['pla'], 'impresa', 7, relleno=0.4,
@@ -325,106 +354,123 @@ def tronco(r: Robot):
                         COLORES['pcb_azul'], 'comprada', 7, masa=xm,
                         descripcion=f'Regulador XL4016 6,0 V (pata {"izquierda" if s > 0 else "derecha"})'))
     mx_, my_, mz_, mm_ = PLACA_MCP3008
-    r.agregar(Pieza('placa_mcp3008', t, caja(-62, -62 + my_, -mx_ / 2, mx_ / 2, 221, 221 + mz_),
+    r.agregar(Pieza('placa_mcp3008', t, caja(33, 33 + my_, -mx_ / 2, mx_ / 2, 221, 221 + mz_),
                     COLORES['pcb_verde'], 'comprada', 7, masa=mm_, descripcion='2× MCP3008 + divisores'))
     # Estante B (paso 8)
-    estante_b = elipse_z(CUERPO_C, 68, 63, 244, 247) - caja(20, 50, -9, 9, 240, 250)
+    estante_b = (placa_redondeada((TRONCO_X[0] + 3.5, TRONCO_X[1] - 3.5), (TRONCO_Y[0] + 3.5, TRONCO_Y[1] - 3.5), (244, 247), 9)
+                 - caja(20, 50, -9, 9, 240, 250))
     r.agregar(Pieza('estante_b', t, estante_b, COLORES['pla'], 'impresa', 8, relleno=0.4,
                     descripcion='Estante B'))
     px, py, pz, pm = PI_ZERO_2W
-    r.agregar(Pieza('pi_zero_2w', t, caja(-8, -8 + py, -px / 2, px / 2, 247, 247 + pz), COLORES['pcb_verde'],
+    r.agregar(Pieza('pi_zero_2w', t, caja(-14, -14 + py, -px / 2, px / 2, 247, 247 + pz), COLORES['pcb_verde'],
                     'comprada', 8, masa=pm + 3, descripcion='Raspberry Pi Zero 2 W'))
     cx_, cy_, cz_, cm_ = PCA9685
-    r.agregar(Pieza('pca9685', t, caja(-45, -45 + cy_, -cx_ / 2, cx_ / 2, 247, 247 + cz_),
+    r.agregar(Pieza('pca9685', t, caja(-44, -44 + cy_, -cx_ / 2, cx_ / 2, 247, 247 + cz_),
                     COLORES['pcb_azul'], 'comprada', 8, masa=cm_, descripcion='PCA9685 (16 PWM)'))
     nx, ny, nz, nm = MINI560
-    r.agregar(Pieza('mini560_5v', t, caja(-62, -62 + nx, 26, 26 + ny, 221, 221 + nz), COLORES['pcb_violeta'],
+    r.agregar(Pieza('mini560_5v', t, caja(20, 20 + nx, 12, 12 + ny, 247, 247 + nz), COLORES['pcb_violeta'],
                     'comprada', 8, masa=nm, descripcion='Mini560 5 V (Pi)'))
     # Servo yaw del cuello (paso 9)
-    caja_c, _ = servo_en(MG90S, (40, 0, 268), (0, 0, 1), (-1, 0, 0), 'lejos')
+    caja_c, _ = servo_en(MG90S, (X_CUELLO, 0, 268), (0, 0, 1), (-1, 0, 0), 'lejos')
     r.agregar(Pieza('servo_cuello_yaw', t, caja_c, COLORES['mg90s'], 'comprada', 9, masa=MG90S.masa,
                     descripcion='MG90S cuello yaw'))
-    # Carcasa y cola (paso 11)
-    cuerpo = cascara(CUERPO_C, CUERPO_R, PARED)
-    cuerpo -= caja(-200, 200, -200, 200, 0, 176)
-    cuerpo -= cil((40, 0, 240), (40, 0, 320), 19)
-    cola = Manifold.batch_hull([Manifold.sphere(11, SEG).translate([-74, 0, 246]),
-                                Manifold.sphere(3, SEG).translate([-100, 0, 270])])
-    cola -= elipsoide(CUERPO_C, CUERPO_R - PARED)
-    inferior = cuerpo - caja(-200, 200, -200, 200, 232, 400)
-    superior = (cuerpo - caja(-200, 200, -200, 200, 0, 232)) + cola
+    # Carcasa (paso 11): cajita redondeada abierta abajo (apoya sobre el piso del tronco)
+    cuerpo = (caja_redondeada(TRONCO_X, TRONCO_Y, TRONCO_Z, TRONCO_R)
+              - caja_redondeada(TRONCO_X, TRONCO_Y, (TRONCO_Z[0] - 5, TRONCO_Z[1]), TRONCO_R, encoger=PARED))
+    cuerpo -= caja(-200, 200, -200, 200, 0, TRONCO_Z[0] + 0.01)
+    cuerpo -= cil((X_CUELLO, 0, 260), (X_CUELLO, 0, 300), 17)        # paso del cuello
+    inferior = cuerpo - caja(-200, 200, -200, 200, Z_CORTE_TRONCO, 400)
+    superior = cuerpo - caja(-200, 200, -200, 200, 0, Z_CORTE_TRONCO)
     r.agregar(Pieza('cuerpo_inferior', t, inferior, COLORES['carcasa'], 'impresa', 11, relleno=1.0,
                     descripcion='Carcasa del cuerpo, mitad inferior'))
     r.agregar(Pieza('cuerpo_superior', t, superior, COLORES['carcasa'], 'impresa', 11, relleno=1.0,
-                    descripcion='Carcasa del cuerpo, mitad superior con cola'))
+                    descripcion='Carcasa del cuerpo, mitad superior'))
     r.masas_extra['tronco'] = (40.0, None)  # cables, conectores, tornillos
 
 
 def cuello_y_cabeza(r: Robot):
-    # Cuello (paso 9)
-    r.anclas['cuello'] = np.array([40.0, 0, 272.0])
+    x = X_CUELLO
+    # Cuello (paso 9): dos servos a la vista entre el tronco y la cabeza, como el original
+    r.anclas['cuello'] = np.array([x, 0, 272.0])
     r.padres['cuello'] = 'tronco'
-    _, horn_cy = servo_en(MG90S, (40, 0, 268), (0, 0, 1), (-1, 0, 0), 'lejos')
+    _, horn_cy = servo_en(MG90S, (x, 0, 268), (0, 0, 1), (-1, 0, 0), 'lejos')
     r.agregar(Pieza('horn_cuello_yaw', 'cuello', horn_cy, COLORES['horn'], 'comprada', 9, masa=1.0))
-    caja_cp, horn_cp = servo_en(MG90S, (40, 8.7, 295), (0, 1, 0), (0, 0, -1), 'eje')
+    caja_cp, horn_cp = servo_en(MG90S, (x, 8.7, Z_PITCH), (0, 1, 0), (0, 0, -1), 'eje')
     r.agregar(Pieza('servo_cuello_pitch', 'cuello', caja_cp, COLORES['mg90s'], 'comprada', 9, masa=MG90S.masa,
                     descripcion='MG90S cuello pitch'))
-    base = cil((40, 0, 275.8), (40, 0, 278), 14)
-    lados = caja(31.5, 33.7, -14, 8.7, 278, 300) + caja(46.3, 48.5, -14, 8.7, 278, 300)
+    base = cil((x, 0, 275.8), (x, 0, 278), 14)
+    lados = caja(x - 8.5, x - 6.3, -14, 8.7, 278, 300) + caja(x + 6.3, x + 8.5, -14, 8.7, 278, 300)
     r.agregar(Pieza('soporte_cuello', 'cuello', base + lados, COLORES['pla'], 'impresa', 9,
                     descripcion='Soporte del cuello (yaw → pitch)'))
+
     # Cabeza (paso 10)
-    r.anclas['cabeza'] = np.array([40.0, 0, 295.0])
+    r.anclas['cabeza'] = np.array([x, 0, Z_PITCH])
     r.padres['cabeza'] = 'cuello'
     r.agregar(Pieza('horn_cuello_pitch', 'cabeza', horn_cp, COLORES['horn'], 'comprada', 9, masa=1.0))
-    c, rr = CABEZA_C, CABEZA_R
-    cab = cascara(c, rr, PARED)
-    cab -= cil((40, 0, 280), (40, 0, 312), 17)            # entrada del cuello
-    cab -= caja(78, 120, 14, 21, 312, 334)                # ranura del brazo del pico inferior
-    cab -= cil((70, 0, 348), (110, 0, 348), 4.5)          # lente
-    for s in (1, -1):
-        cab -= elipsoide((74, s * 23, 352), (8.2, 8.2, 8.2))
-    inf = cab - caja(-200, 200, -200, 200, 336, 500)
-    sup = cab - caja(-200, 200, -200, 200, 0, 336)
-    r.agregar(Pieza('cabeza_inferior', 'cabeza', inf, COLORES['carcasa'], 'impresa', 10, relleno=1.0,
-                    descripcion='Cabeza, mitad inferior'))
-    r.agregar(Pieza('cabeza_superior', 'cabeza', sup, COLORES['carcasa'], 'impresa', 10, relleno=1.0,
-                    descripcion='Cabeza, mitad superior'))
-    placas = (placa_y(16.5, 19.5, [(40, 295, 9)], [(44, 56, 300, 304)])
-              + placa_y(-18, -15, [(40, 295, 7)], [(44, 56, 300, 304)])
-              + cil((40, -15, 295), (40, -14, 295), 3))
-    r.agregar(Pieza('soporte_cabeza', 'cabeza', placas, COLORES['pla'], 'impresa', 10,
-                    descripcion='Soporte de la cabeza (horn del cuello pitch)'))
-    caja_b, horn_b = servo_en(MG90S, (76, 8.7, 326), (0, 1, 0), (-1, 0, 0), 'lejos')
+    z0, z1 = Z_CAB
+    # Cúpula: cáscara abierta abajo, aristas de arriba bien redondeadas
+    cupula = (caja_redondeada(CAB_X, CAB_Y, Z_CAB, R_CAB_ARRIBA, R_CAB_ABAJO)
+              - caja_redondeada(CAB_X, CAB_Y, (z0 - 5, z1), R_CAB_ARRIBA, R_CAB_ABAJO, encoger=PARED))
+    cupula -= caja(-200, 200, -200, 200, 0, z0 + 0.01)
+    cupula -= cil((CAB_X[1] - 10, 0, 328), (CAB_X[1] + 5, 0, 328), 4.5)       # lente
+    r.agregar(Pieza('cupula', 'cabeza', cupula, COLORES['carcasa'], 'impresa', 10, relleno=1.0,
+                    descripcion='Cúpula de la cabeza'))
+    # Base estructural dentro de la cúpula: sostiene el servo de la boca y se une al cuello
+    base_cab = placa_redondeada((0, CAB_X[1] - 12), (-44, 44), (302, 305), 8)
+    base_cab -= caja(x - 10, x + 20, -22, 22, 300, 306)                        # paso del servo pitch
+    soporte = (placa_y(16.5, 19.5, [(x, Z_PITCH, 9)], [(x - 6, x + 10, 302, 305)])
+               + placa_y(-18, -15, [(x, Z_PITCH, 7)], [(x - 6, x + 10, 302, 305)])
+               + cil((x, -15, Z_PITCH), (x, -14, Z_PITCH), 3))
+    bx, bz = BISAGRA_BOCA
+    soporte_bisagra = caja(bx - 4, bx + 4, -16.5, -14, 302, bz + 4) + cil((bx, -16.5, bz), (bx, -19, bz), 2)
+    r.agregar(Pieza('base_cabeza', 'cabeza', base_cab + soporte + soporte_bisagra, COLORES['pla'], 'impresa', 10,
+                    descripcion='Base de la cabeza: une el cuello, el servo de la boca y la cúpula'))
+    # Servo de la boca, en el fondo de la cabeza, eje lateral
+    caja_b, horn_b = servo_en(MG90S, (bx, 9, bz), (0, 1, 0), (1, 0, 0), 'lejos')
     r.agregar(Pieza('servo_boca', 'cabeza', caja_b, COLORES['mg90s'], 'comprada', 10, masa=MG90S.masa,
                     descripcion='MG90S boca'))
-    r.agregar(Pieza('camara', 'cabeza', caja(78, 79, -12.5, 12.5, 336, 360), COLORES['pcb_verde'], 'comprada',
-                    10, masa=3.0, descripcion='Cámara de la Pi (en la frente)'))
-    r.agregar(Pieza('lente', 'cabeza', cil((79, 0, 348), (88, 0, 348), 4), COLORES['negro'], 'comprada', 10,
-                    masa=1.0))
-    r.agregar(Pieza('soporte_camara', 'cabeza', caja(75, 78, -14, 14, 334, 362), COLORES['pla'], 'impresa', 10,
-                    descripcion='Soporte de la cámara'))
-    ojos = elipsoide((74, 23, 352), (8, 8, 8)) + elipsoide((74, -23, 352), (8, 8, 8))
-    pupilas = elipsoide((80.5, 24.5, 353), (3.5, 3.5, 3.5)) + elipsoide((80.5, -24.5, 353), (3.5, 3.5, 3.5))
-    r.agregar(Pieza('ojos', 'cabeza', ojos - pupilas, COLORES['blanco'], 'impresa', 10, relleno=0.3))
-    r.agregar(Pieza('pupilas', 'cabeza', pupilas, COLORES['negro'], 'impresa', 10, relleno=0.5))
-    pico = elipsoide((104, 0, 331), (30, 20, 7)) - elipsoide(c, rr)
-    r.agregar(Pieza('pico_superior', 'cabeza', pico, COLORES['naranja'], 'impresa', 10, relleno=0.3,
+    # Pico superior: lámina amarilla ancha en el borde de abajo de la cúpula
+    pico_sup = placa_redondeada((CAB_X[1] - 12, CAB_X[1] + 24), (-48, 48), (302, 306), 12)
+    r.agregar(Pieza('pico_superior', 'cabeza', pico_sup, COLORES['naranja'], 'impresa', 10, relleno=0.4,
                     descripcion='Pico superior'))
-    # Pico inferior (boca)
-    r.anclas['pico_inferior'] = np.array([76.0, 0, 326.0])
+    # Ojos: aro amarillo con disco claro, uno por lado
+    for s, lado in ((1, 'izq'), (-1, 'der')):
+        yc = CAB_Y[1] if s > 0 else CAB_Y[0]
+        aro = (cil((55, yc, 334), (55, yc + 3 * s, 334), 18)
+               - cil((55, yc - 1 * s, 334), (55, yc + 4 * s, 334), 11))
+        disco = cil((55, yc, 334), (55, yc + 2 * s, 334), 11)
+        r.agregar(Pieza(f'ojo_aro_{lado}', 'cabeza', aro, COLORES['naranja'], 'impresa', 10, relleno=0.4,
+                        descripcion='Aro del ojo'))
+        r.agregar(Pieza(f'ojo_disco_{lado}', 'cabeza', disco, COLORES['amarillo_claro'], 'impresa', 10, relleno=0.4,
+                        descripcion='Disco del ojo'))
+    # Cámara en la frente, detrás del agujero del lente
+    xf = CAB_X[1] - PARED
+    r.agregar(Pieza('camara', 'cabeza', caja(xf - 7, xf - 6, -12.5, 12.5, 316, 340), COLORES['pcb_verde'], 'comprada',
+                    10, masa=3.0, descripcion='Cámara de la Pi (en la frente)'))
+    r.agregar(Pieza('lente', 'cabeza', cil((xf - 6, 0, 328), (xf + 1, 0, 328), 4), COLORES['negro'], 'comprada', 10,
+                    masa=1.0))
+    r.agregar(Pieza('soporte_camara', 'cabeza', caja(xf - 10, xf - 7, -14, 14, 306, 342), COLORES['pla'], 'impresa', 10,
+                    descripcion='Soporte de la cámara'))
+
+    # Pico inferior (paso 10): es todo el piso de la cabeza, abre como una tapa desde atrás
+    r.anclas['pico_inferior'] = np.array([bx, 0, bz])
     r.padres['pico_inferior'] = 'cabeza'
     r.agregar(Pieza('horn_boca', 'pico_inferior', horn_b, COLORES['horn'], 'comprada', 10, masa=0.5))
-    brazo = placa_y(16.5, 18.5, [(76, 326, 6), (96, 318, 4)])
-    mand = (elipsoide((106, 0, 317), (26, 17, 5)) - elipsoide(c, rr)) + brazo
-    r.agregar(Pieza('pico_inf', 'pico_inferior', mand, COLORES['naranja'], 'impresa', 10, relleno=0.3,
-                    descripcion='Pico inferior (lo mueve el servo de la boca)'))
+    mand = placa_redondeada((-12, CAB_X[1] - 12), (-50, 50), (296, 301), 10)
+    mand -= caja(x - 12, x + 22, -22, 22, 290, 310)                             # paso del cuello
+    brazo_h = placa_y(16.8, 18.8, [(bx, bz, 6)], [(bx - 3, bx + 3, 296, bz)])
+    brazo_p = placa_y(-18.8, -16.8, [(bx, bz, 6)], [(bx - 3, bx + 3, 296, bz)])
+    r.agregar(Pieza('mandibula', 'pico_inferior', mand + brazo_h + brazo_p, COLORES['carcasa'], 'impresa', 10,
+                    relleno=0.4, descripcion='Mandíbula: piso de la cabeza, la mueve el servo de la boca'))
+    pico_inf = placa_redondeada((CAB_X[1] - 12, CAB_X[1] + 22), (-46, 46), (296, 301), 12)
+    r.agregar(Pieza('pico_inferior', 'pico_inferior', pico_inf, COLORES['naranja'], 'impresa', 10, relleno=0.4,
+                    descripcion='Pico inferior (amarillo, va pegado a la mandíbula)'))
     r.articulaciones += [
         Articulacion('cuello_yaw', 'tronco', 'cuello', r.anclas['cuello'], np.array([0, 0, 1.0]), (-1.5, 1.5), MG90S),
         Articulacion('cuello_pitch', 'cuello', 'cabeza', r.anclas['cabeza'], np.array([0, 1.0, 0]), (-0.8, 0.8),
                      MG90S),
         Articulacion('boca', 'cabeza', 'pico_inferior', r.anclas['pico_inferior'], np.array([0, 1.0, 0]),
-                     (-0.5, 0.0), MG90S),
+                     (0.0, 0.55), MG90S),
     ]
 
 

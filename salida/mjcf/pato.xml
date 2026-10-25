@@ -70,25 +70,27 @@
     <mesh name="servo_cuello_pitch" file="mallas/servo_cuello_pitch.stl"/>
     <mesh name="soporte_cuello" file="mallas/soporte_cuello.stl"/>
     <mesh name="horn_cuello_pitch" file="mallas/horn_cuello_pitch.stl"/>
-    <mesh name="cabeza_inferior" file="mallas/cabeza_inferior.stl"/>
-    <mesh name="cabeza_superior" file="mallas/cabeza_superior.stl"/>
-    <mesh name="soporte_cabeza" file="mallas/soporte_cabeza.stl"/>
+    <mesh name="cupula" file="mallas/cupula.stl"/>
+    <mesh name="base_cabeza" file="mallas/base_cabeza.stl"/>
     <mesh name="servo_boca" file="mallas/servo_boca.stl"/>
+    <mesh name="pico_superior" file="mallas/pico_superior.stl"/>
+    <mesh name="ojo_aro_izq" file="mallas/ojo_aro_izq.stl"/>
+    <mesh name="ojo_disco_izq" file="mallas/ojo_disco_izq.stl"/>
+    <mesh name="ojo_aro_der" file="mallas/ojo_aro_der.stl"/>
+    <mesh name="ojo_disco_der" file="mallas/ojo_disco_der.stl"/>
     <mesh name="camara" file="mallas/camara.stl"/>
     <mesh name="lente" file="mallas/lente.stl"/>
     <mesh name="soporte_camara" file="mallas/soporte_camara.stl"/>
-    <mesh name="ojos" file="mallas/ojos.stl"/>
-    <mesh name="pupilas" file="mallas/pupilas.stl"/>
-    <mesh name="pico_superior" file="mallas/pico_superior.stl"/>
     <mesh name="horn_boca" file="mallas/horn_boca.stl"/>
-    <mesh name="pico_inf" file="mallas/pico_inf.stl"/>
+    <mesh name="mandibula" file="mallas/mandibula.stl"/>
+    <mesh name="pico_inferior" file="mallas/pico_inferior.stl"/>
   </asset>
   <worldbody>
     <light pos="0 0 2" dir="0 0 -1" directional="true"/>
     <geom name="suelo" type="plane" size="0 0 0.05" rgba="0.75 0.78 0.8 1" contype="1" conaffinity="1"/>
     <body name="tronco" pos="0.00000 0.00000 0.22000">
       <freejoint name="base"/>
-      <inertial pos="-0.00254 0.00016 -0.00260" mass="0.48565" fullinertia="7.381e-04 8.299e-04 9.202e-04 3.357e-06 2.802e-05 -4.270e-07"/>
+      <inertial pos="0.00517 0.00010 -0.00143" mass="0.45160" fullinertia="6.479e-04 7.163e-04 6.486e-04 -1.106e-06 -1.718e-05 -1.299e-06"/>
       <geom mesh="piso_tronco" class="visual" rgba="0.914 0.902 0.875 1.000"/>
       <geom mesh="lipo_2s_1500" class="visual" rgba="0.169 0.424 0.690 1.000"/>
       <geom mesh="tapa_bateria" class="visual" rgba="0.914 0.902 0.875 1.000"/>
@@ -136,7 +138,7 @@
                 <joint name="tobillo_izq" axis="0 1 0" range="-1.2 1.2" class="mg996r"/>
                 <inertial pos="0.01329 0.00155 -0.02431" mass="0.02672" fullinertia="9.750e-06 1.677e-05 1.982e-05 4.886e-07 1.947e-06 -1.006e-06"/>
                 <geom mesh="suela_izq" class="suela" rgba="0.851 0.510 0.169 1.000"/>
-                <geom mesh="paleta_pie_izq" class="visual" rgba="0.961 0.651 0.137 1.000"/>
+                <geom mesh="paleta_pie_izq" class="visual" rgba="0.953 0.757 0.094 1.000"/>
                 <geom mesh="orejas_tobillo_izq" class="visual" rgba="0.914 0.902 0.875 1.000"/>
                 <geom mesh="horn_tobillo_izq" class="visual" rgba="0.949 0.949 0.949 1.000"/>
               </body>
@@ -172,7 +174,7 @@
                 <joint name="tobillo_der" axis="-0 1 -0" range="-1.2 1.2" class="mg996r"/>
                 <inertial pos="0.01329 -0.00155 -0.02431" mass="0.02672" fullinertia="9.750e-06 1.677e-05 1.982e-05 -4.886e-07 1.947e-06 1.006e-06"/>
                 <geom mesh="suela_der" class="suela" rgba="0.851 0.510 0.169 1.000"/>
-                <geom mesh="paleta_pie_der" class="visual" rgba="0.961 0.651 0.137 1.000"/>
+                <geom mesh="paleta_pie_der" class="visual" rgba="0.953 0.757 0.094 1.000"/>
                 <geom mesh="orejas_tobillo_der" class="visual" rgba="0.914 0.902 0.875 1.000"/>
                 <geom mesh="horn_tobillo_der" class="visual" rgba="0.949 0.949 0.949 1.000"/>
               </body>
@@ -188,23 +190,25 @@
         <geom mesh="soporte_cuello" class="visual" rgba="0.914 0.902 0.875 1.000"/>
         <body name="cabeza" pos="0.00000 0.00000 0.02300">
           <joint name="cuello_pitch" axis="0 1 0" range="-0.8 0.8" class="mg90s"/>
-          <inertial pos="0.02366 -0.00015 0.04126" mass="0.05973" fullinertia="3.699e-05 5.729e-05 5.366e-05 6.603e-07 1.459e-06 5.017e-07"/>
+          <inertial pos="0.01160 -0.00004 0.03382" mass="0.10992" fullinertia="1.639e-04 2.803e-04 3.360e-04 -9.233e-07 1.370e-06 2.391e-07"/>
           <geom mesh="horn_cuello_pitch" class="visual" rgba="0.949 0.949 0.949 1.000"/>
-          <geom mesh="cabeza_inferior" class="visual" rgba="0.984 0.980 0.969 1.000"/>
-          <geom mesh="cabeza_superior" class="visual" rgba="0.984 0.980 0.969 1.000"/>
-          <geom mesh="soporte_cabeza" class="visual" rgba="0.914 0.902 0.875 1.000"/>
+          <geom mesh="cupula" class="visual" rgba="0.984 0.980 0.969 1.000"/>
+          <geom mesh="base_cabeza" class="visual" rgba="0.914 0.902 0.875 1.000"/>
           <geom mesh="servo_boca" class="visual" rgba="0.173 0.353 0.627 1.000"/>
+          <geom mesh="pico_superior" class="visual" rgba="0.953 0.757 0.094 1.000"/>
+          <geom mesh="ojo_aro_izq" class="visual" rgba="0.953 0.757 0.094 1.000"/>
+          <geom mesh="ojo_disco_izq" class="visual" rgba="0.976 0.867 0.478 1.000"/>
+          <geom mesh="ojo_aro_der" class="visual" rgba="0.953 0.757 0.094 1.000"/>
+          <geom mesh="ojo_disco_der" class="visual" rgba="0.976 0.867 0.478 1.000"/>
           <geom mesh="camara" class="visual" rgba="0.122 0.478 0.227 1.000"/>
           <geom mesh="lente" class="visual" rgba="0.067 0.067 0.067 1.000"/>
           <geom mesh="soporte_camara" class="visual" rgba="0.914 0.902 0.875 1.000"/>
-          <geom mesh="ojos" class="visual" rgba="1.000 1.000 1.000 1.000"/>
-          <geom mesh="pupilas" class="visual" rgba="0.067 0.067 0.067 1.000"/>
-          <geom mesh="pico_superior" class="visual" rgba="0.961 0.651 0.137 1.000"/>
-          <body name="pico_inferior" pos="0.03600 0.00000 0.03100">
-            <joint name="boca" axis="0 1 0" range="-0.5 0.0" class="mg90s"/>
-            <inertial pos="0.02543 0.00284 -0.00759" mass="0.00406" fullinertia="4.134e-07 9.832e-07 1.263e-06 2.620e-07 1.404e-07 -7.499e-08"/>
+          <body name="pico_inferior" pos="-0.04500 0.00000 0.01700">
+            <joint name="boca" axis="0 1 0" range="0.0 0.55" class="mg90s"/>
+            <inertial pos="0.06616 0.00024 -0.01318" mass="0.03287" fullinertia="2.800e-05 6.670e-05 9.428e-05 5.173e-07 6.870e-07 -1.031e-07"/>
             <geom mesh="horn_boca" class="visual" rgba="0.949 0.949 0.949 1.000"/>
-            <geom mesh="pico_inf" class="visual" rgba="0.961 0.651 0.137 1.000"/>
+            <geom mesh="mandibula" class="visual" rgba="0.984 0.980 0.969 1.000"/>
+            <geom mesh="pico_inferior" class="visual" rgba="0.953 0.757 0.094 1.000"/>
           </body>
         </body>
       </body>

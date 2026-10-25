@@ -107,9 +107,9 @@
   "pico_inferior": {
    "padre": "cabeza",
    "ancla_mm": [
-    76.0,
+    -5.0,
     0.0,
-    326.0
+    312.0
    ]
   }
  },
@@ -371,9 +371,9 @@
    "padre": "cabeza",
    "hijo": "pico_inferior",
    "ancla_mm": [
-    76.0,
+    -5.0,
     0.0,
-    326.0
+    312.0
    ],
    "eje": [
     0.0,
@@ -381,8 +381,8 @@
     0.0
    ],
    "rango": [
-    -0.5,
-    0.0
+    0.0,
+    0.55
    ],
    "servo": "MG90S",
    "parado": 0.0
@@ -395,7 +395,7 @@
    "tipo": "impresa",
    "paso": 6,
    "color": "#e9e6df",
-   "masa_g": 30.4,
+   "masa_g": 42.8,
    "descripcion": "Piso del tronco con alojamientos 608"
   },
   {
@@ -431,7 +431,7 @@
    "tipo": "impresa",
    "paso": 7,
    "color": "#e9e6df",
-   "masa_g": 23.2,
+   "masa_g": 12.7,
    "descripcion": "Estante A"
   },
   {
@@ -467,7 +467,7 @@
    "tipo": "impresa",
    "paso": 8,
    "color": "#e9e6df",
-   "masa_g": 19.2,
+   "masa_g": 12.9,
    "descripcion": "Estante B"
   },
   {
@@ -512,7 +512,7 @@
    "tipo": "impresa",
    "paso": 11,
    "color": "#fbfaf7",
-   "masa_g": 55.7,
+   "masa_g": 28.6,
    "descripcion": "Carcasa del cuerpo, mitad inferior"
   },
   {
@@ -521,8 +521,8 @@
    "tipo": "impresa",
    "paso": 11,
    "color": "#fbfaf7",
-   "masa_g": 56.8,
-   "descripcion": "Carcasa del cuerpo, mitad superior con cola"
+   "masa_g": 54.3,
+   "descripcion": "Carcasa del cuerpo, mitad superior"
   },
   {
    "nombre": "suela_izq",
@@ -538,7 +538,7 @@
    "eslabon": "pie_izq",
    "tipo": "impresa",
    "paso": 1,
-   "color": "#f5a623",
+   "color": "#f3c118",
    "masa_g": 12.7,
    "descripcion": "Pie de pato (paleta)"
   },
@@ -700,7 +700,7 @@
    "eslabon": "pie_der",
    "tipo": "impresa",
    "paso": 1,
-   "color": "#f5a623",
+   "color": "#f3c118",
    "masa_g": 12.7,
    "descripcion": "Pie de pato (paleta)"
   },
@@ -885,31 +885,22 @@
    "descripcion": ""
   },
   {
-   "nombre": "cabeza_inferior",
+   "nombre": "cupula",
    "eslabon": "cabeza",
    "tipo": "impresa",
    "paso": 10,
    "color": "#fbfaf7",
-   "masa_g": 13.2,
-   "descripcion": "Cabeza, mitad inferior"
+   "masa_g": 61.4,
+   "descripcion": "Cúpula de la cabeza"
   },
   {
-   "nombre": "cabeza_superior",
-   "eslabon": "cabeza",
-   "tipo": "impresa",
-   "paso": 10,
-   "color": "#fbfaf7",
-   "masa_g": 18.1,
-   "descripcion": "Cabeza, mitad superior"
-  },
-  {
-   "nombre": "soporte_cabeza",
+   "nombre": "base_cabeza",
    "eslabon": "cabeza",
    "tipo": "impresa",
    "paso": 10,
    "color": "#e9e6df",
-   "masa_g": 1.3,
-   "descripcion": "Soporte de la cabeza (horn del cuello pitch)"
+   "masa_g": 18.6,
+   "descripcion": "Base de la cabeza: une el cuello, el servo de la boca y la cúpula"
   },
   {
    "nombre": "servo_boca",
@@ -919,6 +910,51 @@
    "color": "#2c5aa0",
    "masa_g": 13.4,
    "descripcion": "MG90S boca"
+  },
+  {
+   "nombre": "pico_superior",
+   "eslabon": "cabeza",
+   "tipo": "impresa",
+   "paso": 10,
+   "color": "#f3c118",
+   "masa_g": 6.6,
+   "descripcion": "Pico superior"
+  },
+  {
+   "nombre": "ojo_aro_izq",
+   "eslabon": "cabeza",
+   "tipo": "impresa",
+   "paso": 10,
+   "color": "#f3c118",
+   "masa_g": 0.9,
+   "descripcion": "Aro del ojo"
+  },
+  {
+   "nombre": "ojo_disco_izq",
+   "eslabon": "cabeza",
+   "tipo": "impresa",
+   "paso": 10,
+   "color": "#f9dd7a",
+   "masa_g": 0.4,
+   "descripcion": "Disco del ojo"
+  },
+  {
+   "nombre": "ojo_aro_der",
+   "eslabon": "cabeza",
+   "tipo": "impresa",
+   "paso": 10,
+   "color": "#f3c118",
+   "masa_g": 0.9,
+   "descripcion": "Aro del ojo"
+  },
+  {
+   "nombre": "ojo_disco_der",
+   "eslabon": "cabeza",
+   "tipo": "impresa",
+   "paso": 10,
+   "color": "#f9dd7a",
+   "masa_g": 0.4,
+   "descripcion": "Disco del ojo"
   },
   {
    "nombre": "camara",
@@ -944,35 +980,8 @@
    "tipo": "impresa",
    "paso": 10,
    "color": "#e9e6df",
-   "masa_g": 1.7,
+   "masa_g": 2.2,
    "descripcion": "Soporte de la cámara"
-  },
-  {
-   "nombre": "ojos",
-   "eslabon": "cabeza",
-   "tipo": "impresa",
-   "paso": 10,
-   "color": "#ffffff",
-   "masa_g": 1.5,
-   "descripcion": ""
-  },
-  {
-   "nombre": "pupilas",
-   "eslabon": "cabeza",
-   "tipo": "impresa",
-   "paso": 10,
-   "color": "#111111",
-   "masa_g": 0.2,
-   "descripcion": ""
-  },
-  {
-   "nombre": "pico_superior",
-   "eslabon": "cabeza",
-   "tipo": "impresa",
-   "paso": 10,
-   "color": "#f5a623",
-   "masa_g": 5.2,
-   "descripcion": "Pico superior"
   },
   {
    "nombre": "horn_boca",
@@ -984,13 +993,22 @@
    "descripcion": ""
   },
   {
-   "nombre": "pico_inf",
+   "nombre": "mandibula",
    "eslabon": "pico_inferior",
    "tipo": "impresa",
    "paso": 10,
-   "color": "#f5a623",
-   "masa_g": 3.6,
-   "descripcion": "Pico inferior (lo mueve el servo de la boca)"
+   "color": "#fbfaf7",
+   "masa_g": 24.9,
+   "descripcion": "Mandíbula: piso de la cabeza, la mueve el servo de la boca"
+  },
+  {
+   "nombre": "pico_inferior",
+   "eslabon": "pico_inferior",
+   "tipo": "impresa",
+   "paso": 10,
+   "color": "#f3c118",
+   "masa_g": 7.4,
+   "descripcion": "Pico inferior (amarillo, va pegado a la mandíbula)"
   }
  ],
  "pasos": {
@@ -1003,7 +1021,7 @@
   "7": "Batería, IMU y estante A (reguladores XL4016 y placa de los MCP3008)",
   "8": "Estante B: Pi Zero 2 W, PCA9685 y regulador de 5 V",
   "9": "Cuello: servo yaw y servo pitch",
-  "10": "Cabeza: servo de la boca, cámara, ojos y pico",
-  "11": "Carcasa del cuerpo (dos mitades) y cola"
+  "10": "Cabeza: cúpula, base, servo de la boca, cámara, ojos y pico",
+  "11": "Carcasa del cuerpo (dos mitades)"
  }
 }
