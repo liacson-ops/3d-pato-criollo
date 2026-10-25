@@ -15,23 +15,20 @@ Una versión del XGO-Duck (nombre provisorio) **hecha con piezas de MercadoLibre
   - orejas de servo cortadas donde chocan;
   - cuello de 2 articulaciones;
   - cámara en la frente;
-  - masa estimada **1,26 kg**, altura **31,5 cm** (cabeza al estilo del original: cúpula, ojo amarillo y pico ancho que abre como tapa).
-  - **Rediseño de patas:** los servos de cadera pitch, rodilla y tobillo van acostados en una cuna impresa única; muslo y canilla de 32 mm. El robot pasó de 38 a 31,5 cm.
-- **Simulador en el navegador** (`salida/simulador.html`, MuJoCo WebAssembly): se queda parado, camina con la marcha a mano y aguanta empujones de 6 N. Mostró que los MG90S de cadera yaw saturaban al caminar; **se pasaron a MG996R** (10 MG996R + 3 MG90S en total, 1,37 kg).
+  - masa estimada **1,36 kg**, altura **33,5 cm** parado (cabeza al estilo del original: cúpula, ojo amarillo y pico ancho que abre como tapa).
+  - **Rediseño de patas:** los servos de cadera pitch, rodilla y tobillo van acostados en una cuna impresa única, alternando el lado para que no se toquen al flexionar; muslo y canilla de 32 mm. El robot pasó de 38 a 33,5 cm.
+  - **Verificación de cruces** (`cad/choques.py`): ninguna pieza se cruza con otra en 72 poses (reposo, marcha completa, cada articulación en sus topes, cabeza girada con la boca abierta). De ahí salen los topes de cada articulación y dos reglas para el controlador: las caderas no se cierran hacia adentro con las puntas giradas, y la boca abre menos cuando la cabeza mira abajo (el cuello se alargó 2 cm por esto).
+- **Simulador en el navegador** (`salida/simulador.html`, MuJoCo WebAssembly): se queda parado, camina con la marcha a mano (unos 4 cm/s) y aguanta empujones de 4 N parado; con más hay que dar un paso. Mostró que los MG90S de cadera yaw saturaban al caminar; **se pasaron a MG996R** (10 MG996R + 3 MG90S en total). Caminando, ningún servo pasa del 56 % de su torque máximo.
+- **Entorno de entrenamiento para la Mac** (`rl/`): listo y probado de punta a punta (entrenar, exportar a ONNX, reproducir). Ver abajo.
 
 ## Entrenar en una MacBook M1
 
-Se puede, con dos salvedades:
+Se puede y ya está armado en [`rl/`](rl/README.md): MuJoCo para Python (anda nativo en Apple Silicon) + PPO de Stable-Baselines3 en CPU. **El pipeline del original (`xgoduck_rl` / mjlab) necesita GPU NVIDIA**; este no, y la GPU tampoco ayudaría porque el tiempo se va en la física, no en la red.
 
-- **El pipeline del original (`xgoduck_rl` / mjlab) necesita GPU NVIDIA**, así que en la Mac no corre. En su lugar: MuJoCo para Python (anda nativo en Apple Silicon) + PPO con PyTorch (usa la GPU de la M1 por Metal para la red; la física va en CPU). Con 8 entornos en paralelo una M1 hace unos 10.000–30.000 pasos de simulación por segundo con este modelo.
-- **Tiempo:** una marcha básica sale en una noche (5–10 millones de pasos); una robusta, con terreno irregular y empujones, lleva 1–3 días. En una GPU alquilada eso son 1–2 horas. Lo práctico: iterar recompensas y el modelo en la Mac, y las corridas largas en GPU.
-
-Para que lo aprendido sirva en el robot real hay que entrenar con:
-- **choques consigo mismo:** cada eslabón con su envolvente convexa y colisiones habilitadas entre eslabones no vecinos (hoy el simulador web usa una caja por eslabón y no mira choques entre piezas);
-- **objetos externos:** terreno con escalones y rampas, obstáculos y empujones aleatorios;
-- **variaciones aleatorias** de masas, fricción, torque y retardo de los servos, con el modelo de servo medido en la fase 0.
-
-Eso es la fase 4 del plan; se arma en `rl/` cuando lo pidas.
+- **Instalar y probar** (menos de un minuto): `pip install -r rl/requirements.txt` y la prueba rápida de `rl/README.md`.
+- **Tiempo:** unos 2.000–4.000 pasos de control por segundo con 8 entornos en una M1. Una marcha básica (10 M pasos) lleva 1 a 2 horas; una robusta, con terreno irregular, varias veces eso. Se puede cortar y seguir después.
+- **Qué simula:** choques consigo mismo (envolvente convexa de cada pieza, choques entre eslabones no vecinos: patas entre sí, patas con el tronco, cabeza con el tronco), piso con fricción variable, servos con torque máximo y retardo aleatorios, masas ±15 %, empujones al azar y comandos de velocidad y giro. Falta el terreno con escalones (campo de alturas en `pato_rl.xml`) y el modelo del servo medido en la fase 0.
+- **Qué sale:** un ONNX de 200 kB que recibe 39 valores (orientación, giros, ángulos y velocidades de los servos, última acción y comando) y devuelve los 10 objetivos de las patas. Es el contrato que va a implementar el runtime de la Pi Zero.
 - **Torques del modelo nuevo (MuJoCo):** parado, el tobillo usa el 18 % del máximo del MG996R. En el peor caso (una pata, sin desplazar el cuerpo), la **cadera roll llega al 40 %**. Es la articulación a vigilar en la fase 0 y en el entrenamiento.
 
 ---
@@ -144,7 +141,7 @@ La Pi Zero 2 W, la Pi 4 y las cámaras ya las tenés. Para comparar: solo los 15
 | **1. Diseño en código y simulación** | Patas y tronco para MG996R, cabeza de 2 articulaciones, modelo MuJoCo generado automáticamente. Simular parado, en una pata y el paso programado, con los límites medidos. | Yo | En simulación, torque pico por debajo del **60 %** del torque máximo medido. |
 | **2. Una pata en el banco** | Imprimir una pata, cargarla con medio robot de peso (bolsa de arena) y hacer sentadillas y pasos. | Vos imprimís y armás, yo hago el software. | Sin juego excesivo, sin calentamiento y con una lectura de posición que coincida con la simulación. |
 | **3. Pato completo, sin RL** | Armado completo, nueva capa de hardware en `hal/` (PCA9685 + MCP3008 + MPU-6050), calibración, pose y paso programado. | Los dos | Se para solo y da pasos programados sin caerse. |
-| **4. RL** | Entrenar caminar y levantarse con el modelo identificado y variaciones aleatorias (fork de `xgoduck_rl`, que es Apache-2.0). Exportar a ONNX y correrlo en la Pi Zero. | Yo preparo todo; el entrenamiento necesita **GPU NVIDIA**. | Camina con la política RL. |
+| **4. RL** | Entrenar caminar y levantarse con el modelo identificado y variaciones aleatorias (entorno propio en `rl/`, PPO sobre MuJoCo). Exportar a ONNX y correrlo en la Pi Zero. | Yo preparo todo; el entrenamiento corre en **la MacBook, en CPU** (1 a 2 horas por política). | Camina con la política RL. |
 | **5. Cámara y extras** | Seguimiento con la cabeza, transmisión de video, "seguime" con la Pi 4, aviso de batería. | Yo, con tus pruebas | — |
 
 ## 6. Software
@@ -156,7 +153,7 @@ La Pi Zero 2 W, la Pi 4 y las cámaras ya las tenés. Para comparar: solo los 15
   - el simulador y los tests.
 - **Cambia el backend de hardware:** sale el bus Feetech y entran PCA9685 + MCP3008 + MPU-6050.
 - **El runtime de Luwu no publica licencia,** así que no podemos distribuir una versión modificada. Para la nueva cantidad de articulaciones escribimos un runtime propio y liviano. La parte de política y filtros es chica.
-- **Entrenamiento:** `mjlab` necesita una **GPU NVIDIA con CUDA**. Si no tenés, se alquila por hora: hay servicios a unos USD 0,3–0,6 por hora y cada política lleva algunas horas.
+- **Entrenamiento:** en `rl/`, con MuJoCo + Stable-Baselines3, en CPU. No usa `mjlab` ni hace falta GPU.
 
 ## 7. Qué se reutiliza de lo ya impreso
 

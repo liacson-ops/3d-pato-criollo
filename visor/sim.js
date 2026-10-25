@@ -6,6 +6,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import loadMujoco from '@mujoco/mujoco';
 
 const ROBOT = window.PATO_ROBOT;
+const BOCA_MAX = (ROBOT.envolventes && ROBOT.envolventes.boca_max_por_cuello_pitch) || [[0, 0.3]];
+function bocaMax(pitch) { for (const [p, b] of BOCA_MAX) if (pitch <= p + 1e-9) return b; return 0; }
 const $ = (id) => document.getElementById(id);
 const NGAIN = 10, NBIAS = 10;
 const PARADO = { cadera_pitch: -0.35, rodilla: 0.7, tobillo: -0.35 };
@@ -23,7 +25,7 @@ function b64ABytes(b64) {
 // ---------------------------------------------------------------------------
 // Marcha programada a mano (la misma de sim/marcha.py)
 // ---------------------------------------------------------------------------
-const marcha = { frecuencia: 1.2, balanceo: 0.12, levante: 0.35, zancada: 0.26, giro: 0.0, rampa: 1.0 };
+const marcha = { frecuencia: 1.2, balanceo: 0.07, levante: 0.15, zancada: 0.24, giro: 0.0, rampa: 1.0 };
 
 function objetivosMarcha(t, vel, q) {
   const fase = 2 * Math.PI * marcha.frecuencia * t;
@@ -36,7 +38,7 @@ function objetivosMarcha(t, vel, q) {
     const zanc = marcha.zancada * g * s * Math.cos(fase);
     let v = 0;
     if (k === 'cadera_yaw') v = marcha.giro * g * s;
-    else if (k === 'cadera_roll') v = marcha.balanceo * sen * g;
+    else if (k === 'cadera_roll') v = -marcha.balanceo * sen * g * s;   // signo medido en MuJoCo: ver sim/marcha.py
     else if (k === 'cadera_pitch') v = PARADO.cadera_pitch - lev / 2 + zanc;
     else if (k === 'rodilla') v = PARADO.rodilla + lev;
     else if (k === 'tobillo') v = PARADO.tobillo - lev / 2 - zanc;
@@ -244,7 +246,14 @@ function armarInterfaz() {
       `<input id="j_${a.nombre}" type="range" min="${a.rango[0]}" max="${a.rango[1]}" step="0.01" value="0"><output>0°</output>`;
     man.appendChild(div);
     const s = div.querySelector('input');
-    s.oninput = () => { estado.manual[a.nombre] = +s.value; s.nextElementSibling.textContent = `${(+s.value * 180 / Math.PI).toFixed(0)}°`; };
+    s.oninput = () => {
+      let v = +s.value;
+      // Envolvente de la cabeza: con la cabeza baja, la boca abre menos (ver cad/pato.py, BOCA_MAX).
+      if (a.nombre === 'boca') { v = Math.min(v, bocaMax(estado.manual.cuello_pitch ?? 0)); s.value = v; }
+      estado.manual[a.nombre] = v;
+      s.nextElementSibling.textContent = `${(v * 180 / Math.PI).toFixed(0)}°`;
+      if (a.nombre === 'cuello_pitch') { const b = $('j_boca'); if (b && +b.value > bocaMax(v)) { b.value = bocaMax(v); b.oninput(); } }
+    };
   }
   window.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowUp') $('b_caminar').click();
@@ -310,6 +319,7 @@ async function principal() {
   });
   window.PATO_SIM = {
     set(op) { Object.assign(estado, op); actualizarBotones(); },
+    reiniciar,
     marcha, estado, get t() { return tSim; }, get x() { return data.xpos[3 * idTronco]; }, get cayo() { return estado.cayo; },
     pasos(n) { for (let i = 0; i < n; i++) paso(); sincronizarVista(); lecturas(); renderer.render(scene, camera); },
   };

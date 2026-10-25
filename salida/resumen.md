@@ -1,39 +1,39 @@
 # Resumen del modelo v0
 
-- Masa total estimada: **1.37 kg**
+- Masa total estimada: **1.36 kg**
 - Servos: 8× MG996R, 5× MG90S
-- Piezas impresas: 31 (466 g de PLA/TPU, con el relleno indicado)
+- Piezas impresas: 31 (460 g de PLA/TPU, con el relleno indicado)
 
 | Paso | Pieza | Tipo | Masa (g) | Descripción |
 | ---: | --- | --- | ---: | --- |
-| 1 | `orejas_tobillo_der` | impresa | 2.2 | Orejas del tobillo (horn afuera, pin adentro) |
-| 1 | `orejas_tobillo_izq` | impresa | 2.2 | Orejas del tobillo (horn afuera, pin adentro) |
-| 1 | `paleta_pie_der` | impresa | 10.0 | Pie de pato (paleta) |
-| 1 | `paleta_pie_izq` | impresa | 10.0 | Pie de pato (paleta) |
-| 1 | `suela_der` | tpu | 3.9 | Suela de TPU |
-| 1 | `suela_izq` | tpu | 3.9 | Suela de TPU |
+| 1 | `paleta_pie_der` | impresa | 10.7 | Pie de pato (paleta) |
+| 1 | `paleta_pie_izq` | impresa | 10.7 | Pie de pato (paleta) |
+| 1 | `servo_tobillo_der` | comprada | 55.0 | MG996R tobillo (acostado, en el pie) |
+| 1 | `servo_tobillo_izq` | comprada | 55.0 | MG996R tobillo (acostado, en el pie) |
+| 1 | `soporte_pie_der` | impresa | 15.2 | Cuna del servo del tobillo, sobre la paleta |
+| 1 | `soporte_pie_izq` | impresa | 15.2 | Cuna del servo del tobillo, sobre la paleta |
+| 1 | `suela_der` | tpu | 4.2 | Suela de TPU |
+| 1 | `suela_izq` | tpu | 4.2 | Suela de TPU |
 | 2 | `horn_tobillo_der` | comprada | 2.0 |  |
 | 2 | `horn_tobillo_izq` | comprada | 2.0 |  |
-| 2 | `servo_tobillo_der` | comprada | 55.0 | MG996R tobillo (acostado) |
-| 2 | `servo_tobillo_izq` | comprada | 55.0 | MG996R tobillo (acostado) |
-| 2 | `soporte_canilla_der` | impresa | 19.2 | Canilla: cuna del servo del tobillo |
-| 2 | `soporte_canilla_izq` | impresa | 19.2 | Canilla: cuna del servo del tobillo |
+| 2 | `servo_rodilla_der` | comprada | 55.0 | MG996R rodilla (acostado, en la canilla) |
+| 2 | `servo_rodilla_izq` | comprada | 55.0 | MG996R rodilla (acostado, en la canilla) |
+| 2 | `soporte_canilla_der` | impresa | 16.7 | Canilla: cuna del servo de la rodilla; abajo recibe el horn del tobillo |
+| 2 | `soporte_canilla_izq` | impresa | 16.7 | Canilla: cuna del servo de la rodilla; abajo recibe el horn del tobillo |
 | 3 | `horn_rodilla_der` | comprada | 2.0 |  |
 | 3 | `horn_rodilla_izq` | comprada | 2.0 |  |
-| 3 | `servo_rodilla_der` | comprada | 55.0 | MG996R rodilla (acostado) |
-| 3 | `servo_rodilla_izq` | comprada | 55.0 | MG996R rodilla (acostado) |
-| 3 | `soporte_muslo_der` | impresa | 19.2 | Muslo: cuna del servo de la rodilla |
-| 3 | `soporte_muslo_izq` | impresa | 19.2 | Muslo: cuna del servo de la rodilla |
+| 3 | `servo_cadera_pitch_der` | comprada | 55.0 | MG996R cadera pitch (acostado, en el muslo) |
+| 3 | `servo_cadera_pitch_izq` | comprada | 55.0 | MG996R cadera pitch (acostado, en el muslo) |
+| 3 | `soporte_muslo_der` | impresa | 16.7 | Muslo: cuna del servo pitch de cadera; abajo recibe el horn de la rodilla |
+| 3 | `soporte_muslo_izq` | impresa | 16.7 | Muslo: cuna del servo pitch de cadera; abajo recibe el horn de la rodilla |
 | 4 | `horn_cadera_pitch_der` | comprada | 2.0 |  |
 | 4 | `horn_cadera_pitch_izq` | comprada | 2.0 |  |
-| 4 | `servo_cadera_pitch_der` | comprada | 55.0 | MG996R cadera pitch (acostado) |
-| 4 | `servo_cadera_pitch_izq` | comprada | 55.0 | MG996R cadera pitch (acostado) |
-| 4 | `soporte_u_der` | impresa | 20.8 | Soporte U de cadera: cuna del servo pitch, cuelga del servo roll |
-| 4 | `soporte_u_izq` | impresa | 20.8 | Soporte U de cadera: cuna del servo pitch, cuelga del servo roll |
+| 4 | `soporte_u_der` | impresa | 11.3 | Soporte U de cadera: cuelga del servo roll, recibe el horn y el pin del muslo |
+| 4 | `soporte_u_izq` | impresa | 11.3 | Soporte U de cadera: cuelga del servo roll, recibe el horn y el pin del muslo |
 | 5 | `horn_cadera_roll_der` | comprada | 2.0 |  |
 | 5 | `horn_cadera_roll_izq` | comprada | 2.0 |  |
-| 5 | `placa_yaw_der` | impresa | 9.1 | Placa yaw: sostiene el servo roll por las orejas y sube al rulemán |
-| 5 | `placa_yaw_izq` | impresa | 9.1 | Placa yaw: sostiene el servo roll por las orejas y sube al rulemán |
+| 5 | `placa_yaw_der` | impresa | 6.7 | Placa yaw: sostiene el servo roll por las orejas y sube al rulemán |
+| 5 | `placa_yaw_izq` | impresa | 6.7 | Placa yaw: sostiene el servo roll por las orejas y sube al rulemán |
 | 5 | `servo_cadera_roll_der` | comprada | 55.0 | MG996R cadera roll |
 | 5 | `servo_cadera_roll_izq` | comprada | 55.0 | MG996R cadera roll |
 | 6 | `horn_cadera_yaw_der` | comprada | 1.0 |  |
@@ -58,13 +58,13 @@
 | 9 | `horn_cuello_yaw` | comprada | 1.0 |  |
 | 9 | `servo_cuello_pitch` | comprada | 13.4 | MG90S cuello pitch |
 | 9 | `servo_cuello_yaw` | comprada | 13.4 | MG90S cuello yaw |
-| 9 | `soporte_cuello` | impresa | 2.6 | Soporte del cuello (yaw → pitch) |
+| 9 | `soporte_cuello` | impresa | 4.1 | Soporte del cuello (yaw → pitch) |
 | 10 | `base_cabeza` | impresa | 20.9 | Base de la cabeza: une el cuello, el servo de la boca y la cúpula |
 | 10 | `camara` | comprada | 3.0 | Cámara de la Pi (en la frente) |
 | 10 | `cupula` | impresa | 65.6 | Cúpula de la cabeza |
 | 10 | `horn_boca` | comprada | 0.5 |  |
 | 10 | `lente` | comprada | 1.0 |  |
-| 10 | `mandibula` | impresa | 27.8 | Mandíbula: piso de la cabeza, la mueve el servo de la boca |
+| 10 | `mandibula` | impresa | 26.2 | Mandíbula: piso de la cabeza, la mueve el servo de la boca |
 | 10 | `ojo_aro_der` | impresa | 0.9 | Aro del ojo |
 | 10 | `ojo_aro_izq` | impresa | 0.9 | Aro del ojo |
 | 10 | `ojo_disco_der` | impresa | 0.4 | Disco del ojo |

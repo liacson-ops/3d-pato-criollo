@@ -5,7 +5,7 @@
    "ancla_mm": [
     0.0,
     0.0,
-    186.0
+    190.0
    ]
   },
   "cadera_yaw_izq": {
@@ -13,7 +13,7 @@
    "ancla_mm": [
     0.0,
     42.0,
-    150.0
+    154.0
    ]
   },
   "cadera_roll_izq": {
@@ -21,7 +21,7 @@
    "ancla_mm": [
     0.0,
     42.0,
-    118.0
+    122.0
    ]
   },
   "muslo_izq": {
@@ -29,7 +29,7 @@
    "ancla_mm": [
     0.0,
     42.0,
-    88.0
+    86.0
    ]
   },
   "canilla_izq": {
@@ -37,7 +37,7 @@
    "ancla_mm": [
     0.0,
     42.0,
-    56.0
+    54.0
    ]
   },
   "pie_izq": {
@@ -45,7 +45,7 @@
    "ancla_mm": [
     0.0,
     42.0,
-    24.0
+    22.0
    ]
   },
   "cadera_yaw_der": {
@@ -53,7 +53,7 @@
    "ancla_mm": [
     0.0,
     -42.0,
-    150.0
+    154.0
    ]
   },
   "cadera_roll_der": {
@@ -61,7 +61,7 @@
    "ancla_mm": [
     0.0,
     -42.0,
-    118.0
+    122.0
    ]
   },
   "muslo_der": {
@@ -69,7 +69,7 @@
    "ancla_mm": [
     0.0,
     -42.0,
-    88.0
+    86.0
    ]
   },
   "canilla_der": {
@@ -77,7 +77,7 @@
    "ancla_mm": [
     0.0,
     -42.0,
-    56.0
+    54.0
    ]
   },
   "pie_der": {
@@ -85,7 +85,7 @@
    "ancla_mm": [
     0.0,
     -42.0,
-    24.0
+    22.0
    ]
   },
   "cuello": {
@@ -93,7 +93,7 @@
    "ancla_mm": [
     40.0,
     0.0,
-    222.0
+    226.0
    ]
   },
   "cabeza": {
@@ -101,7 +101,7 @@
    "ancla_mm": [
     40.0,
     0.0,
-    245.0
+    269.0
    ]
   },
   "pico_inferior": {
@@ -109,7 +109,7 @@
    "ancla_mm": [
     -5.0,
     0.0,
-    262.0
+    286.0
    ]
   }
  },
@@ -121,7 +121,7 @@
    "ancla_mm": [
     0.0,
     42.0,
-    150.0
+    154.0
    ],
    "eje": [
     0.0,
@@ -129,8 +129,8 @@
     1.0
    ],
    "rango": [
-    -0.4,
-    0.4
+    -0.15,
+    0.35
    ],
    "servo": "MG996R",
    "parado": 0.0
@@ -142,7 +142,7 @@
    "ancla_mm": [
     0.0,
     42.0,
-    118.0
+    122.0
    ],
    "eje": [
     1.0,
@@ -150,8 +150,8 @@
     0.0
    ],
    "rango": [
-    -0.4,
-    0.4
+    -0.09,
+    0.25
    ],
    "servo": "MG996R",
    "parado": 0.0
@@ -163,7 +163,7 @@
    "ancla_mm": [
     0.0,
     42.0,
-    88.0
+    86.0
    ],
    "eje": [
     0.0,
@@ -171,8 +171,8 @@
     0.0
    ],
    "rango": [
-    -1.6,
-    1.0
+    -1.15,
+    0.15
    ],
    "servo": "MG996R",
    "parado": -0.35
@@ -184,7 +184,7 @@
    "ancla_mm": [
     0.0,
     42.0,
-    56.0
+    54.0
    ],
    "eje": [
     0.0,
@@ -193,7 +193,7 @@
    ],
    "rango": [
     -0.1,
-    2.2
+    1.15
    ],
    "servo": "MG996R",
    "parado": 0.7
@@ -205,7 +205,7 @@
    "ancla_mm": [
     0.0,
     42.0,
-    24.0
+    22.0
    ],
    "eje": [
     0.0,
@@ -213,8 +213,8 @@
     0.0
    ],
    "rango": [
-    -1.2,
-    1.2
+    -0.8,
+    0.3
    ],
    "servo": "MG996R",
    "parado": -0.35
@@ -226,7 +226,7 @@
    "ancla_mm": [
     0.0,
     -42.0,
-    150.0
+    154.0
    ],
    "eje": [
     -0.0,
@@ -234,8 +234,8 @@
     -1.0
    ],
    "rango": [
-    -0.4,
-    0.4
+    -0.15,
+    0.35
    ],
    "servo": "MG996R",
    "parado": 0.0
@@ -247,7 +247,7 @@
    "ancla_mm": [
     0.0,
     -42.0,
-    118.0
+    122.0
    ],
    "eje": [
     -1.0,
@@ -255,8 +255,8 @@
     -0.0
    ],
    "rango": [
-    -0.4,
-    0.4
+    -0.09,
+    0.25
    ],
    "servo": "MG996R",
    "parado": 0.0
@@ -268,7 +268,7 @@
    "ancla_mm": [
     0.0,
     -42.0,
-    88.0
+    86.0
    ],
    "eje": [
     -0.0,
@@ -276,8 +276,8 @@
     -0.0
    ],
    "rango": [
-    -1.6,
-    1.0
+    -1.15,
+    0.15
    ],
    "servo": "MG996R",
    "parado": -0.35
@@ -289,7 +289,7 @@
    "ancla_mm": [
     0.0,
     -42.0,
-    56.0
+    54.0
    ],
    "eje": [
     -0.0,
@@ -298,7 +298,7 @@
    ],
    "rango": [
     -0.1,
-    2.2
+    1.15
    ],
    "servo": "MG996R",
    "parado": 0.7
@@ -310,7 +310,7 @@
    "ancla_mm": [
     0.0,
     -42.0,
-    24.0
+    22.0
    ],
    "eje": [
     -0.0,
@@ -318,8 +318,8 @@
     -0.0
    ],
    "rango": [
-    -1.2,
-    1.2
+    -0.8,
+    0.3
    ],
    "servo": "MG996R",
    "parado": -0.35
@@ -331,7 +331,7 @@
    "ancla_mm": [
     40.0,
     0.0,
-    222.0
+    226.0
    ],
    "eje": [
     0.0,
@@ -352,7 +352,7 @@
    "ancla_mm": [
     40.0,
     0.0,
-    245.0
+    269.0
    ],
    "eje": [
     0.0,
@@ -360,8 +360,8 @@
     0.0
    ],
    "rango": [
-    -0.8,
-    0.8
+    -0.5,
+    0.6
    ],
    "servo": "MG90S",
    "parado": 0.0
@@ -373,7 +373,7 @@
    "ancla_mm": [
     -5.0,
     0.0,
-    262.0
+    286.0
    ],
    "eje": [
     0.0,
@@ -382,7 +382,7 @@
    ],
    "rango": [
     0.0,
-    0.55
+    0.3
    ],
    "servo": "MG90S",
    "parado": 0.0
@@ -530,7 +530,7 @@
    "tipo": "tpu",
    "paso": 1,
    "color": "#d9822b",
-   "masa_g": 3.9,
+   "masa_g": 4.2,
    "descripcion": "Suela de TPU"
   },
   {
@@ -539,35 +539,44 @@
    "tipo": "impresa",
    "paso": 1,
    "color": "#f3c118",
-   "masa_g": 10.0,
+   "masa_g": 10.7,
    "descripcion": "Pie de pato (paleta)"
   },
   {
-   "nombre": "orejas_tobillo_izq",
+   "nombre": "servo_tobillo_izq",
+   "eslabon": "pie_izq",
+   "tipo": "comprada",
+   "paso": 1,
+   "color": "#26282c",
+   "masa_g": 55.0,
+   "descripcion": "MG996R tobillo (acostado, en el pie)"
+  },
+  {
+   "nombre": "soporte_pie_izq",
    "eslabon": "pie_izq",
    "tipo": "impresa",
    "paso": 1,
    "color": "#e9e6df",
-   "masa_g": 2.2,
-   "descripcion": "Orejas del tobillo (horn afuera, pin adentro)"
-  },
-  {
-   "nombre": "servo_tobillo_izq",
-   "eslabon": "canilla_izq",
-   "tipo": "comprada",
-   "paso": 2,
-   "color": "#26282c",
-   "masa_g": 55.0,
-   "descripcion": "MG996R tobillo (acostado)"
+   "masa_g": 15.2,
+   "descripcion": "Cuna del servo del tobillo, sobre la paleta"
   },
   {
    "nombre": "horn_tobillo_izq",
-   "eslabon": "pie_izq",
+   "eslabon": "canilla_izq",
    "tipo": "comprada",
    "paso": 2,
    "color": "#f2f2f2",
    "masa_g": 2.0,
    "descripcion": ""
+  },
+  {
+   "nombre": "servo_rodilla_izq",
+   "eslabon": "canilla_izq",
+   "tipo": "comprada",
+   "paso": 2,
+   "color": "#26282c",
+   "masa_g": 55.0,
+   "descripcion": "MG996R rodilla (acostado, en la canilla)"
   },
   {
    "nombre": "soporte_canilla_izq",
@@ -575,21 +584,12 @@
    "tipo": "impresa",
    "paso": 2,
    "color": "#e9e6df",
-   "masa_g": 19.2,
-   "descripcion": "Canilla: cuna del servo del tobillo"
-  },
-  {
-   "nombre": "servo_rodilla_izq",
-   "eslabon": "muslo_izq",
-   "tipo": "comprada",
-   "paso": 3,
-   "color": "#26282c",
-   "masa_g": 55.0,
-   "descripcion": "MG996R rodilla (acostado)"
+   "masa_g": 16.7,
+   "descripcion": "Canilla: cuna del servo de la rodilla; abajo recibe el horn del tobillo"
   },
   {
    "nombre": "horn_rodilla_izq",
-   "eslabon": "canilla_izq",
+   "eslabon": "muslo_izq",
    "tipo": "comprada",
    "paso": 3,
    "color": "#f2f2f2",
@@ -597,26 +597,26 @@
    "descripcion": ""
   },
   {
+   "nombre": "servo_cadera_pitch_izq",
+   "eslabon": "muslo_izq",
+   "tipo": "comprada",
+   "paso": 3,
+   "color": "#26282c",
+   "masa_g": 55.0,
+   "descripcion": "MG996R cadera pitch (acostado, en el muslo)"
+  },
+  {
    "nombre": "soporte_muslo_izq",
    "eslabon": "muslo_izq",
    "tipo": "impresa",
    "paso": 3,
    "color": "#e9e6df",
-   "masa_g": 19.2,
-   "descripcion": "Muslo: cuna del servo de la rodilla"
-  },
-  {
-   "nombre": "servo_cadera_pitch_izq",
-   "eslabon": "cadera_roll_izq",
-   "tipo": "comprada",
-   "paso": 4,
-   "color": "#26282c",
-   "masa_g": 55.0,
-   "descripcion": "MG996R cadera pitch (acostado)"
+   "masa_g": 16.7,
+   "descripcion": "Muslo: cuna del servo pitch de cadera; abajo recibe el horn de la rodilla"
   },
   {
    "nombre": "horn_cadera_pitch_izq",
-   "eslabon": "muslo_izq",
+   "eslabon": "cadera_roll_izq",
    "tipo": "comprada",
    "paso": 4,
    "color": "#f2f2f2",
@@ -629,8 +629,8 @@
    "tipo": "impresa",
    "paso": 4,
    "color": "#e9e6df",
-   "masa_g": 20.8,
-   "descripcion": "Soporte U de cadera: cuna del servo pitch, cuelga del servo roll"
+   "masa_g": 11.3,
+   "descripcion": "Soporte U de cadera: cuelga del servo roll, recibe el horn y el pin del muslo"
   },
   {
    "nombre": "servo_cadera_roll_izq",
@@ -656,7 +656,7 @@
    "tipo": "impresa",
    "paso": 5,
    "color": "#e9e6df",
-   "masa_g": 9.1,
+   "masa_g": 6.7,
    "descripcion": "Placa yaw: sostiene el servo roll por las orejas y sube al rulemán"
   },
   {
@@ -692,7 +692,7 @@
    "tipo": "tpu",
    "paso": 1,
    "color": "#d9822b",
-   "masa_g": 3.9,
+   "masa_g": 4.2,
    "descripcion": "Suela de TPU"
   },
   {
@@ -701,35 +701,44 @@
    "tipo": "impresa",
    "paso": 1,
    "color": "#f3c118",
-   "masa_g": 10.0,
+   "masa_g": 10.7,
    "descripcion": "Pie de pato (paleta)"
   },
   {
-   "nombre": "orejas_tobillo_der",
+   "nombre": "servo_tobillo_der",
+   "eslabon": "pie_der",
+   "tipo": "comprada",
+   "paso": 1,
+   "color": "#26282c",
+   "masa_g": 55.0,
+   "descripcion": "MG996R tobillo (acostado, en el pie)"
+  },
+  {
+   "nombre": "soporte_pie_der",
    "eslabon": "pie_der",
    "tipo": "impresa",
    "paso": 1,
    "color": "#e9e6df",
-   "masa_g": 2.2,
-   "descripcion": "Orejas del tobillo (horn afuera, pin adentro)"
-  },
-  {
-   "nombre": "servo_tobillo_der",
-   "eslabon": "canilla_der",
-   "tipo": "comprada",
-   "paso": 2,
-   "color": "#26282c",
-   "masa_g": 55.0,
-   "descripcion": "MG996R tobillo (acostado)"
+   "masa_g": 15.2,
+   "descripcion": "Cuna del servo del tobillo, sobre la paleta"
   },
   {
    "nombre": "horn_tobillo_der",
-   "eslabon": "pie_der",
+   "eslabon": "canilla_der",
    "tipo": "comprada",
    "paso": 2,
    "color": "#f2f2f2",
    "masa_g": 2.0,
    "descripcion": ""
+  },
+  {
+   "nombre": "servo_rodilla_der",
+   "eslabon": "canilla_der",
+   "tipo": "comprada",
+   "paso": 2,
+   "color": "#26282c",
+   "masa_g": 55.0,
+   "descripcion": "MG996R rodilla (acostado, en la canilla)"
   },
   {
    "nombre": "soporte_canilla_der",
@@ -737,21 +746,12 @@
    "tipo": "impresa",
    "paso": 2,
    "color": "#e9e6df",
-   "masa_g": 19.2,
-   "descripcion": "Canilla: cuna del servo del tobillo"
-  },
-  {
-   "nombre": "servo_rodilla_der",
-   "eslabon": "muslo_der",
-   "tipo": "comprada",
-   "paso": 3,
-   "color": "#26282c",
-   "masa_g": 55.0,
-   "descripcion": "MG996R rodilla (acostado)"
+   "masa_g": 16.7,
+   "descripcion": "Canilla: cuna del servo de la rodilla; abajo recibe el horn del tobillo"
   },
   {
    "nombre": "horn_rodilla_der",
-   "eslabon": "canilla_der",
+   "eslabon": "muslo_der",
    "tipo": "comprada",
    "paso": 3,
    "color": "#f2f2f2",
@@ -759,26 +759,26 @@
    "descripcion": ""
   },
   {
+   "nombre": "servo_cadera_pitch_der",
+   "eslabon": "muslo_der",
+   "tipo": "comprada",
+   "paso": 3,
+   "color": "#26282c",
+   "masa_g": 55.0,
+   "descripcion": "MG996R cadera pitch (acostado, en el muslo)"
+  },
+  {
    "nombre": "soporte_muslo_der",
    "eslabon": "muslo_der",
    "tipo": "impresa",
    "paso": 3,
    "color": "#e9e6df",
-   "masa_g": 19.2,
-   "descripcion": "Muslo: cuna del servo de la rodilla"
-  },
-  {
-   "nombre": "servo_cadera_pitch_der",
-   "eslabon": "cadera_roll_der",
-   "tipo": "comprada",
-   "paso": 4,
-   "color": "#26282c",
-   "masa_g": 55.0,
-   "descripcion": "MG996R cadera pitch (acostado)"
+   "masa_g": 16.7,
+   "descripcion": "Muslo: cuna del servo pitch de cadera; abajo recibe el horn de la rodilla"
   },
   {
    "nombre": "horn_cadera_pitch_der",
-   "eslabon": "muslo_der",
+   "eslabon": "cadera_roll_der",
    "tipo": "comprada",
    "paso": 4,
    "color": "#f2f2f2",
@@ -791,8 +791,8 @@
    "tipo": "impresa",
    "paso": 4,
    "color": "#e9e6df",
-   "masa_g": 20.8,
-   "descripcion": "Soporte U de cadera: cuna del servo pitch, cuelga del servo roll"
+   "masa_g": 11.3,
+   "descripcion": "Soporte U de cadera: cuelga del servo roll, recibe el horn y el pin del muslo"
   },
   {
    "nombre": "servo_cadera_roll_der",
@@ -818,7 +818,7 @@
    "tipo": "impresa",
    "paso": 5,
    "color": "#e9e6df",
-   "masa_g": 9.1,
+   "masa_g": 6.7,
    "descripcion": "Placa yaw: sostiene el servo roll por las orejas y sube al rulemán"
   },
   {
@@ -872,7 +872,7 @@
    "tipo": "impresa",
    "paso": 9,
    "color": "#e9e6df",
-   "masa_g": 2.6,
+   "masa_g": 4.1,
    "descripcion": "Soporte del cuello (yaw → pitch)"
   },
   {
@@ -998,7 +998,7 @@
    "tipo": "impresa",
    "paso": 10,
    "color": "#fbfaf7",
-   "masa_g": 27.8,
+   "masa_g": 26.2,
    "descripcion": "Mandíbula: piso de la cabeza, la mueve el servo de la boca"
   },
   {
@@ -1012,10 +1012,10 @@
   }
  ],
  "pasos": {
-  "1": "Pies: suela de TPU, placa y orejas del tobillo",
-  "2": "Canilla con el servo del tobillo; se une al pie",
-  "3": "Muslo con el servo de la rodilla; se une a la canilla",
-  "4": "Soporte U de cadera con el servo pitch; se une al muslo",
+  "1": "Pies: suela de TPU, paleta y la cuna con el servo del tobillo",
+  "2": "Canilla: cuna con el servo de la rodilla; abajo se une al horn del tobillo",
+  "3": "Muslo: cuna con el servo pitch de cadera; abajo se une al horn de la rodilla",
+  "4": "Soporte U de cadera: cuelga del servo roll y recibe el muslo",
   "5": "Servo roll de cadera, placa yaw y eje",
   "6": "Piso del tronco: rulemanes 608 y servos yaw de cadera; se cuelgan las patas",
   "7": "Batería, IMU y estante A (reguladores XL4016 y placa de los MCP3008)",
@@ -1023,6 +1023,22 @@
   "9": "Cuello: servo yaw y servo pitch",
   "10": "Cabeza: cúpula, base, servo de la boca, cámara, ojos y pico",
   "11": "Carcasa del cuerpo (dos mitades)"
+ },
+ "envolventes": {
+  "boca_max_por_cuello_pitch": [
+   [
+    0.0,
+    0.3
+   ],
+   [
+    0.45,
+    0.15
+   ],
+   [
+    0.6,
+    0.0
+   ]
+  ]
  },
  "orden_mjcf": [
   "tronco",

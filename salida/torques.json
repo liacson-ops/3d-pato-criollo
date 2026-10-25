@@ -1,5 +1,5 @@
 {
- "masa_kg": 1.366,
+ "masa_kg": 1.36,
  "stall_kgcm": {
   "mg996r": 11.0,
   "mg90s": 2.2
@@ -7,175 +7,91 @@
  "poses": [
   {
    "pose": "parado (rodillas 40°)",
-   "altura_cm_masa_m": -0.112,
+   "altura_cm_masa_m": 0.136,
    "filas": [
     {
      "articulacion": "cadera_yaw_izq",
-     "servo": "MG996R",
-     "kgcm": 0.02,
-     "uso": 0.2
-    },
-    {
-     "articulacion": "cadera_roll_izq",
-     "servo": "MG996R",
-     "kgcm": 0.17,
-     "uso": 1.6
-    },
-    {
-     "articulacion": "cadera_pitch_izq",
-     "servo": "MG996R",
-     "kgcm": 1.85,
-     "uso": 16.8
-    },
-    {
-     "articulacion": "rodilla_izq",
-     "servo": "MG996R",
-     "kgcm": 0.86,
-     "uso": 7.8
-    },
-    {
-     "articulacion": "tobillo_izq",
-     "servo": "MG996R",
-     "kgcm": 2.23,
-     "uso": 20.2
-    },
-    {
-     "articulacion": "cadera_yaw_der",
-     "servo": "MG996R",
-     "kgcm": 0.02,
-     "uso": 0.2
-    },
-    {
-     "articulacion": "cadera_roll_der",
-     "servo": "MG996R",
-     "kgcm": 0.17,
-     "uso": 1.6
-    },
-    {
-     "articulacion": "cadera_pitch_der",
-     "servo": "MG996R",
-     "kgcm": 1.85,
-     "uso": 16.8
-    },
-    {
-     "articulacion": "rodilla_der",
-     "servo": "MG996R",
-     "kgcm": 0.86,
-     "uso": 7.8
-    },
-    {
-     "articulacion": "tobillo_der",
-     "servo": "MG996R",
-     "kgcm": 2.23,
-     "uso": 20.3
-    },
-    {
-     "articulacion": "cuello_yaw",
      "servo": "MG996R",
      "kgcm": 0.0,
      "uso": 0.0
     },
     {
-     "articulacion": "cuello_pitch",
-     "servo": "MG996R",
-     "kgcm": 0.65,
-     "uso": 5.9
-    },
-    {
-     "articulacion": "boca",
-     "servo": "MG996R",
-     "kgcm": 0.53,
-     "uso": 4.8
-    }
-   ]
-  },
-  {
-   "pose": "cuclillas (rodillas 90°)",
-   "altura_cm_masa_m": -0.103,
-   "filas": [
-    {
-     "articulacion": "cadera_yaw_izq",
-     "servo": "MG996R",
-     "kgcm": 0.07,
-     "uso": 0.6
-    },
-    {
      "articulacion": "cadera_roll_izq",
      "servo": "MG996R",
-     "kgcm": 0.19,
-     "uso": 1.8
+     "kgcm": 0.15,
+     "uso": 1.4
     },
     {
      "articulacion": "cadera_pitch_izq",
-     "servo": "MG996R",
-     "kgcm": 1.22,
-     "uso": 11.1
-    },
-    {
-     "articulacion": "rodilla_izq",
-     "servo": "MG996R",
-     "kgcm": 1.11,
-     "uso": 10.1
-    },
-    {
-     "articulacion": "tobillo_izq",
-     "servo": "MG996R",
-     "kgcm": 1.64,
-     "uso": 14.9
-    },
-    {
-     "articulacion": "cadera_yaw_der",
-     "servo": "MG996R",
-     "kgcm": 0.07,
-     "uso": 0.6
-    },
-    {
-     "articulacion": "cadera_roll_der",
-     "servo": "MG996R",
-     "kgcm": 0.19,
-     "uso": 1.8
-    },
-    {
-     "articulacion": "cadera_pitch_der",
-     "servo": "MG996R",
-     "kgcm": 1.22,
-     "uso": 11.1
-    },
-    {
-     "articulacion": "rodilla_der",
-     "servo": "MG996R",
-     "kgcm": 1.12,
-     "uso": 10.1
-    },
-    {
-     "articulacion": "tobillo_der",
-     "servo": "MG996R",
-     "kgcm": 1.64,
-     "uso": 14.9
-    },
-    {
-     "articulacion": "cuello_yaw",
-     "servo": "MG996R",
-     "kgcm": 0.0,
-     "uso": 0.0
-    },
-    {
-     "articulacion": "cuello_pitch",
-     "servo": "MG996R",
-     "kgcm": 0.43,
-     "uso": 3.9
-    },
-    {
-     "articulacion": "boca",
      "servo": "MG996R",
      "kgcm": 0.54,
-     "uso": 4.9
+     "uso": 5.0
+    },
+    {
+     "articulacion": "rodilla_izq",
+     "servo": "MG996R",
+     "kgcm": 0.08,
+     "uso": 0.7
+    },
+    {
+     "articulacion": "tobillo_izq",
+     "servo": "MG996R",
+     "kgcm": 0.63,
+     "uso": 5.7
+    },
+    {
+     "articulacion": "cadera_yaw_der",
+     "servo": "MG996R",
+     "kgcm": 0.0,
+     "uso": 0.0
+    },
+    {
+     "articulacion": "cadera_roll_der",
+     "servo": "MG996R",
+     "kgcm": 0.07,
+     "uso": 0.6
+    },
+    {
+     "articulacion": "cadera_pitch_der",
+     "servo": "MG996R",
+     "kgcm": 0.57,
+     "uso": 5.2
+    },
+    {
+     "articulacion": "rodilla_der",
+     "servo": "MG996R",
+     "kgcm": 0.08,
+     "uso": 0.7
+    },
+    {
+     "articulacion": "tobillo_der",
+     "servo": "MG996R",
+     "kgcm": 0.66,
+     "uso": 6.0
+    },
+    {
+     "articulacion": "cuello_yaw",
+     "servo": "MG90S",
+     "kgcm": 0.0,
+     "uso": 0.0
+    },
+    {
+     "articulacion": "cuello_pitch",
+     "servo": "MG90S",
+     "kgcm": 0.21,
+     "uso": 9.7
+    },
+    {
+     "articulacion": "boca",
+     "servo": "MG90S",
+     "kgcm": 0.23,
+     "uso": 10.5
     }
    ]
   },
   {
-   "pose": "en una pata (apoya la derecha)",
-   "altura_cm_masa_m": 0.152,
+   "pose": "cuclillas (rodillas 63°)",
+   "altura_cm_masa_m": 0.131,
    "filas": [
     {
      "articulacion": "cadera_yaw_izq",
@@ -187,25 +103,109 @@
      "articulacion": "cadera_roll_izq",
      "servo": "MG996R",
      "kgcm": 0.16,
-     "uso": 1.4
+     "uso": 1.5
     },
     {
      "articulacion": "cadera_pitch_izq",
      "servo": "MG996R",
-     "kgcm": 0.06,
-     "uso": 0.5
+     "kgcm": 0.55,
+     "uso": 5.0
     },
     {
      "articulacion": "rodilla_izq",
      "servo": "MG996R",
-     "kgcm": 0.24,
-     "uso": 2.2
+     "kgcm": 0.36,
+     "uso": 3.2
     },
     {
      "articulacion": "tobillo_izq",
      "servo": "MG996R",
-     "kgcm": 0.01,
-     "uso": 0.1
+     "kgcm": 0.68,
+     "uso": 6.2
+    },
+    {
+     "articulacion": "cadera_yaw_der",
+     "servo": "MG996R",
+     "kgcm": 0.0,
+     "uso": 0.0
+    },
+    {
+     "articulacion": "cadera_roll_der",
+     "servo": "MG996R",
+     "kgcm": 0.06,
+     "uso": 0.6
+    },
+    {
+     "articulacion": "cadera_pitch_der",
+     "servo": "MG996R",
+     "kgcm": 0.57,
+     "uso": 5.2
+    },
+    {
+     "articulacion": "rodilla_der",
+     "servo": "MG996R",
+     "kgcm": 0.37,
+     "uso": 3.3
+    },
+    {
+     "articulacion": "tobillo_der",
+     "servo": "MG996R",
+     "kgcm": 0.71,
+     "uso": 6.4
+    },
+    {
+     "articulacion": "cuello_yaw",
+     "servo": "MG90S",
+     "kgcm": 0.0,
+     "uso": 0.0
+    },
+    {
+     "articulacion": "cuello_pitch",
+     "servo": "MG90S",
+     "kgcm": 0.21,
+     "uso": 9.7
+    },
+    {
+     "articulacion": "boca",
+     "servo": "MG90S",
+     "kgcm": 0.23,
+     "uso": 10.5
+    }
+   ]
+  },
+  {
+   "pose": "en una pata (apoya la derecha)",
+   "altura_cm_masa_m": 0.137,
+   "filas": [
+    {
+     "articulacion": "cadera_yaw_izq",
+     "servo": "MG996R",
+     "kgcm": 0.0,
+     "uso": 0.0
+    },
+    {
+     "articulacion": "cadera_roll_izq",
+     "servo": "MG996R",
+     "kgcm": 0.15,
+     "uso": 1.3
+    },
+    {
+     "articulacion": "cadera_pitch_izq",
+     "servo": "MG996R",
+     "kgcm": 0.39,
+     "uso": 3.5
+    },
+    {
+     "articulacion": "rodilla_izq",
+     "servo": "MG996R",
+     "kgcm": 0.03,
+     "uso": 0.2
+    },
+    {
+     "articulacion": "tobillo_izq",
+     "servo": "MG996R",
+     "kgcm": 0.06,
+     "uso": 0.5
     },
     {
      "articulacion": "cadera_yaw_der",
@@ -216,44 +216,44 @@
     {
      "articulacion": "cadera_roll_der",
      "servo": "MG996R",
-     "kgcm": 5.65,
-     "uso": 51.3
+     "kgcm": 5.63,
+     "uso": 51.1
     },
     {
      "articulacion": "cadera_pitch_der",
      "servo": "MG996R",
-     "kgcm": 1.03,
-     "uso": 9.4
+     "kgcm": 1.5,
+     "uso": 13.7
     },
     {
      "articulacion": "rodilla_der",
      "servo": "MG996R",
-     "kgcm": 0.33,
-     "uso": 3.0
+     "kgcm": 0.12,
+     "uso": 1.1
     },
     {
      "articulacion": "tobillo_der",
      "servo": "MG996R",
-     "kgcm": 1.01,
-     "uso": 9.1
+     "kgcm": 1.59,
+     "uso": 14.4
     },
     {
      "articulacion": "cuello_yaw",
-     "servo": "MG996R",
+     "servo": "MG90S",
      "kgcm": 0.0,
-     "uso": 0.0
+     "uso": 0.1
     },
     {
      "articulacion": "cuello_pitch",
-     "servo": "MG996R",
-     "kgcm": 0.22,
-     "uso": 2.0
+     "servo": "MG90S",
+     "kgcm": 0.21,
+     "uso": 9.7
     },
     {
      "articulacion": "boca",
-     "servo": "MG996R",
-     "kgcm": 0.24,
-     "uso": 2.2
+     "servo": "MG90S",
+     "kgcm": 0.23,
+     "uso": 10.5
     }
    ]
   }

@@ -24,7 +24,7 @@ Descargá **[`salida/simulador.html`](salida/simulador.html)** (botón *Download
 - A la derecha, el **torque de cada servo en % de su máximo**, en tiempo real. Rojo = saturado.
 - *Ver cajas de choque* muestra las formas que usa la física (una caja por eslabón).
 
-Qué da hoy: se queda parado, aguanta empujones de 6 N y camina derecho, aunque despacio (unos 2 cm/s con la marcha a mano). En el banco de pruebas con Python ([`sim/marcha.py`](sim/marcha.py)) ninguna de las 81 combinaciones de marcha probadas lo hizo caer.
+Qué da hoy: se queda parado, aguanta un empujón de 4 N (0,15 s) sin dar un paso y camina derecho a unos 4 cm/s con la marcha a mano (33 cm en 8 s). Con 5 N o más se cae: para aguantar eso hay que dar un paso, y eso es lo que tiene que aprender la política RL. En el banco de pruebas con Python ([`sim/marcha.py`](sim/marcha.py)) las 108 combinaciones de marcha probadas caminan hacia adelante sin caerse, y las mejores aguantan empujones de 4 N en cualquier dirección mientras caminan.
 
 ## Ver el modelo en 3D
 
@@ -40,10 +40,10 @@ Desde el visor podés:
 
 | | |
 | --- | --- |
-| Altura | **31,5 cm** parado (el original mide unos 25 cm) |
-| Masa estimada | **1,37 kg** (31 piezas impresas; la cabeza completa pesa unos 150 g) |
+| Altura | **33,5 cm** parado, 33,9 cm con las patas rectas (el original mide unos 25 cm) |
+| Masa estimada | **1,36 kg** (29 piezas impresas, 450 g de PLA y TPU; la cabeza completa pesa unos 150 g) |
 | Servos | **10× MG996R** (cadera yaw, cadera roll, cadera pitch, rodilla y tobillo de cada pata) y **3× MG90S** (cuello yaw, cuello pitch, boca) |
-| Patas | 5 articulaciones cada una. Los servos de cadera pitch, rodilla y tobillo van **acostados** (eje lateral, cuerpo hacia atrás) en una cuna impresa igual para los tres: así muslo y canilla miden 32 mm y la pata queda compacta |
+| Patas | 5 articulaciones cada una. Los servos de cadera pitch, rodilla y tobillo van **acostados** (eje lateral) en una cuna impresa igual para los tres, alternando el lado del cuerpo (cadera atrás, rodilla adelante, tobillo atrás) para que al flexionar no se toquen: muslo y canilla miden 32 mm. El pie levanta hasta 11 mm del piso con la rodilla en su tope |
 | Control | Raspberry Pi Zero 2 W a bordo, PCA9685 (PWM), 2× MCP3008 (lectura de los potenciómetros), MPU-6050 (IMU) |
 | Cámara | Cámara de la Pi en la frente, con el lente justo arriba del pico |
 | Energía | LiPo 2S de 1500 mAh, 2× XL4016 a 6,0 V (uno por pata), Mini560 de 5 V para la Pi |
@@ -52,14 +52,34 @@ Desde el visor podés:
 
 | Pose | Articulación más exigida | Uso del torque máximo |
 | --- | --- | ---: |
-| Parado (rodillas a 40°) | tobillo, 2,2 kg·cm | 20 % |
-| Cuclillas (rodillas a 90°) | tobillo, 1,6 kg·cm | 15 % |
-| En una pata, sin desplazar el cuerpo (peor caso) | cadera roll, 5,7 kg·cm | **51 %** |
-| Cabeza (cualquier pose) | cuello pitch, 0,65 kg·cm | 30 % (MG90S) |
+| Parado (rodillas a 40°) | tobillo, 0,7 kg·cm | 6 % |
+| Cuclillas (rodillas a 63°, el tope) | tobillo, 0,7 kg·cm | 6 % |
+| En una pata, sin desplazar el cuerpo (peor caso) | cadera roll, 5,6 kg·cm | **51 %** |
+| Caminando (marcha a mano, pico) | tobillo, 6,2 kg·cm | 56 % |
+| Cabeza (cualquier pose) | boca y cuello pitch, 0,23 kg·cm | 10 % (MG90S) |
 
 Al caminar, los picos suelen ser 2 a 3 veces el valor estático. **La cadera roll es el punto a vigilar.** Un paso normal desplaza el cuerpo sobre el pie de apoyo, así que exige menos que el peor caso. Tabla completa: [`salida/torques.md`](salida/torques.md).
 
-Caminando en la simulación, con MG90S en la cadera yaw esos servos saturaban (100 % del torque) porque reciben toda la torsión de la pata apoyada. Por eso **la cadera yaw usa MG996R**: parados dentro del tronco, con las orejas atornilladas al estante A y el rulemán 608 tomando la carga radial. Con ese cambio, caminando ningún servo pasa del 81 % (cadera roll) y la cadera yaw queda por debajo del 40 %.
+Caminando en la simulación, con MG90S en la cadera yaw esos servos saturaban (100 % del torque) porque reciben toda la torsión de la pata apoyada. Por eso **la cadera yaw usa MG996R**: parados dentro del tronco, con las orejas atornilladas al estante A y el rulemán 608 tomando la carga radial. Con ese cambio, caminando ningún servo pasa del 56 % y la cadera yaw queda por debajo del 10 %.
+
+### Que ninguna pieza choque con otra ([`cad/choques.py`](cad/choques.py))
+
+El generador no solo arma el robot: lo mueve. `cad/choques.py` lleva cada pieza con la cinemática real a 72 poses (reposo, parado, cuclillas, 24 fases de un ciclo de marcha, cada articulación en sus dos topes, las dos caderas al tope a la vez, la cabeza girada con la boca abierta) y mide el volumen de intersección entre piezas de eslabones distintos. Hoy da **sin cruces** en las 72. Esa prueba fue la que corrigió el diseño anterior, donde los servos de la rodilla y el tobillo se cruzaban al flexionar.
+
+De ahí salen los topes de cada articulación, que son los que usan el simulador y el entrenamiento:
+
+| Articulación | Rango (rad) | Qué lo limita |
+| --- | --- | --- |
+| cadera yaw | −0,15 a +0,35 (punta hacia afuera) | la placa yaw con el soporte U de la otra pata |
+| cadera roll | −0,09 (hacia adentro) a +0,25 | las dos patas entre sí |
+| cadera pitch | −1,15 (muslo adelante) a +0,15 | la cuna del muslo con el servo roll |
+| rodilla | −0,1 a +1,15 | la cuna de la canilla con el servo de la cadera |
+| tobillo | −0,8 a +0,3 | el pie con la canilla |
+| cuello yaw | ±1,5 | — |
+| cuello pitch | −0,5 (arriba) a +0,6 (abajo) | el pico con la carcasa, con la cabeza girada |
+| boca | 0 a 0,3 | ver abajo |
+
+Dos combinaciones no se pueden impedir con topes y las tiene que evitar el controlador (el modelo de entrenamiento las simula como choque y las penaliza): las dos caderas cerradas hacia adentro **y** con las puntas giradas a la vez, y la boca abierta con la cabeza mirando abajo: con el cuello inclinado más de 0,45 rad la boca va cerrada, entre 0 y 0,45 abre hasta 0,15, y con la cabeza horizontal o hacia arriba abre entera (`BOCA_MAX` en `cad/pato.py`; el simulador lo aplica en modo manual).
 
 ## Cómo se arma
 
@@ -84,15 +104,18 @@ Las imágenes salen del mismo visor, en modo *Paso a paso*: en cada paso lo nuev
 ```
 cad/componentes.py        medidas y masas reales: MG996R, MG90S, Pi Zero 2 W, LiPo, PCA9685, XL4016…
 cad/pato.py               el robot completo: piezas, eslabones, articulaciones, pasos de armado
+cad/choques.py            prueba de que ninguna pieza se cruza con otra en 72 poses (reposo, marcha, topes)
 sim/torques.py            torques estáticos en MuJoCo contra el torque máximo de cada servo
 sim/marcha.py             marcha programada a mano y barrido de parámetros (MuJoCo, Python)
+rl/                       entrenamiento por refuerzo en la Mac (PPO sobre MuJoCo) y exportación a ONNX, ver rl/README.md
 visor/                    visor 3D y simulador (three.js + MuJoCo WASM), capturas y pruebas automáticas
 salida/simulador.html     simulador físico autocontenido (16 MB, se abre con doble clic)
 salida/pato.html          visor autocontenido (se abre con doble clic)
 salida/pato.glb           modelo 3D con colores (sirve en Blender o en https://gltf-viewer.donmccurdy.com)
 salida/piezas_impresas/   STL de las 31 piezas impresas (v0, todavía no para imprimir)
 salida/mjcf/pato.xml      modelo MuJoCo con masas e inercias (mallas)
-salida/mjcf/pato_sim.xml  el mismo con cajas de choque, es el que usa el simulador
+salida/mjcf/pato_sim.xml  el mismo con cajas de choque (una por pieza en las patas), es el que usa el simulador
+salida/mjcf/pato_rl.xml   envolventes convexas de cada pieza con choques entre eslabones, para entrenar
 salida/resumen.md         masa de cada pieza
 docs/img/                 imágenes de este README
 PLAN.md                   plan completo, fases y presupuesto
@@ -106,6 +129,7 @@ pip install manifold3d trimesh numpy mujoco        # probado con 3.5.4 / 5.2.0 /
 python3 cad/pato.py                                # STL, GLB, MJCF, resumen
 python3 sim/torques.py                             # tabla de torques
 python3 sim/marcha.py                              # ¿camina? ¿con qué picos de torque?
+python3 cad/choques.py                             # ¿se cruza alguna pieza con otra? (sale 1 si sí)
 cd visor && npm install && npm run construir       # salida/pato.html y salida/simulador.html
 node capturas.mjs && node probar_sim.mjs           # docs/img y prueba automática del simulador (Playwright)
 ```
@@ -118,9 +142,10 @@ Todo sale de `cad/pato.py`. Si cambiás una medida, como el largo del muslo o el
 - [x] Modelo 3D v0 con componentes reales, sin choques entre piezas (verificado por intersección de mallas)
 - [x] Simulación de torques estáticos
 - [x] Simulador en el navegador: se para, camina con marcha a mano, aguanta empujones
+- [x] Entorno de entrenamiento para la Mac ([`rl/`](rl/README.md)): choques consigo mismo, variaciones aleatorias, PPO en CPU, exportación a ONNX
 - [ ] **Fase 0:** banco de pruebas de servos (soporte imprimible y scripts de medición para la Pi 4), [lista de compras](COMPRAS-FASE0.md)
 - [ ] v1: piezas para imprimir con las medidas reales de los servos: agujeros, tornillería M3, tolerancias
-- [ ] Caminar programado a mano, después política RL entrenada con el modelo identificado del servo
+- [ ] Entrenar la primera política de marcha en la Mac y probarla en el simulador; después reentrenar con el modelo identificado del servo
 
 ## Licencia
 

@@ -3,7 +3,7 @@
 
 Poses:
   parado        dos pies, rodillas a 40°
-  cuclillas     dos pies, rodillas a 90°
+  cuclillas     dos pies, rodillas a 63° (tope del modelo: 66°)
   una_pata      parado sobre el pie derecho, el izquierdo levantado
 
 Escribe salida/torques.md y salida/torques.json.
@@ -32,8 +32,9 @@ def pose(m, rodilla, pie_izq_arriba=False):
         q[f'rodilla_{lado}'] = rodilla
         q[f'tobillo_{lado}'] = -rodilla / 2
     if pie_izq_arriba:
-        q['cadera_pitch_izq'] -= 0.35
-        q['rodilla_izq'] += 0.7
+        # Pata izquierda recogida al tope (muslo adelante, rodilla a 1,15 rad): el pie queda 11 mm
+        # sobre el piso, que es lo máximo que levanta esta pata con la rodilla en su tope.
+        q['cadera_pitch_izq'], q['rodilla_izq'], q['tobillo_izq'] = -1.0, 1.15, -0.15
     return q
 
 
@@ -77,6 +78,8 @@ def medir(nombre_pose, q, apoyo_der=False, segundos=2.0):
         eq.data[:11] = [0, 0, 0, *(-rot.T @ d.xpos[pie]), *quat_inv, 1.0]
         m = spec.compile()
         d = mujoco.MjData(m)
+    # Qué servo es cada uno, por el torque máximo del XML (antes de pisarlo).
+    clases = ['mg996r' if abs(m.actuator_forcerange[i, 1]) > 0.5 else 'mg90s' for i in range(m.nu)]
     # Servos muy rígidos y sin límite: medimos el torque que hace falta, no lo que el servo logra.
     for i in range(m.nu):
         m.actuator_gainprm[i, 0] *= 30
@@ -91,7 +94,7 @@ def medir(nombre_pose, q, apoyo_der=False, segundos=2.0):
     filas = []
     for i in range(m.nu):
         nombre = m.actuator(i).name
-        clase = 'mg996r' if abs(m.actuator_forcerange[i, 1]) > 0.5 else 'mg90s'   # por el torque máximo del XML
+        clase = clases[i]
         t = float(d.actuator_force[i]) / 9.81 * 100  # N·m -> kg·cm
         filas.append(dict(articulacion=nombre, servo=clase.upper(), kgcm=round(abs(t), 2),
                           uso=round(abs(t) / STALL[clase] * 100, 1)))
@@ -104,7 +107,7 @@ def main():
     masa = float(sum(m.body_mass))
     resultados = [
         medir('parado (rodillas 40°)', pose(m, 0.70)),
-        medir('cuclillas (rodillas 90°)', pose(m, 1.57)),
+        medir('cuclillas (rodillas 63°)', pose(m, 1.1)),
         medir('en una pata (apoya la derecha)', pose(m, 0.70, pie_izq_arriba=True), apoyo_der=True),
     ]
     salida = dict(masa_kg=round(masa, 3), stall_kgcm=STALL, poses=resultados)

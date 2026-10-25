@@ -11,7 +11,7 @@ const $ = (id) => document.getElementById(id);
 const POSES = {
   cero: {},
   parado: { cadera_pitch: -0.35, rodilla: 0.7, tobillo: -0.35 },
-  cuclillas: { cadera_pitch: -0.78, rodilla: 1.57, tobillo: -0.78 },
+  cuclillas: { cadera_pitch: -0.65, rodilla: 1.3, tobillo: -0.65 },
   saludo: { cadera_pitch: -0.35, rodilla: 0.7, tobillo: -0.35, cuello_yaw: 0.6, cuello_pitch: -0.3, boca: 0.45 },
 };
 

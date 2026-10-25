@@ -1,0 +1,205 @@
+<mujoco model="pato_criollo_v0">
+  <compiler angle="radian" meshdir="."/>
+  <option timestep="0.002" integrator="implicitfast"/>
+  <default>
+    <geom contype="0" conaffinity="0" density="0"/>
+    <default class="visual"><geom type="mesh" group="2"/></default>
+    <default class="suela"><geom type="mesh" contype="1" conaffinity="0" friction="0.9 0.02 0.01" group="2"/></default>
+    <default class="choque"><geom contype="1" conaffinity="0" friction="0.9 0.02 0.01" group="3" rgba="0.9 0.5 0.2 0.3"/></default>
+    <default class="casco"><geom type="mesh" contype="1" conaffinity="1" friction="0.9 0.02 0.01" group="3" rgba="0.9 0.5 0.2 0.3"/></default>
+    <default class="mg996r">
+      <joint damping="0.08" frictionloss="0.02" armature="0.002"/>
+      <position kp="15" forcerange="-1.079 1.079"/>
+    </default>
+    <default class="mg90s">
+      <joint damping="0.01" frictionloss="0.005" armature="0.0005"/>
+      <position kp="4" forcerange="-0.216 0.216"/>
+    </default>
+  </default>
+  <asset>
+    <mesh name="piso_tronco" file="mallas/piso_tronco.stl"/>
+    <mesh name="lipo_2s_1500" file="mallas/lipo_2s_1500.stl"/>
+    <mesh name="tapa_bateria" file="mallas/tapa_bateria.stl"/>
+    <mesh name="estante_a" file="mallas/estante_a.stl"/>
+    <mesh name="xl4016_izq" file="mallas/xl4016_izq.stl"/>
+    <mesh name="xl4016_der" file="mallas/xl4016_der.stl"/>
+    <mesh name="placa_mcp3008" file="mallas/placa_mcp3008.stl"/>
+    <mesh name="estante_b" file="mallas/estante_b.stl"/>
+    <mesh name="pi_zero_2w" file="mallas/pi_zero_2w.stl"/>
+    <mesh name="pca9685" file="mallas/pca9685.stl"/>
+    <mesh name="mini560_5v" file="mallas/mini560_5v.stl"/>
+    <mesh name="imu_gy521" file="mallas/imu_gy521.stl"/>
+    <mesh name="servo_cuello_yaw" file="mallas/servo_cuello_yaw.stl"/>
+    <mesh name="cuerpo_inferior" file="mallas/cuerpo_inferior.stl"/>
+    <mesh name="cuerpo_superior" file="mallas/cuerpo_superior.stl"/>
+    <mesh name="suela_izq" file="mallas/suela_izq.stl"/>
+    <mesh name="paleta_pie_izq" file="mallas/paleta_pie_izq.stl"/>
+    <mesh name="servo_tobillo_izq" file="mallas/servo_tobillo_izq.stl"/>
+    <mesh name="soporte_pie_izq" file="mallas/soporte_pie_izq.stl"/>
+    <mesh name="horn_tobillo_izq" file="mallas/horn_tobillo_izq.stl"/>
+    <mesh name="servo_rodilla_izq" file="mallas/servo_rodilla_izq.stl"/>
+    <mesh name="soporte_canilla_izq" file="mallas/soporte_canilla_izq.stl"/>
+    <mesh name="horn_rodilla_izq" file="mallas/horn_rodilla_izq.stl"/>
+    <mesh name="servo_cadera_pitch_izq" file="mallas/servo_cadera_pitch_izq.stl"/>
+    <mesh name="soporte_muslo_izq" file="mallas/soporte_muslo_izq.stl"/>
+    <mesh name="horn_cadera_pitch_izq" file="mallas/horn_cadera_pitch_izq.stl"/>
+    <mesh name="soporte_u_izq" file="mallas/soporte_u_izq.stl"/>
+    <mesh name="servo_cadera_roll_izq" file="mallas/servo_cadera_roll_izq.stl"/>
+    <mesh name="horn_cadera_roll_izq" file="mallas/horn_cadera_roll_izq.stl"/>
+    <mesh name="placa_yaw_izq" file="mallas/placa_yaw_izq.stl"/>
+    <mesh name="servo_cadera_yaw_izq" file="mallas/servo_cadera_yaw_izq.stl"/>
+    <mesh name="horn_cadera_yaw_izq" file="mallas/horn_cadera_yaw_izq.stl"/>
+    <mesh name="ruleman_cadera_izq" file="mallas/ruleman_cadera_izq.stl"/>
+    <mesh name="suela_der" file="mallas/suela_der.stl"/>
+    <mesh name="paleta_pie_der" file="mallas/paleta_pie_der.stl"/>
+    <mesh name="servo_tobillo_der" file="mallas/servo_tobillo_der.stl"/>
+    <mesh name="soporte_pie_der" file="mallas/soporte_pie_der.stl"/>
+    <mesh name="horn_tobillo_der" file="mallas/horn_tobillo_der.stl"/>
+    <mesh name="servo_rodilla_der" file="mallas/servo_rodilla_der.stl"/>
+    <mesh name="soporte_canilla_der" file="mallas/soporte_canilla_der.stl"/>
+    <mesh name="horn_rodilla_der" file="mallas/horn_rodilla_der.stl"/>
+    <mesh name="servo_cadera_pitch_der" file="mallas/servo_cadera_pitch_der.stl"/>
+    <mesh name="soporte_muslo_der" file="mallas/soporte_muslo_der.stl"/>
+    <mesh name="horn_cadera_pitch_der" file="mallas/horn_cadera_pitch_der.stl"/>
+    <mesh name="soporte_u_der" file="mallas/soporte_u_der.stl"/>
+    <mesh name="servo_cadera_roll_der" file="mallas/servo_cadera_roll_der.stl"/>
+    <mesh name="horn_cadera_roll_der" file="mallas/horn_cadera_roll_der.stl"/>
+    <mesh name="placa_yaw_der" file="mallas/placa_yaw_der.stl"/>
+    <mesh name="servo_cadera_yaw_der" file="mallas/servo_cadera_yaw_der.stl"/>
+    <mesh name="horn_cadera_yaw_der" file="mallas/horn_cadera_yaw_der.stl"/>
+    <mesh name="ruleman_cadera_der" file="mallas/ruleman_cadera_der.stl"/>
+    <mesh name="horn_cuello_yaw" file="mallas/horn_cuello_yaw.stl"/>
+    <mesh name="servo_cuello_pitch" file="mallas/servo_cuello_pitch.stl"/>
+    <mesh name="soporte_cuello" file="mallas/soporte_cuello.stl"/>
+    <mesh name="horn_cuello_pitch" file="mallas/horn_cuello_pitch.stl"/>
+    <mesh name="cupula" file="mallas/cupula.stl"/>
+    <mesh name="base_cabeza" file="mallas/base_cabeza.stl"/>
+    <mesh name="servo_boca" file="mallas/servo_boca.stl"/>
+    <mesh name="pico_superior" file="mallas/pico_superior.stl"/>
+    <mesh name="ojo_aro_izq" file="mallas/ojo_aro_izq.stl"/>
+    <mesh name="ojo_disco_izq" file="mallas/ojo_disco_izq.stl"/>
+    <mesh name="ojo_aro_der" file="mallas/ojo_aro_der.stl"/>
+    <mesh name="ojo_disco_der" file="mallas/ojo_disco_der.stl"/>
+    <mesh name="camara" file="mallas/camara.stl"/>
+    <mesh name="lente" file="mallas/lente.stl"/>
+    <mesh name="soporte_camara" file="mallas/soporte_camara.stl"/>
+    <mesh name="horn_boca" file="mallas/horn_boca.stl"/>
+    <mesh name="mandibula" file="mallas/mandibula.stl"/>
+    <mesh name="pico_inferior" file="mallas/pico_inferior.stl"/>
+  </asset>
+  <worldbody>
+    <light pos="0 0 2" dir="0 0 -1" directional="true"/>
+    <geom name="suelo" type="plane" size="0 0 0.05" rgba="0.75 0.78 0.8 1" contype="1" conaffinity="1" friction="0.9 0.02 0.01"/>
+    <body name="tronco" pos="0.00000 0.00000 0.19000">
+      <freejoint name="base"/>
+      <inertial pos="0.00530 -0.00000 -0.01028" mass="0.53844" fullinertia="7.013e-04 6.583e-04 9.160e-04 8.409e-09 -8.296e-06 7.969e-09"/>
+      <geom mesh="piso_tronco" class="casco"/>
+      <geom mesh="cuerpo_inferior" class="casco"/>
+      <geom mesh="cuerpo_superior" class="casco"/>
+      <geom mesh="servo_cadera_yaw_izq" class="casco"/>
+      <geom mesh="servo_cadera_yaw_der" class="casco"/>
+      <body name="cadera_yaw_izq" pos="0.00000 0.04200 -0.03600">
+        <joint name="cadera_yaw_izq" axis="0 0 1" range="-0.15 0.35" class="mg996r"/>
+        <inertial pos="-0.00621 -0.00932 -0.03022" mass="0.06575" fullinertia="1.350e-05 1.231e-05 1.802e-05 7.484e-08 -9.614e-08 -6.772e-07"/>
+        <geom mesh="servo_cadera_roll_izq" class="casco"/>
+        <geom mesh="placa_yaw_izq" class="casco"/>
+        <body name="cadera_roll_izq" pos="0.00000 0.00000 -0.03200">
+          <joint name="cadera_roll_izq" axis="1 0 0" range="-0.09 0.25" class="mg996r"/>
+          <inertial pos="0.00327 0.00588 -0.01391" mass="0.01826" fullinertia="7.953e-06 1.026e-05 1.130e-05 1.743e-06 1.146e-07 3.678e-07"/>
+          <geom mesh="soporte_u_izq" class="casco"/>
+          <body name="muslo_izq" pos="0.00000 0.00000 -0.03600">
+            <joint name="cadera_pitch_izq" axis="0 1 0" range="-1.15 0.15" class="mg996r"/>
+            <inertial pos="-0.01036 -0.00587 -0.00181" mass="0.07672" fullinertia="1.963e-05 1.880e-05 2.390e-05 -8.117e-07 1.271e-06 2.239e-06"/>
+            <geom mesh="servo_cadera_pitch_izq" class="casco"/>
+            <geom mesh="soporte_muslo_izq" class="casco"/>
+            <body name="canilla_izq" pos="0.00000 0.00000 -0.03200">
+              <joint name="rodilla_izq" axis="0 1 0" range="-0.1 1.15" class="mg996r"/>
+              <inertial pos="0.01037 -0.00585 -0.00181" mass="0.07666" fullinertia="1.958e-05 1.880e-05 2.385e-05 8.293e-07 -1.272e-06 2.235e-06"/>
+              <geom mesh="servo_rodilla_izq" class="casco"/>
+              <geom mesh="soporte_canilla_izq" class="casco"/>
+              <body name="pie_izq" pos="0.00000 0.00000 -0.03200">
+                <joint name="tobillo_izq" axis="0 1 0" range="-0.8 0.3" class="mg996r"/>
+                <inertial pos="-0.00684 -0.00577 -0.00348" mass="0.08806" fullinertia="1.991e-05 3.490e-05 3.900e-05 -2.249e-06 5.313e-06 1.539e-06"/>
+                <geom mesh="suela_izq" class="casco"/>
+                <geom mesh="paleta_pie_izq" class="casco"/>
+                <geom mesh="servo_tobillo_izq" class="casco"/>
+                <geom mesh="soporte_pie_izq" class="casco"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="cadera_yaw_der" pos="0.00000 -0.04200 -0.03600">
+        <joint name="cadera_yaw_der" axis="-0 0 -1" range="-0.15 0.35" class="mg996r"/>
+        <inertial pos="-0.00621 0.00932 -0.03022" mass="0.06575" fullinertia="1.350e-05 1.231e-05 1.802e-05 -7.484e-08 -9.614e-08 6.772e-07"/>
+        <geom mesh="servo_cadera_roll_der" class="casco"/>
+        <geom mesh="placa_yaw_der" class="casco"/>
+        <body name="cadera_roll_der" pos="0.00000 0.00000 -0.03200">
+          <joint name="cadera_roll_der" axis="-1 0 -0" range="-0.09 0.25" class="mg996r"/>
+          <inertial pos="0.00327 -0.00588 -0.01391" mass="0.01826" fullinertia="7.953e-06 1.026e-05 1.130e-05 -1.743e-06 1.146e-07 -3.678e-07"/>
+          <geom mesh="soporte_u_der" class="casco"/>
+          <body name="muslo_der" pos="0.00000 0.00000 -0.03600">
+            <joint name="cadera_pitch_der" axis="-0 1 -0" range="-1.15 0.15" class="mg996r"/>
+            <inertial pos="-0.01036 0.00587 -0.00181" mass="0.07672" fullinertia="1.963e-05 1.880e-05 2.390e-05 8.117e-07 1.271e-06 -2.239e-06"/>
+            <geom mesh="servo_cadera_pitch_der" class="casco"/>
+            <geom mesh="soporte_muslo_der" class="casco"/>
+            <body name="canilla_der" pos="0.00000 0.00000 -0.03200">
+              <joint name="rodilla_der" axis="-0 1 -0" range="-0.1 1.15" class="mg996r"/>
+              <inertial pos="0.01037 0.00585 -0.00181" mass="0.07666" fullinertia="1.958e-05 1.880e-05 2.385e-05 -8.293e-07 -1.272e-06 -2.235e-06"/>
+              <geom mesh="servo_rodilla_der" class="casco"/>
+              <geom mesh="soporte_canilla_der" class="casco"/>
+              <body name="pie_der" pos="0.00000 0.00000 -0.03200">
+                <joint name="tobillo_der" axis="-0 1 -0" range="-0.8 0.3" class="mg996r"/>
+                <inertial pos="-0.00684 0.00577 -0.00348" mass="0.08806" fullinertia="1.991e-05 3.490e-05 3.900e-05 2.249e-06 5.313e-06 -1.539e-06"/>
+                <geom mesh="suela_der" class="casco"/>
+                <geom mesh="paleta_pie_der" class="casco"/>
+                <geom mesh="servo_tobillo_der" class="casco"/>
+                <geom mesh="soporte_pie_der" class="casco"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="cuello" pos="0.04000 0.00000 0.03600">
+        <joint name="cuello_yaw" axis="0 0 1" range="-1.5 1.5" class="mg90s"/>
+        <inertial pos="-0.00000 -0.00170 0.03255" mass="0.01852" fullinertia="4.127e-06 3.649e-06 1.272e-06 8.308e-17 -3.700e-16 1.691e-08"/>
+        <geom mesh="soporte_cuello" class="casco"/>
+        <body name="cabeza" pos="0.00000 0.00000 0.04300">
+          <joint name="cuello_pitch" axis="0 1 0" range="-0.5 0.6" class="mg90s"/>
+          <inertial pos="0.01197 -0.00004 0.03395" mass="0.11714" fullinertia="1.989e-04 3.011e-04 3.816e-04 -9.248e-07 2.747e-06 2.385e-07"/>
+          <geom mesh="cupula" class="casco"/>
+          <geom mesh="pico_superior" class="casco"/>
+          <geom mesh="soporte_camara" class="casco"/>
+          <body name="pico_inferior" pos="-0.04500 0.00000 0.01700">
+            <joint name="boca" axis="0 1 0" range="0.0 0.3" class="mg90s"/>
+            <inertial pos="0.06599 0.00023 -0.01321" mass="0.03502" fullinertia="3.735e-05 7.336e-05 1.103e-04 5.353e-07 6.706e-07 -1.072e-07"/>
+            <geom mesh="mandibula" class="casco"/>
+            <geom mesh="pico_inferior" class="casco"/>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  <contact>
+    <!-- Abuelo-nieto: la envolvente convexa de la mandíbula (que es cóncava) roza el soporte del cuello. -->
+    <exclude body1="cuello" body2="pico_inferior"/>
+  </contact>
+  <actuator>
+    <position name="cadera_yaw_izq" joint="cadera_yaw_izq" class="mg996r"/>
+    <position name="cadera_roll_izq" joint="cadera_roll_izq" class="mg996r"/>
+    <position name="cadera_pitch_izq" joint="cadera_pitch_izq" class="mg996r"/>
+    <position name="rodilla_izq" joint="rodilla_izq" class="mg996r"/>
+    <position name="tobillo_izq" joint="tobillo_izq" class="mg996r"/>
+    <position name="cadera_yaw_der" joint="cadera_yaw_der" class="mg996r"/>
+    <position name="cadera_roll_der" joint="cadera_roll_der" class="mg996r"/>
+    <position name="cadera_pitch_der" joint="cadera_pitch_der" class="mg996r"/>
+    <position name="rodilla_der" joint="rodilla_der" class="mg996r"/>
+    <position name="tobillo_der" joint="tobillo_der" class="mg996r"/>
+    <position name="cuello_yaw" joint="cuello_yaw" class="mg90s"/>
+    <position name="cuello_pitch" joint="cuello_pitch" class="mg90s"/>
+    <position name="boca" joint="boca" class="mg90s"/>
+  </actuator>
+  <keyframe>
+    <key name="parado" qpos="0 0 0.1900 1 0 0 0 0 0 -0.35 0.7 -0.35 0 0 -0.35 0.7 -0.35 0 0 0" ctrl="0 0 -0.35 0.7 -0.35 0 0 -0.35 0.7 -0.35 0 0 0"/>
+  </keyframe>
+</mujoco>

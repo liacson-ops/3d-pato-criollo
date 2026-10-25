@@ -1,0 +1,9 @@
+# Entrenamiento en CPU (MacBook M1/M2/M3, también Linux). Probado con estas versiones mínimas.
+mujoco>=3.1
+gymnasium>=0.29
+stable-baselines3>=2.3
+torch>=2.2
+numpy>=1.26
+onnx>=1.15
+onnxruntime>=1.17
+tensorboard>=2.15

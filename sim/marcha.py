@@ -24,7 +24,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 XML = RAIZ / 'salida' / 'mjcf' / 'pato_sim.xml'
 
 PARADO = dict(cadera_pitch=-0.35, rodilla=0.70, tobillo=-0.35)
-DEFECTO = dict(frecuencia=1.2, balanceo=0.10, levante=0.30, zancada=0.18, giro=0.0, rampa=1.0)
+DEFECTO = dict(frecuencia=1.2, balanceo=0.07, levante=0.15, zancada=0.24, giro=0.0, rampa=1.0)
 
 
 def objetivos(t, p, vel=1.0):
@@ -35,8 +35,11 @@ def objetivos(t, p, vel=1.0):
     sen = math.sin(fase)
     q = {}
     for lado, s in (('izq', 1), ('der', -1)):
-        # El cuerpo se inclina hacia la derecha cuando sen > 0: entonces levanta la izquierda.
-        roll = p['balanceo'] * sen * g
+        # Mismo giro en el mundo para las dos caderas (ejes espejados). El signo sale de medir los
+        # apoyos en MuJoCo: como no hay roll de tobillo, el pie gira con la pata y apoya por un
+        # canto; eso corre el punto de apoyo más que el centro de masa. Con sen > 0 el pie izquierdo
+        # queda apoyado por el canto de afuera y descargado: es el que se levanta.
+        roll = -p['balanceo'] * sen * g * s
         swing = max(0.0, s * sen)                 # 0..1 mientras esta pata está en el aire
         lev = p['levante'] * swing * g
         zanc = p['zancada'] * g * (s * math.cos(fase))   # atrás→adelante en el aire, al revés apoyada
@@ -92,7 +95,7 @@ def main():
             print(f'  {n:18s} pico {u:5.1f} % del torque máximo')
         return
     print('frec  balan  levan  zanc  ->  resultado')
-    for f, b, l, z in itertools.product((0.8, 1.2, 1.6), (0.06, 0.10, 0.14), (0.2, 0.3, 0.4), (0.1, 0.18, 0.26)):
+    for f, b, l, z in itertools.product((0.8, 1.0, 1.2, 1.6), (0.05, 0.07, 0.09), (0.15, 0.25, 0.35), (0.12, 0.18, 0.24)):
         p = dict(DEFECTO, frecuencia=f, balanceo=b, levante=l, zancada=z)
         r = correr(p, args.segundos)
         print(f'{f:4.1f}  {b:5.2f}  {l:5.2f}  {z:5.2f}  ->  '

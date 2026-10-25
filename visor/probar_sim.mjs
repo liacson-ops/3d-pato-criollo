@@ -1,4 +1,4 @@
-// Prueba automática del simulador: carga, camina 5 s y saca una captura.
+// Prueba automática del simulador: carga, camina 5 s, saca una captura y prueba un empujón parado.
 import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -26,6 +26,12 @@ const r = await page.evaluate(async () => {
 console.log(JSON.stringify(r));
 mkdirSync(join(aqui, '..', 'docs', 'img'), { recursive: true });
 await page.screenshot({ path: join(aqui, '..', 'docs', 'img', 'simulador.png') });
-const r2 = await page.evaluate(() => { const S = window.PATO_SIM; S.set({ empuje: 0.15, empujeN: 6 }); S.pasos(1500); return { cayo_tras_empujon_6N: S.cayo, x: S.x }; });
+// Empujón de 4 N durante 0,15 s, parado (con 5 N se cae: haría falta dar un paso).
+const r2 = await page.evaluate(() => {
+  const S = window.PATO_SIM;
+  S.reiniciar(); S.set({ modo: 'parado' }); S.pasos(500);
+  S.set({ empuje: 0.15, empujeN: 4 }); S.pasos(1500);
+  return { cayo_tras_empujon_4N_parado: S.cayo, x: S.x };
+});
 console.log(JSON.stringify(r2));
 await browser.close();
