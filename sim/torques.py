@@ -91,8 +91,7 @@ def medir(nombre_pose, q, apoyo_der=False, segundos=2.0):
     filas = []
     for i in range(m.nu):
         nombre = m.actuator(i).name
-        clase = 'mg996r' if m.actuator_forcerange[i, 1] and 'cuello' not in nombre and 'boca' not in nombre \
-            and 'yaw' not in nombre else 'mg90s'
+        clase = 'mg996r' if abs(m.actuator_forcerange[i, 1]) > 0.5 else 'mg90s'   # por el torque máximo del XML
         t = float(d.actuator_force[i]) / 9.81 * 100  # N·m -> kg·cm
         filas.append(dict(articulacion=nombre, servo=clase.upper(), kgcm=round(abs(t), 2),
                           uso=round(abs(t) / STALL[clase] * 100, 1)))

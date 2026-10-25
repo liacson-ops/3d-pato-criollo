@@ -47,7 +47,8 @@ Z_ROLL = Z_CADERA + 30.0
 Z_PISO = (Z_ROLL + 24.0, Z_ROLL + 32.0)
 # Tronco: cajita redondeada, como el original (la electrónica va en estantes adentro).
 TRONCO_X = (-54.0, 70.0)
-TRONCO_Y = (-50.0, 50.0)
+TRONCO_Y = (-55.0, 55.0)          # los MG996R de cadera yaw (19,7 de ancho en y = ±42) van adentro
+Z_TAPA_YAW_CADERA = Z_PISO[1] + 0.5 + MG996R.alto_horn      # horn sobre el eje del rulemán
 TRONCO_Z = (Z_PISO[1] + 1.0, Z_PISO[1] + 71.0)
 TRONCO_R = 12.0
 Z_CORTE_TRONCO = TRONCO_Z[0] + 38.0
@@ -57,7 +58,7 @@ Z_PITCH = Z_YAW_TAPA + 27.0
 # Cabeza: cúpula tipo "pan" con el piso plano y pico ancho que abre como una tapa.
 # Se modela en el marco de referencia viejo (pitch en z=295) y se baja al final.
 CAB_X = (-15.0, 115.0)
-CAB_Y = (-52.0, 52.0)
+CAB_Y = (-57.0, 57.0)             # más ancha que el tronco, como el original
 Z_CAB = (305.0, 365.0)
 R_CAB_ARRIBA, R_CAB_ABAJO = 26.0, 10.0
 BISAGRA_BOCA = (-5.0, 312.0)       # (x, z) del eje del pico inferior, atrás de la cabeza
@@ -307,10 +308,9 @@ def pata(r: Robot, lado: str):
         descripcion='Placa yaw: sostiene el servo roll por las orejas y sube al rulemán')
 
     # Servo yaw de cadera y rulemán (paso 6), en el tronco
-    tapa_yaw = Z_PISO[1] + 0.5 + MG90S.alto_horn
-    caja_y, horn_y = servo_en(MG90S, (0, y, tapa_yaw), (0, 0, -1), (1, 0, 0))
-    r.agregar(Pieza(f'servo_cadera_yaw_{lado}', 'tronco', espejo(caja_y), COLORES['mg90s'], 'comprada', 6,
-                    masa=MG90S.masa, descripcion='MG90S cadera yaw'))
+    caja_y, horn_y = servo_en(MG996R, (0, y, Z_TAPA_YAW_CADERA), (0, 0, -1), (1, 0, 0))
+    r.agregar(Pieza(f'servo_cadera_yaw_{lado}', 'tronco', espejo(caja_y), COLORES['mg996r'], 'comprada', 6,
+                    masa=MG996R.masa, descripcion='MG996R cadera yaw (parado, las orejas van contra el estante A)'))
     r.agregar(Pieza(f'horn_cadera_yaw_{lado}', nombres['cadera_yaw'], espejo(horn_y), COLORES['horn'],
                     'comprada', 6, masa=1.0))
     rul = (cil((0, y, Z_PISO[0] + 0.5), (0, y, Z_PISO[0] + 7.5), RULEMAN_608[0] / 2)
@@ -325,7 +325,7 @@ def pata(r: Robot, lado: str):
     anc = lambda z: np.array([0.0, s * y, z])
     r.articulaciones += [
         Articulacion(f'cadera_yaw_{lado}', 'tronco', nombres['cadera_yaw'], anc(Z_PISO[1]), eje_lado((0, 0, 1)),
-                     (-0.4, 0.4), MG90S),
+                     (-0.4, 0.4), MG996R),
         Articulacion(f'cadera_roll_{lado}', nombres['cadera_yaw'], nombres['cadera_roll'], anc(Z_ROLL),
                      eje_lado((1, 0, 0)), (-0.4, 0.4), MG996R),
         Articulacion(f'cadera_pitch_{lado}', nombres['cadera_roll'], nombres['muslo'], anc(Z_CADERA),
@@ -350,7 +350,7 @@ def tronco(r: Robot):
     inx = (TRONCO_X[0] + 3.5, TRONCO_X[1] - 3.5)
     iny = (TRONCO_Y[0] + 3.5, TRONCO_Y[1] - 3.5)
     # Piso con alojamientos de rulemanes (paso 6)
-    piso = placa_redondeada(TRONCO_X, (-54, 54), Z_PISO, 10)
+    piso = placa_redondeada(TRONCO_X, TRONCO_Y, Z_PISO, 10)
     for s in (1, -1):
         piso -= cil((0, s * Y_PATA, Z_PISO[0] + 0.5), (0, s * Y_PATA, Z_PISO[1] + 1), 11.1)
         piso -= cil((0, s * Y_PATA, Z_PISO[0] - 1), (0, s * Y_PATA, Z_PISO[1] + 1), 6)
@@ -362,10 +362,12 @@ def tronco(r: Robot):
                     'comprada', 7, masa=lm, descripcion='LiPo 2S 1500 mAh'))
     r.agregar(Pieza('tapa_bateria', t, caja(-lx / 2 - 2, lx / 2 + 2, -ly / 2 - 2, ly / 2 + 2, zb + lz, zb + lz + 1.5),
                     COLORES['pla'], 'impresa', 7, relleno=0.5, descripcion='Tapa y traba de la batería'))
-    za = zb + lz + 2.0
+    # El estante A apoya sobre las orejas de los servos yaw de cadera (se atornillan desde abajo).
+    za = max(zb + lz + 2.0, Z_TAPA_YAW_CADERA + MG996R.orejas_desde_tapa + MG996R.espesor_orejas + 0.1)
     estante_a = placa_redondeada(inx, iny, (za, za + 3), 9)
-    for s in (1, -1):  # paso de los servos yaw de cadera
-        estante_a -= caja(-8, 19, s * Y_PATA - 8, s * Y_PATA + 8, za - 5, za + 8)
+    for s in (1, -1):  # paso del cuerpo de los servos yaw de cadera
+        y0, y1 = sorted((s * (Y_PATA - 10.4), s * (Y_PATA + 10.4)))
+        estante_a -= caja(-MG996R.eje_desde_punta - 0.5, MG996R.largo - MG996R.eje_desde_punta + 0.5, y0, y1, za - 5, za + 8)
     r.agregar(Pieza('estante_a', t, estante_a, COLORES['pla'], 'impresa', 7, relleno=0.4,
                     descripcion='Estante A'))
     xl, xw, xh, xm = XL4016   # girados: el largo va a lo ancho del tronco, uno detrás del otro
@@ -440,7 +442,8 @@ def cuello_y_cabeza(r: Robot):
     r.agregar(Pieza('cupula', 'cabeza', cupula, COLORES['carcasa'], 'impresa', 10, relleno=1.0,
                     descripcion='Cúpula de la cabeza'))
     # Base estructural dentro de la cúpula: sostiene el servo de la boca y se une al cuello
-    base_cab = placa_redondeada((0, CAB_X[1] - 12), (-44, 44), (302, 305), 8)
+    w = CAB_Y[1]
+    base_cab = placa_redondeada((0, CAB_X[1] - 12), (-w + 8, w - 8), (302, 305), 8)
     base_cab -= caja(x - 10, x + 20, -22, 22, 300, 306)                        # paso del servo pitch
     soporte = (placa_y(16.5, 19.5, [(x, ZP0, 9)], [(x - 6, x + 10, 302, 305)])
                + placa_y(-18, -15, [(x, ZP0, 7)], [(x - 6, x + 10, 302, 305)])
@@ -454,7 +457,7 @@ def cuello_y_cabeza(r: Robot):
     r.agregar(Pieza('servo_boca', 'cabeza', caja_b, COLORES['mg90s'], 'comprada', 10, masa=MG90S.masa,
                     descripcion='MG90S boca'))
     # Pico superior: lámina amarilla ancha en el borde de abajo de la cúpula
-    pico_sup = placa_redondeada((CAB_X[1] - 12, CAB_X[1] + 24), (-48, 48), (302, 306), 12)
+    pico_sup = placa_redondeada((CAB_X[1] - 12, CAB_X[1] + 24), (-w + 4, w - 4), (302, 306), 12)
     r.agregar(Pieza('pico_superior', 'cabeza', pico_sup, COLORES['naranja'], 'impresa', 10, relleno=0.4,
                     descripcion='Pico superior'))
     # Ojos: aro amarillo con disco claro, uno por lado
@@ -480,13 +483,13 @@ def cuello_y_cabeza(r: Robot):
     r.anclas['pico_inferior'] = np.array([bx, 0, bz])
     r.padres['pico_inferior'] = 'cabeza'
     r.agregar(Pieza('horn_boca', 'pico_inferior', horn_b, COLORES['horn'], 'comprada', 10, masa=0.5))
-    mand = placa_redondeada((-12, CAB_X[1] - 12), (-50, 50), (296, 301), 10)
+    mand = placa_redondeada((-12, CAB_X[1] - 12), (-w + 2, w - 2), (296, 301), 10)
     mand -= caja(x - 12, x + 22, -22, 22, 290, 310)                             # paso del cuello
     brazo_h = placa_y(16.8, 18.8, [(bx, bz, 6)], [(bx - 3, bx + 3, 296, bz)])
     brazo_p = placa_y(-18.8, -16.8, [(bx, bz, 6)], [(bx - 3, bx + 3, 296, bz)]) - cil((bx, -20, bz), (bx, -15, bz), 2.3)
     r.agregar(Pieza('mandibula', 'pico_inferior', mand + brazo_h + brazo_p, COLORES['carcasa'], 'impresa', 10,
                     relleno=0.4, descripcion='Mandíbula: piso de la cabeza, la mueve el servo de la boca'))
-    pico_inf = placa_redondeada((CAB_X[1] - 12, CAB_X[1] + 22), (-46, 46), (296, 301), 12)
+    pico_inf = placa_redondeada((CAB_X[1] - 12, CAB_X[1] + 22), (-w + 6, w - 6), (296, 301), 12)
     r.agregar(Pieza('pico_inferior', 'pico_inferior', pico_inf, COLORES['naranja'], 'impresa', 10, relleno=0.4,
                     descripcion='Pico inferior (amarillo, va pegado a la mandíbula)'))
     r.articulaciones += [

@@ -41,8 +41,8 @@ Desde el visor podés:
 | | |
 | --- | --- |
 | Altura | **31,5 cm** parado (el original mide unos 25 cm) |
-| Masa estimada | **1,26 kg** (31 piezas impresas; la cabeza completa pesa 146 g) |
-| Servos | **8× MG996R** (cadera roll, cadera pitch, rodilla y tobillo de cada pata) y **5× MG90S** (cadera yaw ×2, cuello yaw, cuello pitch, boca) |
+| Masa estimada | **1,37 kg** (31 piezas impresas; la cabeza completa pesa unos 150 g) |
+| Servos | **10× MG996R** (cadera yaw, cadera roll, cadera pitch, rodilla y tobillo de cada pata) y **3× MG90S** (cuello yaw, cuello pitch, boca) |
 | Patas | 5 articulaciones cada una. Los servos de cadera pitch, rodilla y tobillo van **acostados** (eje lateral, cuerpo hacia atrás) en una cuna impresa igual para los tres: así muslo y canilla miden 32 mm y la pata queda compacta |
 | Control | Raspberry Pi Zero 2 W a bordo, PCA9685 (PWM), 2× MCP3008 (lectura de los potenciómetros), MPU-6050 (IMU) |
 | Cámara | Cámara de la Pi en la frente, con el lente justo arriba del pico |
@@ -53,13 +53,13 @@ Desde el visor podés:
 | Pose | Articulación más exigida | Uso del torque máximo |
 | --- | --- | ---: |
 | Parado (rodillas a 40°) | tobillo, 2,2 kg·cm | 20 % |
-| Cuclillas (rodillas a 90°) | tobillo, 1,6 kg·cm | 14 % |
-| En una pata, sin desplazar el cuerpo (peor caso) | cadera roll, 5,2 kg·cm | **47 %** |
+| Cuclillas (rodillas a 90°) | tobillo, 1,6 kg·cm | 15 % |
+| En una pata, sin desplazar el cuerpo (peor caso) | cadera roll, 5,7 kg·cm | **51 %** |
 | Cabeza (cualquier pose) | cuello pitch, 0,65 kg·cm | 30 % (MG90S) |
 
 Al caminar, los picos suelen ser 2 a 3 veces el valor estático. **La cadera roll es el punto a vigilar.** Un paso normal desplaza el cuerpo sobre el pie de apoyo, así que exige menos que el peor caso. Tabla completa: [`salida/torques.md`](salida/torques.md).
 
-Caminando en la simulación aparece otro problema: **los MG90S de la cadera yaw saturan** (100 % del torque) porque reciben toda la torsión de la pata apoyada. Opciones para la v1: trabar el yaw (patas de 4 articulaciones, como muchos bípedos chicos), pasar esos dos servos a MG996R, o un tope mecánico que descargue al servo. Se decide con lo que midamos en la fase 0.
+Caminando en la simulación, con MG90S en la cadera yaw esos servos saturaban (100 % del torque) porque reciben toda la torsión de la pata apoyada. Por eso **la cadera yaw usa MG996R**: parados dentro del tronco, con las orejas atornilladas al estante A y el rulemán 608 tomando la carga radial. Con ese cambio, caminando ningún servo pasa del 81 % (cadera roll) y la cadera yaw queda por debajo del 40 %.
 
 ## Cómo se arma
 
@@ -67,7 +67,7 @@ Las imágenes salen del mismo visor, en modo *Paso a paso*: en cada paso lo nuev
 
 **Antes de empezar, hay que modificar los servos:**
 - Se abren y se suelda un cable al cursor (pin del medio) del potenciómetro interno, para que la Pi pueda leer la posición.
-- Los MG996R de las patas van **con sus orejas**: la cuna impresa los sujeta por ahí (apoyos a ambos lados del cuerpo).
+- Los MG996R de las patas van **con sus orejas**: la cuna impresa los sujeta por ahí (apoyos a ambos lados del cuerpo). Los dos de cadera yaw se atornillan por las orejas al estante A, desde abajo.
 - A los MG90S del **cuello pitch** se les corta la oreja del lado opuesto al eje. Los del **cuello yaw** y la **boca** al revés: se corta la oreja del lado del eje.
 
 | | |

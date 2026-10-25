@@ -17,7 +17,21 @@ Una versión del XGO-Duck (nombre provisorio) **hecha con piezas de MercadoLibre
   - cámara en la frente;
   - masa estimada **1,26 kg**, altura **31,5 cm** (cabeza al estilo del original: cúpula, ojo amarillo y pico ancho que abre como tapa).
   - **Rediseño de patas:** los servos de cadera pitch, rodilla y tobillo van acostados en una cuna impresa única; muslo y canilla de 32 mm. El robot pasó de 38 a 31,5 cm.
-- **Simulador en el navegador** (`salida/simulador.html`, MuJoCo WebAssembly): se queda parado, camina con la marcha a mano y aguanta empujones de 6 N. Mostró que **los MG90S de cadera yaw saturan al caminar**: para la v1 hay que trabar el yaw, pasarlo a MG996R o descargarlo con un tope.
+- **Simulador en el navegador** (`salida/simulador.html`, MuJoCo WebAssembly): se queda parado, camina con la marcha a mano y aguanta empujones de 6 N. Mostró que los MG90S de cadera yaw saturaban al caminar; **se pasaron a MG996R** (10 MG996R + 3 MG90S en total, 1,37 kg).
+
+## Entrenar en una MacBook M1
+
+Se puede, con dos salvedades:
+
+- **El pipeline del original (`xgoduck_rl` / mjlab) necesita GPU NVIDIA**, así que en la Mac no corre. En su lugar: MuJoCo para Python (anda nativo en Apple Silicon) + PPO con PyTorch (usa la GPU de la M1 por Metal para la red; la física va en CPU). Con 8 entornos en paralelo una M1 hace unos 10.000–30.000 pasos de simulación por segundo con este modelo.
+- **Tiempo:** una marcha básica sale en una noche (5–10 millones de pasos); una robusta, con terreno irregular y empujones, lleva 1–3 días. En una GPU alquilada eso son 1–2 horas. Lo práctico: iterar recompensas y el modelo en la Mac, y las corridas largas en GPU.
+
+Para que lo aprendido sirva en el robot real hay que entrenar con:
+- **choques consigo mismo:** cada eslabón con su envolvente convexa y colisiones habilitadas entre eslabones no vecinos (hoy el simulador web usa una caja por eslabón y no mira choques entre piezas);
+- **objetos externos:** terreno con escalones y rampas, obstáculos y empujones aleatorios;
+- **variaciones aleatorias** de masas, fricción, torque y retardo de los servos, con el modelo de servo medido en la fase 0.
+
+Eso es la fase 4 del plan; se arma en `rl/` cuando lo pidas.
 - **Torques del modelo nuevo (MuJoCo):** parado, el tobillo usa el 18 % del máximo del MG996R. En el peor caso (una pata, sin desplazar el cuerpo), la **cadera roll llega al 40 %**. Es la articulación a vigilar en la fase 0 y en el entrenamiento.
 
 ---
@@ -62,7 +76,7 @@ Al caminar, los picos son entre 2 y 3 veces esos valores, es decir **4–6 kg·c
 | Zona | Articulaciones | Servo | Cant. |
 | --- | --- | --- | ---: |
 | Patas | cadera lateral, cadera adelante-atrás, rodilla, tobillo (×2 patas) | MG996R | 8 |
-| Patas | cadera yaw, para girar (×2) | MG90S | 2 |
+| Patas | cadera yaw, para girar (×2) | MG996R (en la simulación, con MG90S saturaba) | 2 |
 | Cuello y cabeza | yaw y pitch (antes eran 4 articulaciones) | MG90S | 2 |
 | Pico | boca | MG90S | 1 |
 
@@ -107,8 +121,8 @@ La Pi 4 también se podría llevar a bordo, pero pesa más, consume entre 3 y 6 
 
 | Cant. | Pieza | ARS aprox. |
 | ---: | --- | ---: |
-| 8 | Servo MG996R (los packs salen más baratos por unidad) | 90.000–100.000 |
-| 5 | Servo MG90S de metal | 23.000–30.000 |
+| 10 | Servo MG996R (los packs salen más baratos por unidad) | 110.000–125.000 |
+| 3 | Servo MG90S de metal | 14.000–18.000 |
 | 1 | PCA9685 (16 canales PWM, I²C) | 4.000–8.000 |
 | 2 | MCP3008 (ADC de 8 canales, SPI) | 6.000–12.000 |
 | 1 | GY-521 (MPU-6050) | 3.000–5.000 |
@@ -118,7 +132,7 @@ La Pi 4 también se podría llevar a bordo, pero pesa más, consume entre 3 y 6 
 | 1 | Cargador balanceador (tipo B3 o B6) | 10.000–25.000 |
 | — | Rulemanes 608ZZ y 6700ZZ, tornillos M3, cables, resistencias, capacitores, llave, fusible, conectores | 15.000–25.000 |
 | ~1 kg | Filamento PLA o PETG | 20.000–25.000 |
-| | **Total** | **≈ 210.000–290.000** |
+| | **Total** | **≈ 220.000–300.000** |
 
 La Pi Zero 2 W, la Pi 4 y las cámaras ya las tenés. Para comparar: solo los 15 servos originales importados cuestan unos 470 €, y el kit oficial USD 352 más la importación.
 
