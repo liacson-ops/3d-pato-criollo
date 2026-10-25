@@ -637,6 +637,11 @@ def mjcf(r: Robot, mallas, props, hijos, modo):
                     lineas.append(f'{sp}  <geom mesh="{p.nombre}" class="{clase}" rgba="{rgba}"/>')
             return
         if modo == 'cascos':
+            # Mallas visuales (sin física) para verlo en el visor de MuJoCo, más las envolventes de choque.
+            for p in r.piezas:
+                if p.eslabon == esl:
+                    rgba = ' '.join(f'{v / 255:.3f}' for v in color_rgba(p.color))
+                    lineas.append(f'{sp}  <geom mesh="{p.nombre}" class="visual" rgba="{rgba}"/>')
             for p in r.piezas:
                 if p.eslabon == esl and any(p.nombre.startswith(n) for n in CHOQUE_RL) \
                         and not p.nombre.startswith('servo_cuello') and not p.nombre.startswith('servo_boca'):
