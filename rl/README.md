@@ -39,10 +39,12 @@ Velocidad de referencia: en la máquina de prueba (4 núcleos, sin GPU) da 1.300
 ## Ver el resultado
 
 ```bash
-python3 rl/jugar.py                              # abre la ventana de MuJoCo con la última política
+mjpython rl/jugar.py                             # abre la ventana de MuJoCo con la última política (en Mac, mjpython; en Linux, python3)
 python3 rl/jugar.py --sin-ventana --segundos 20  # solo imprime cuánto avanzó y si se cayó
-python3 rl/jugar.py --comando 0.0 0.0 0.5        # girar en el lugar
+mjpython rl/jugar.py --comando 0.0 0.0 0.5       # girar en el lugar
 ```
+
+`mjpython` viene con el paquete `mujoco` y queda en el mismo `bin/` del entorno virtual. En macOS la ventana no funciona con `python3` a secas.
 
 ## Exportar a la Pi
 
