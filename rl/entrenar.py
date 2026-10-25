@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Entrena una política con PPO (Stable-Baselines3) en CPU, apto para MacBook M1.
 
-  python3 rl/entrenar.py                            # caminar: 8 entornos, 10 M pasos (1–2 h en una M1)
+  python3 rl/entrenar.py                            # caminar: 8 entornos, 10 M pasos (menos de 1 h en una M1)
+  python3 rl/entrenar.py --pasos 60e6               # toda la noche: 60 M pasos, unas 5 h
   python3 rl/entrenar.py --modo levantarse          # levantarse del piso: 5 M pasos alcanzan
   python3 rl/entrenar.py --pasos 2e6 --envs 4       # prueba corta
   python3 rl/entrenar.py --continuar rl/corridas/ultimo_caminar   # sigue una corrida
@@ -45,6 +46,7 @@ def main():
     ap.add_argument('--envs', type=int, default=max(2, min(8, (os.cpu_count() or 4) - 1)))
     ap.add_argument('--continuar', type=str, default=None)
     ap.add_argument('--semilla', type=int, default=0)
+    ap.add_argument('--lr', type=float, default=3e-4, help='tasa de aprendizaje inicial; baja linealmente a un décimo')
     ap.add_argument('--cabeza-quieta', action='store_true', help='caminar sin mover la cabeza al azar')
     args = ap.parse_args()
 
@@ -75,7 +77,8 @@ def main():
     else:
         venv = VecNormalize(venv, norm_obs=True, norm_reward=True, clip_obs=10.0)
         modelo = PPO('MlpPolicy', venv, device='cpu', verbose=1, seed=args.semilla,
-                     n_steps=1024, batch_size=4096, n_epochs=5, learning_rate=3e-4, gamma=0.99, gae_lambda=0.95,
+                     n_steps=1024, batch_size=4096, n_epochs=5, gamma=0.99, gae_lambda=0.95,
+                     learning_rate=lambda restante: args.lr * (0.1 + 0.9 * restante),   # baja a lo largo de la corrida
                      ent_coef=0.005, clip_range=0.2, policy_kwargs=dict(net_arch=[256, 128, 64]),
                      tensorboard_log=str(salida) if _hay_tensorboard() else None)
 

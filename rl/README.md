@@ -10,6 +10,13 @@ Tres cosas, y solo dos se entrenan:
 | **Levantarse si se cae** | segunda política (`--modo levantarse`), arranca tirado de espaldas, de frente o de costado. **Con la mecánica actual no lo logra** (ver abajo) | `rl/entorno.py` |
 | **Mirar arriba y abrir la boca** (y otros gestos) | programado, no se entrena: trayectorias suaves de los tres MG90S de la cabeza, dentro de la envolvente boca/pitch | `rl/cabeza.py` |
 
+Arriba de la política de marcha van dos capas que no se entrenan (`rl/navegar.py`):
+
+| Qué | Cómo |
+| --- | --- |
+| **Ir de un punto A a un punto B** | `Navegador`: lista de puntos (x, y); apunta al siguiente con el comando de giro, avanza y frena cerca. En la simulación usa la posición real; en el robot va a salir de la odometría o de un marcador visto por la cámara |
+| **Seguir un objeto con la cámara** | `Seguidor`: con la posición del objeto en la imagen (en el robot, detección por color con OpenCV; acá, la proyección exacta de la cámara de la cabeza) centra el objeto moviendo el cuello; si queda muy de costado gira el cuerpo, y si está lejos camina hacia él hasta quedar a 45 cm. Si lo pierde, barre con la cabeza |
+
 Las junta un **supervisor** (`rl/jugar.py`, clase `Supervisor`, la misma lógica que va a correr en la Pi): camina con la política de marcha; si el tronco se inclina más de 53° o baja de 12 cm, pasa a la política de levantarse; cuando lleva medio segundo de pie, vuelve a caminar. Los gestos de la cabeza corren en paralelo mientras camina. La marcha se entrena con la cabeza moviéndose al azar en la mitad de los episodios, para que seguir caminando con la cabeza girada o el pico abierto no la sorprenda.
 
 ## Instalación (una vez)
@@ -38,10 +45,13 @@ Si `tensorboard` no está instalado el entrenamiento avisa y sigue sin guardar c
 
 ```bash
 python3 rl/entrenar.py --pasos 2e6 --envs 4      # caminar, prueba de 10 minutos en una M1: tiene que dejar de caerse
-python3 rl/entrenar.py                           # caminar, 10 M pasos con 8 entornos: 1 a 2 horas
-python3 rl/entrenar.py --modo levantarse         # levantarse, 5 M pasos: una hora
+python3 rl/entrenar.py                           # caminar, 10 M pasos con 8 entornos: menos de una hora
+python3 rl/entrenar.py --pasos 60e6              # toda la noche (unas 5 horas): la marcha definitiva
+python3 rl/entrenar.py --modo levantarse         # levantarse, 5 M pasos (hoy no lo logra, ver abajo)
 tensorboard --logdir rl/corridas                 # curvas de recompensa (rollout/ep_rew_mean)
 ```
+
+La tasa de aprendizaje baja linealmente a lo largo de la corrida (de 3e-4 a 3e-5), así que una corrida larga termina más fina que una corta: para la noche conviene una sola corrida de 60 M y no varias cortas encadenadas.
 
 En zsh no pegues el texto que sigue al `#`: la terminal se lo pasa al script.
 
@@ -57,6 +67,8 @@ mjpython rl/jugar.py --demo                      # cuac mirando arriba, mira alr
 mjpython rl/jugar.py --caido                     # arranca tirado en el piso: prueba solo levantarse
 mjpython rl/jugar.py --gesto mirar_arriba_y_abrir --comando 0 0 0
 mjpython rl/jugar.py --comando 0.0 0.0 0.5       # girar en el lugar
+mjpython rl/jugar.py --ir-a 1 0 1 1 0 1          # va a (1,0), después a (1,1), después a (0,1) y se queda
+mjpython rl/jugar.py --seguir                    # sigue la pelota roja, que da vueltas sola, con la cabeza y el cuerpo
 python3 rl/jugar.py --sin-ventana --segundos 20  # solo imprime cuánto avanzó, cuántas veces se cayó y se levantó
 ```
 
@@ -99,6 +111,7 @@ Alternativas: soltar el torque al caer y pedir ayuda con un "cuac" (barato, es l
 
 ## Si no aprende
 
+- **Gira sobre su eje y se cae de golpe.** Pasó con la segunda recompensa: el premio por seguir el giro pedido era blando (0,5, sigma² 0,2) y la política giraba sin castigo. Ahora pesa 1,0 con sigma² 0,1. Los tumbos de golpe son falta de entrenamiento: a 2,4 M pasos todavía se caía una vez por episodio; la curva seguía subiendo.
 - **Salta en el lugar en vez de caminar.** Pasó en la primera corrida: la recompensa por estar vivo, por "velocidad lateral cero" y por "giro cero" sumaban más quieto que caminando, y el premio al tiempo en el aire valía con los dos pies a la vez. La recompensa actual (`rl/entorno.py`) paga avanzar de forma lineal, solo premia el tiempo en el aire con un pie apoyado y penaliza volar y rebotar. Si vuelve a pasar, subí `avance` o bajá `vivo`.
 
 - Con 2 M pasos ya tiene que mantenerse de pie casi siempre (`rollout/ep_len_mean` cerca del máximo, 750). Si se cae siempre, revisá que el modelo se pare solo y camine con la marcha a mano: `python3 sim/marcha.py` (en el modelo de choques, `pato_sim.xml`) y `python3 rl/jugar.py --sin-ventana` con una política recién inicializada.

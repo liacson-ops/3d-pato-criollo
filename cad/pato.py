@@ -697,6 +697,10 @@ def mjcf(r: Robot, mallas, props, hijos, modo):
         lineas.append(f'{sp}  <inertial pos="{com[0]:.5f} {com[1]:.5f} {com[2]:.5f}" mass="{m:.5f}" '
                       f'fullinertia="{ii[0,0]:.3e} {ii[1,1]:.3e} {ii[2,2]:.3e} {ii[0,1]:.3e} {ii[0,2]:.3e} {ii[1,2]:.3e}"/>')
         geoms(esl, sp)
+        if esl == 'cabeza' and modo == 'cascos':
+            # Cámara de la Pi detrás del lente, mirando hacia adelante (+x de la cabeza). fovy de la cámara v2.
+            cx, cz = (CAB_X[1] - PARED + 1 - X_CUELLO) / 1000.0, (328 - 295) / 1000.0
+            lineas.append(f'{sp}  <camera name="camara" pos="{cx:.4f} 0 {cz:.4f}" xyaxes="0 -1 0 0 0 1" fovy="49"/>')
         for a in hijos[esl]:
             cuerpo(a.hijo, a, sangria + 2)
         lineas.append(f'{sp}</body>')
@@ -730,7 +734,10 @@ def mjcf(r: Robot, mallas, props, hijos, modo):
 {assets}  <worldbody>
     <light pos="0 0 2" dir="0 0 -1" directional="true"/>
     <geom name="suelo" type="plane" size="0 0 0.05" rgba="0.75 0.78 0.8 1" contype="1" conaffinity="1" friction="0.9 0.02 0.01"/>
-{chr(10).join(lineas)}
+{'''    <body name="pelota" mocap="true" pos="1 0 0.03">
+      <geom type="sphere" size="0.03" rgba="0.9 0.2 0.2 1" contype="0" conaffinity="0"/>
+    </body>
+''' if modo == 'cascos' else ''}{chr(10).join(lineas)}
   </worldbody>
 {'''  <contact>
     <!-- Abuelo-nieto: la envolvente convexa de la mandíbula (que es cóncava) roza el soporte del cuello. -->

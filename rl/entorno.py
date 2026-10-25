@@ -256,6 +256,38 @@ class PatoEnv(gym.Env):
         obs = np.concatenate([giro, grav, q, qd * 0.1, self.accion_prev, self.comando])
         return obs.astype(np.float32)
 
+    # ------------------------------------------------------------------ navegación y cámara
+    def posicion(self):
+        """(x, y) del tronco en el mundo, en metros. En el robot real sale de la odometría o de un marcador."""
+        return self.data.xpos[self.tronco][:2].copy()
+
+    def rumbo(self):
+        """Ángulo del frente del tronco en el mundo (rad)."""
+        R = self.data.xmat[self.tronco].reshape(3, 3)
+        return float(math.atan2(R[1, 0], R[0, 0]))
+
+    def pelota(self, pos=None):
+        """Posición del objeto a seguir (cuerpo mocap 'pelota'). Con pos la mueve; devuelve la actual."""
+        i = self.model.body('pelota').mocapid[0]
+        if pos is not None:
+            self.data.mocap_pos[i] = pos
+        return self.data.mocap_pos[i].copy()
+
+    def camara_pixel(self, punto, ancho=640, alto=480):
+        """Proyecta un punto del mundo en la imagen de la cámara de la cabeza: (u, v, distancia) o None si
+        queda fuera del encuadre. Es lo que en el robot real da la detección por color en OpenCV."""
+        cam = self.model.camera('camara').id
+        R = self.data.cam_xmat[cam].reshape(3, 3)
+        p = R.T @ (np.asarray(punto, float) - self.data.cam_xpos[cam])
+        prof = -p[2]
+        if prof <= 0.02:
+            return None
+        f = (alto / 2) / math.tan(math.radians(self.model.cam_fovy[cam]) / 2)
+        u, v = ancho / 2 + f * p[0] / prof, alto / 2 - f * p[1] / prof
+        if not (0 <= u < ancho and 0 <= v < alto):
+            return None
+        return float(u), float(v), float(prof)
+
     def estado_cuerpo(self):
         """(componente vertical del eje z del tronco, altura del tronco): de pie si > 0,6 y > 0,12."""
         R = self.data.xmat[self.tronco].reshape(3, 3)
@@ -322,7 +354,7 @@ class PatoEnv(gym.Env):
             'vel_x': 1.5 * np.exp(-((v_local[0] - cx) ** 2) / 0.05),
             'avance': avance,
             'vel_y': 0.3 * np.exp(-((v_local[1] - self.comando[1]) ** 2) / 0.05),
-            'giro': 0.5 * np.exp(-((w_local[2] - self.comando[2]) ** 2) / 0.2),
+            'giro': 1.0 * np.exp(-((w_local[2] - self.comando[2]) ** 2) / 0.1),   # giraba sobre su eje con 0,5 y sigma² 0,2
             'vivo': 0.2,
             'derecho': 0.5 * arriba,
             'altura': -5.0 * max(0.0, 0.175 - z),

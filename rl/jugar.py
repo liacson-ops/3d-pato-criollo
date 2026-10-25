@@ -8,12 +8,15 @@ levantarse hasta quedar de pie y vuelve a caminar.
   python3 rl/jugar.py --demo                 # cuac mirando arriba, camina, lo tiran, se levanta, sigue
   python3 rl/jugar.py --caido                # arranca en el piso: prueba solo levantarse
   python3 rl/jugar.py --gesto mirar_arriba_y_abrir --comando 0 0 0
+  python3 rl/jugar.py --ir-a 1 0 1 1 0 1          # va de punto en punto (x y x y ...) y se queda
+  python3 rl/jugar.py --seguir                     # sigue la pelota con la cabeza y el cuerpo
   python3 rl/jugar.py --onnx rl/corridas/ultimo_caminar/pato_caminar.onnx
 
 Por defecto usa rl/corridas/ultimo_caminar y rl/corridas/ultimo_levantarse (si existe).
 """
 import argparse
 import json
+import math
 import sys
 import time
 from pathlib import Path
@@ -23,6 +26,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from entorno import PatoEnv, CONTROL_HZ, ESCALA_ACCION  # noqa: E402
 from cabeza import Cabeza, GESTOS  # noqa: E402
+from navegar import Navegador, Seguidor  # noqa: E402
 
 RAIZ = Path(__file__).resolve().parent.parent
 
@@ -98,6 +102,8 @@ def main():
     ap.add_argument('--gesto', choices=sorted(GESTOS), default=None, help='gesto de la cabeza al arrancar')
     ap.add_argument('--demo', action='store_true', help='cuac mirando arriba, camina, empujón, se levanta, sigue')
     ap.add_argument('--caido', action='store_true', help='arranca tirado en el piso')
+    ap.add_argument('--ir-a', type=float, nargs='+', default=None, metavar='XY', help='puntos x y x y ... en metros')
+    ap.add_argument('--seguir', action='store_true', help='sigue la pelota (se mueve sola) con la cámara')
     ap.add_argument('--sin-ventana', action='store_true')
     ap.add_argument('--semilla', type=int, default=0, help='cambia la pose inicial')
     args = ap.parse_args()
@@ -118,6 +124,15 @@ def main():
     if args.demo:
         cabeza.hacer('mirar_arriba_y_abrir', 'mirar_alrededor')
         args.segundos = max(args.segundos, 25.0)
+    navegador = seguidor = None
+    if args.ir_a:
+        if len(args.ir_a) % 2:
+            sys.exit('--ir-a necesita pares x y')
+        navegador = Navegador(list(zip(args.ir_a[::2], args.ir_a[1::2])))
+        args.segundos = max(args.segundos, 10.0 * len(navegador.puntos))
+    if args.seguir:
+        seguidor = Seguidor()
+        args.segundos = max(args.segundos, 30.0)
 
     env = PatoEnv(aleatorizar=False, empujones=False, comando_fijo=args.comando, max_segundos=args.segundos,
                   cabeza_aleatoria=False)
@@ -133,10 +148,26 @@ def main():
         except RuntimeError as e:   # en macOS la ventana solo abre bajo mjpython
             sys.exit(f'{e}\nEn macOS: mjpython rl/jugar.py ... (o usá --sin-ventana)')
     choques = 0
+    centrado = visto = 0
     t0 = time.time()
     while True:
         t = env.paso / CONTROL_HZ
         comando = list(args.comando)
+        if navegador is not None:
+            comando = navegador.comando(env.posicion(), env.rumbo())
+        if seguidor is not None:
+            # La pelota da una vuelta lenta alrededor del origen; el robot tiene que seguirla.
+            ang = 0.25 * t
+            env.pelota([0.9 * math.cos(ang), 0.9 * math.sin(ang), 0.03])
+            det = env.camara_pixel(env.pelota())
+            if det is not None:
+                u, v, prof = det
+                det = (u, v, seguidor.f * 0.03 / prof)
+                visto += 1
+                centrado += abs(u - 320) < 64 and abs(v - 240) < 48
+            yaw_a, pitch_a, _ = env.cabeza_actual()
+            (yaw, pitch, boca), comando = seguidor.paso(det, yaw_a, pitch_a)
+            cabeza.ultimo = (yaw, pitch, boca)
         if args.demo:
             if t < 6.0 or sup.modo == 'levantarse':
                 comando = [0.0, 0.0, 0.0]           # quieto mientras hace el gesto y mientras se levanta
@@ -162,6 +193,13 @@ def main():
     print(f'terminó {estado} a los {env.paso / CONTROL_HZ:.1f} s; avanzó {avance * 100:.0f} cm '
           f'({avance / (env.paso / CONTROL_HZ) * 100:.1f} cm/s); caídas: {sup.caidas}, se levantó: {sup.levantadas}; '
           f'contactos consigo mismo: {choques}')
+    if navegador is not None:
+        print(f'llegó a {navegador.i} de {len(navegador.puntos)} puntos; quedó a '
+              f'{np.linalg.norm(navegador.puntos[-1] - env.posicion()) * 100:.0f} cm del último')
+    if seguidor is not None:
+        n = env.paso
+        print(f'pelota: vista el {100 * visto / n:.0f} % del tiempo, centrada el {100 * centrado / n:.0f} %; '
+              f'distancia final {np.linalg.norm(env.pelota()[:2] - env.posicion()) * 100:.0f} cm')
     if visor is not None:
         visor.close()
 
