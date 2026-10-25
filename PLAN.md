@@ -15,7 +15,7 @@ Una versión del XGO-Duck (nombre provisorio) **hecha con piezas de MercadoLibre
   - orejas de servo cortadas donde chocan;
   - cuello de 2 articulaciones;
   - cámara en la frente;
-  - masa estimada **1,18 kg**.
+  - masa estimada **1,22 kg** (cabeza al estilo del original: cúpula, ojo amarillo y pico ancho que abre como tapa).
 - **Torques del modelo nuevo (MuJoCo):** parado, el tobillo usa el 18 % del máximo del MG996R. En el peor caso (una pata, sin desplazar el cuerpo), la **cadera roll llega al 40 %**. Es la articulación a vigilar en la fase 0 y en el entrenamiento.
 
 ---
