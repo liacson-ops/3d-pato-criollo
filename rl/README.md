@@ -7,7 +7,7 @@ Tres cosas, y solo dos se entrenan:
 | Qué | Cómo | Dónde |
 | --- | --- | --- |
 | **Caminar** | política entrenada (`--modo caminar`), sigue un comando de velocidad y giro | `rl/entorno.py` |
-| **Levantarse si se cae** | segunda política (`--modo levantarse`), arranca tirado de espaldas, de frente o de costado | `rl/entorno.py` |
+| **Levantarse si se cae** | segunda política (`--modo levantarse`), arranca tirado de espaldas, de frente o de costado. **Con la mecánica actual no lo logra** (ver abajo) | `rl/entorno.py` |
 | **Mirar arriba y abrir la boca** (y otros gestos) | programado, no se entrena: trayectorias suaves de los tres MG90S de la cabeza, dentro de la envolvente boca/pitch | `rl/cabeza.py` |
 
 Las junta un **supervisor** (`rl/jugar.py`, clase `Supervisor`, la misma lógica que va a correr en la Pi): camina con la política de marcha; si el tronco se inclina más de 53° o baja de 12 cm, pasa a la política de levantarse; cuando lleva medio segundo de pie, vuelve a caminar. Los gestos de la cabeza corren en paralelo mientras camina. La marcha se entrena con la cabeza moviéndose al azar en la mitad de los episodios, para que seguir caminando con la cabeza girada o el pico abierto no la sorprenda.
@@ -87,6 +87,15 @@ Cada ONNX recibe la observación de 39 valores sin normalizar (la normalización
 | Comando | velocidad adelante (−0,05 a 0,25 m/s), lateral (±0,1) y giro (±0,6 rad/s); 15 % del tiempo quieto |
 
 Lo que todavía no está: terreno con escalones y obstáculos (hay que agregar un campo de alturas en `pato_rl.xml`) y el modelo del servo medido en el banco de la fase 0 (reemplaza los actuadores de posición por el modelo de BAM).
+
+## Levantarse: lo que dio y por qué
+
+Entrenada 1 M pasos, la política de levantarse no se paró ni una vez; la recompensa se estancó a los 400 k. Para descartar un problema de aprendizaje se probaron 400 trayectorias al azar desde cada pose caída: ninguna lo para, y lo más derecho que llega es a 56° de la vertical. Es un límite del diseño:
+
+- de costado no hay fuerza lateral: la cadera roll gira 0,25 rad hacia afuera y 0,09 hacia adentro, así que no puede rodar hasta los pies;
+- de frente o de espaldas, las patas (6,4 cm) levantan la cadera 6 cm y el cuerpo con la cabeza mide más de 20: no alcanza para pivotar.
+
+Alternativas: soltar el torque al caer y pedir ayuda con un "cuac" (barato, es lo que hacen los robots de juguete), o agregar dos alas con MG90S que empujen contra el piso para rodar hasta los pies (cambio de diseño, después reentrenar). Hasta decidirlo, el supervisor se queda quieto si no hay política de levantarse, y el modo `levantarse` queda para cuando el diseño lo permita.
 
 ## Si no aprende
 
