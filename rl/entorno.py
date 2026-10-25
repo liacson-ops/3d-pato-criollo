@@ -1,11 +1,18 @@
-"""Entorno Gymnasium del Pato Criollo para aprender a caminar (MuJoCo, CPU).
+"""Entorno Gymnasium del Pato Criollo (MuJoCo, CPU). Dos modos:
+
+  caminar      seguir un comando de velocidad [vx, vy, giro] sin caerse (política principal);
+  levantarse   arrancar caído (de espaldas, de frente o de costado) y volver a quedar de pie.
 
 Observación (39 valores, parecida a la del XGO-Duck para poder reusar su runtime):
   giro del tronco (3), gravedad en el tronco (3), posición de las 10 articulaciones
   de las patas respecto de la pose de parado (10), velocidad (10), acción anterior (10),
-  comando [vx, vy, giro] (3).
-Acción (10): desplazamiento objetivo de cada articulación de las patas, en radianes,
-sobre la pose de parado. El cuello y la boca se mantienen en 0.
+  comando [vx, vy, giro] (3; en modo levantarse va en 0).
+Acción (10): desplazamiento objetivo de cada articulación de las patas, en radianes, sobre la
+pose de parado: objetivo = parado + escala × acción (escala 0,5 rad caminando, 0,8 levantándose).
+
+La cabeza (cuello yaw, cuello pitch, boca) no la maneja la política: es un gesto programado
+(rl/cabeza.py). Al entrenar la marcha, la cabeza se mueve al azar en parte de los episodios para
+que caminar siga estable cuando mira arriba o gira: son 150 g en lo más alto del robot.
 
 Incluye lo que hace falta para que lo aprendido sirva en el robot real:
   - choques consigo mismo (pato_rl.xml: envolventes convexas de cada pieza) y con el piso;
@@ -16,6 +23,8 @@ Incluye lo que hace falta para que lo aprendido sirva en el robot real:
 from __future__ import annotations
 
 import collections
+import json
+import math
 from pathlib import Path
 
 import gymnasium as gym
@@ -27,29 +36,60 @@ XML = RAIZ / 'salida' / 'mjcf' / 'pato_rl.xml'
 
 PATAS = ['cadera_yaw', 'cadera_roll', 'cadera_pitch', 'rodilla', 'tobillo']
 ARTICULACIONES = [f'{a}_{lado}' for lado in ('izq', 'der') for a in PATAS]
+CABEZA = ['cuello_yaw', 'cuello_pitch', 'boca']
 PARADO = {'cadera_pitch': -0.35, 'rodilla': 0.70, 'tobillo': -0.35}
 CONTROL_HZ = 50
 OBS_DIM = 39
 ACT_DIM = 10
+MODOS = ('caminar', 'levantarse')
+ESCALA_ACCION = {'caminar': 0.5, 'levantarse': 0.8}
+Z_TRONCO_PARADO = 0.185     # altura del origen del tronco con las rodillas a 40°
+
+
+def _boca_max_tabla():
+    try:
+        datos = json.loads((RAIZ / 'salida' / 'robot.json').read_text())
+        return [tuple(x) for x in datos['envolventes']['boca_max_por_cuello_pitch']]
+    except (OSError, KeyError, ValueError):
+        return [(0.0, 0.3), (0.45, 0.15), (0.6, 0.0)]
+
+
+BOCA_MAX = _boca_max_tabla()
+
+
+def boca_max(cuello_pitch):
+    """Cuánto puede abrir la boca según cuánto mira abajo (misma regla que cad/pato.py)."""
+    for pitch, boca in BOCA_MAX:
+        if cuello_pitch <= pitch + 1e-9:
+            return boca
+    return 0.0
 
 
 class PatoEnv(gym.Env):
     metadata = {'render_modes': ['rgb_array'], 'render_fps': CONTROL_HZ}
 
-    def __init__(self, xml=XML, max_segundos=15.0, aleatorizar=True, empujones=True,
-                 comando_fijo=None, render_mode=None, semilla=None):
+    def __init__(self, xml=XML, modo='caminar', max_segundos=None, aleatorizar=True, empujones=True,
+                 comando_fijo=None, cabeza_aleatoria=True, render_mode=None, semilla=None):
         super().__init__()
+        assert modo in MODOS, modo
+        self.modo = modo
         self.model = mujoco.MjModel.from_xml_path(str(xml))
         self.data = mujoco.MjData(self.model)
         self.render_mode = render_mode
         self.aleatorizar, self.empujones, self.comando_fijo = aleatorizar, empujones, comando_fijo
+        self.cabeza_aleatoria = cabeza_aleatoria and modo == 'caminar'
         self.sub = int(round(1.0 / (CONTROL_HZ * self.model.opt.timestep)))
+        if max_segundos is None:
+            max_segundos = 15.0 if modo == 'caminar' else 6.0
         self.max_pasos = int(max_segundos * CONTROL_HZ)
         self.rng = np.random.default_rng(semilla)
         self.act_id = np.array([self.model.actuator(n).id for n in ARTICULACIONES])
         self.jnt_qpos = np.array([self.model.jnt_qposadr[self.model.joint(n).id] for n in ARTICULACIONES])
         self.jnt_qvel = np.array([self.model.jnt_dofadr[self.model.joint(n).id] for n in ARTICULACIONES])
         self.rango = np.array([self.model.jnt_range[self.model.joint(n).id] for n in ARTICULACIONES])
+        self.cab_act = np.array([self.model.actuator(n).id for n in CABEZA])
+        self.cab_qpos = np.array([self.model.jnt_qposadr[self.model.joint(n).id] for n in CABEZA])
+        self.cab_rango = np.array([self.model.jnt_range[self.model.joint(n).id] for n in CABEZA])
         self.parado = np.array([PARADO.get(n.rsplit('_', 1)[0], 0.0) for n in ARTICULACIONES])
         self.tronco = self.model.body('tronco').id
         self.pies = [self.model.body(f'pie_{l}').id for l in ('izq', 'der')]
@@ -59,8 +99,9 @@ class PatoEnv(gym.Env):
                             fric=self.model.geom_friction.copy())
         self.observation_space = gym.spaces.Box(-np.inf, np.inf, (OBS_DIM,), np.float32)
         self.action_space = gym.spaces.Box(-1.0, 1.0, (ACT_DIM,), np.float32)
-        self.escala_accion = 0.5          # rad por unidad de acción
+        self.escala_accion = ESCALA_ACCION[modo]
         self.renderer = None
+        self.caida_inicial = None
         self._reset_estado()
 
     # ------------------------------------------------------------------ utilidades
@@ -71,6 +112,9 @@ class PatoEnv(gym.Env):
         self.retardo = 0
         self.comando = np.zeros(3)
         self.tiempo_aire = np.zeros(2)
+        self.pasos_de_pie = 0
+        self.cabeza_plan = None          # (yaw, pitch, boca, frecuencia) o None: cabeza quieta
+        self.cabeza_objetivo = np.zeros(3)
 
     def _aleatorizar(self):
         m, n, r = self.model, self.nominal, self.rng
@@ -87,15 +131,39 @@ class PatoEnv(gym.Env):
         m.geom_friction[:, 0] = n['fric'][:, 0] * r.uniform(0.6, 1.4)
         self.retardo = int(r.integers(0, 3))          # 0–2 ciclos de control (0–40 ms)
 
-    def _obs(self):
-        d = self.data
-        R = d.xmat[self.tronco].reshape(3, 3)
-        giro = R.T @ d.cvel[self.tronco][:3]          # velocidad angular en el marco del tronco
-        grav = R.T @ np.array([0, 0, -1.0])
-        q = d.qpos[self.jnt_qpos] - self.parado
-        qd = d.qvel[self.jnt_qvel]
-        obs = np.concatenate([giro, grav, q, qd * 0.1, self.accion_prev, self.comando])
-        return obs.astype(np.float32)
+    def fijar_cabeza(self, yaw, pitch, boca):
+        """Objetivo de los servos de la cabeza, dentro de los topes y de la envolvente boca/pitch."""
+        yaw = float(np.clip(yaw, *self.cab_rango[0]))
+        pitch = float(np.clip(pitch, *self.cab_rango[1]))
+        boca = float(np.clip(boca, 0.0, min(self.cab_rango[2][1], boca_max(pitch))))
+        self.cabeza_objetivo[:] = (yaw, pitch, boca)
+        self.data.ctrl[self.cab_act] = self.cabeza_objetivo
+
+    def cabeza_actual(self):
+        return self.data.qpos[self.cab_qpos].copy()
+
+    def _plan_cabeza(self):
+        """Al entrenar la marcha: la mitad de los episodios con la cabeza quieta, un cuarto en una pose
+        fija al azar y un cuarto moviéndose despacio (mirar alrededor, abrir la boca)."""
+        self.cabeza_plan = None
+        if not self.cabeza_aleatoria:
+            self.fijar_cabeza(0, 0, 0)
+            return
+        u = self.rng.random()
+        r = self.rng
+        if u < 0.5:
+            self.fijar_cabeza(0, 0, 0)
+        elif u < 0.75:
+            self.fijar_cabeza(r.uniform(-1.5, 1.5), r.uniform(-0.5, 0.6), r.uniform(0, 0.3))
+        else:
+            self.cabeza_plan = (r.uniform(0.3, 1.5), r.uniform(0.2, 0.55), r.uniform(0, 0.3), r.uniform(0.2, 0.7))
+
+    def _mover_cabeza(self, t):
+        if self.cabeza_plan is None:
+            return
+        ay, ap, ab, f = self.cabeza_plan
+        fase = 2 * math.pi * f * t
+        self.fijar_cabeza(ay * math.sin(fase), ap * math.sin(0.7 * fase), ab * (0.5 + 0.5 * math.sin(1.3 * fase)))
 
     def _contactos_propios(self):
         n = 0
@@ -115,6 +183,45 @@ class PatoEnv(gym.Env):
                     apoyo[self.pies.index(b)] = True
         return apoyo
 
+    def _apoyar_en_el_piso(self, margen=0.002):
+        mujoco.mj_forward(self.model, self.data)
+        zmin = min(self.data.geom_xpos[g][2] - self.model.geom_rbound[g] for g in range(self.model.ngeom)
+                   if self.model.geom_contype[g] and g != self.suelo)
+        self.data.qpos[2] -= zmin - margen
+        mujoco.mj_forward(self.model, self.data)
+
+    def _reset_parado(self):
+        mujoco.mj_resetDataKeyframe(self.model, self.data, 0)
+        self.data.qpos[self.jnt_qpos] = self.parado + self.rng.uniform(-0.05, 0.05, ACT_DIM)
+        self.data.ctrl[self.act_id] = self.data.qpos[self.jnt_qpos]
+        self._apoyar_en_el_piso()
+
+    def _reset_caido(self):
+        """Lo tira al piso: de espaldas, de frente o de costado, con las patas en cualquier ángulo,
+        y deja que se asiente medio segundo con los servos sosteniendo esa pose."""
+        m, d, r = self.model, self.data, self.rng
+        mujoco.mj_resetDataKeyframe(m, d, 0)
+        q = r.uniform(self.rango[:, 0], self.rango[:, 1])
+        d.qpos[self.jnt_qpos] = q
+        d.ctrl[self.act_id] = q
+        self.fijar_cabeza(0, r.uniform(-0.3, 0.3), 0)
+        lado = r.choice(['espaldas', 'frente', 'costado_izq', 'costado_der'])
+        eje, ang = {'espaldas': ((1, 0, 0), math.pi), 'frente': ((0, 1, 0), math.pi / 2),
+                    'costado_izq': ((1, 0, 0), math.pi / 2), 'costado_der': ((1, 0, 0), -math.pi / 2)}[lado]
+        ang += r.uniform(-0.4, 0.4)
+        quat = np.zeros(4)
+        mujoco.mju_axisAngle2Quat(quat, np.array(eje, float), ang)
+        giro = np.zeros(4)
+        mujoco.mju_axisAngle2Quat(giro, np.array([0, 0, 1.0]), r.uniform(-math.pi, math.pi))
+        qf = np.zeros(4)
+        mujoco.mju_mulQuat(qf, giro, quat)
+        d.qpos[3:7] = qf
+        self._apoyar_en_el_piso(margen=0.03)
+        d.qvel[:] = 0
+        for _ in range(int(0.5 * CONTROL_HZ) * self.sub):
+            mujoco.mj_step(m, d)
+        self.caida_inicial = lado
+
     # ------------------------------------------------------------------ gym
     def reset(self, *, seed=None, options=None):
         super().reset(seed=seed)
@@ -122,15 +229,15 @@ class PatoEnv(gym.Env):
             self.rng = np.random.default_rng(seed)
         self._reset_estado()
         self._aleatorizar()
-        mujoco.mj_resetDataKeyframe(self.model, self.data, 0)
-        self.data.qpos[self.jnt_qpos] = self.parado + self.rng.uniform(-0.05, 0.05, ACT_DIM)
-        self.data.ctrl[self.act_id] = self.data.qpos[self.jnt_qpos]
-        mujoco.mj_forward(self.model, self.data)
-        zmin = min(self.data.geom_xpos[g][2] - self.model.geom_rbound[g] for g in range(self.model.ngeom)
-                   if self.model.geom_contype[g] and g != self.suelo)
-        self.data.qpos[2] -= zmin - 0.002
-        mujoco.mj_forward(self.model, self.data)
-        if self.comando_fijo is not None:
+        caido = (options or {}).get('caido', self.modo == 'levantarse')
+        if caido:
+            self._reset_caido()
+        else:
+            self._reset_parado()
+            self._plan_cabeza()
+        if self.modo == 'levantarse':
+            self.comando[:] = 0.0
+        elif self.comando_fijo is not None:
             self.comando = np.array(self.comando_fijo, float)
         else:
             self.comando = np.array([self.rng.uniform(-0.05, 0.25), self.rng.uniform(-0.1, 0.1),
@@ -139,13 +246,29 @@ class PatoEnv(gym.Env):
                 self.comando[:] = 0.0                    # también tiene que saber quedarse quieto
         return self._obs(), {}
 
+    def _obs(self):
+        d = self.data
+        R = d.xmat[self.tronco].reshape(3, 3)
+        giro = R.T @ d.cvel[self.tronco][:3]          # velocidad angular en el marco del tronco
+        grav = R.T @ np.array([0, 0, -1.0])
+        q = d.qpos[self.jnt_qpos] - self.parado
+        qd = d.qvel[self.jnt_qvel]
+        obs = np.concatenate([giro, grav, q, qd * 0.1, self.accion_prev, self.comando])
+        return obs.astype(np.float32)
+
+    def estado_cuerpo(self):
+        """(componente vertical del eje z del tronco, altura del tronco): de pie si > 0,6 y > 0,12."""
+        R = self.data.xmat[self.tronco].reshape(3, 3)
+        return float(R[2, 2]), float(self.data.xpos[self.tronco][2])
+
     def step(self, accion):
         accion = np.clip(np.asarray(accion, float), -1, 1)
         self.cola.append(accion)
         aplicada = self.cola[max(0, len(self.cola) - 1 - self.retardo)]
         objetivo = np.clip(self.parado + self.escala_accion * aplicada, self.rango[:, 0], self.rango[:, 1])
         self.data.ctrl[self.act_id] = objetivo
-        if self.empujones and self.rng.random() < 0.01:
+        self._mover_cabeza(self.paso / CONTROL_HZ)
+        if self.empujones and self.modo == 'caminar' and self.rng.random() < 0.01:
             self.data.xfrc_applied[self.tronco, :2] = self.rng.uniform(-6, 6, 2)
         for _ in range(self.sub):
             mujoco.mj_step(self.model, self.data)
@@ -163,19 +286,41 @@ class PatoEnv(gym.Env):
         apoyo = self._pie_apoyado()
         self.tiempo_aire = np.where(apoyo, 0.0, self.tiempo_aire + 1.0 / CONTROL_HZ)
         torque = d.actuator_force[self.act_id] / np.abs(self.model.actuator_forcerange[self.act_id, 1])
+        q_rel = d.qpos[self.jnt_qpos] - self.parado
+        de_pie = arriba > 0.9 and z > 0.16
+        self.pasos_de_pie = self.pasos_de_pie + 1 if de_pie else 0
 
-        # Recompensa: seguir el comando, mantenerse derecho y gastar poco.
+        if self.modo == 'caminar':
+            r, terminado = self._recompensa_caminar(v_local, w_local, arriba, z, accion, torque, propios, apoyo)
+            if cayo:
+                r['caida'] = -10.0
+                terminado = True
+        else:
+            r, terminado = self._recompensa_levantarse(arriba, z, accion, torque, propios, q_rel, apoyo)
+        recompensa = float(sum(r.values()))
+        self.accion_prev = accion
+        obs = self._obs()
+        truncado = self.paso >= self.max_pasos
+        info = {'recompensas': r, 'cayo': bool(cayo), 'de_pie': bool(de_pie), 'v_x': float(v_local[0]),
+                'choques_propios': propios}
+        return obs, recompensa, bool(terminado), bool(truncado), info
+
+    def _recompensa_caminar(self, v_local, w_local, arriba, z, accion, torque, propios, apoyo):
         # Lección de la primera corrida: con un bono por estar vivo alto, un seguimiento de velocidad
         # muy estrecho y un premio al tiempo en el aire que valía con los dos pies a la vez, la política
         # aprendió a saltar en el lugar. Ahora avanzar paga de forma lineal, el tiempo en el aire solo
         # cuenta con un pie apoyado y volar o rebotar se penaliza.
         con_comando = np.linalg.norm(self.comando) > 0.05
         un_pie_en_aire = sum(apoyo) == 1
-        vz = float(d.cvel[self.tronco][5])
+        vz = float(self.data.cvel[self.tronco][5])
+        cx = self.comando[0]
+        if abs(cx) > 0.05:
+            avance = 2.0 * float(np.clip(v_local[0] / abs(cx), -1, 1)) * np.sign(cx)
+        else:
+            avance = -1.0 * abs(float(v_local[0]))
         r = {
-            'vel_x': 1.5 * np.exp(-((v_local[0] - self.comando[0]) ** 2) / 0.05),
-            'avance': 2.0 * float(np.clip(v_local[0] / max(abs(self.comando[0]), 0.05), -1, 1)) * np.sign(self.comando[0])
-                      if abs(self.comando[0]) > 0.05 else -1.0 * abs(float(v_local[0])),
+            'vel_x': 1.5 * np.exp(-((v_local[0] - cx) ** 2) / 0.05),
+            'avance': avance,
             'vel_y': 0.3 * np.exp(-((v_local[1] - self.comando[1]) ** 2) / 0.05),
             'giro': 0.5 * np.exp(-((w_local[2] - self.comando[2]) ** 2) / 0.2),
             'vivo': 0.2,
@@ -189,14 +334,24 @@ class PatoEnv(gym.Env):
             'choque_propio': -0.5 * propios,
             'pies_aire': 0.3 * float(np.sum(np.clip(self.tiempo_aire, 0, 0.3))) if (con_comando and un_pie_en_aire) else 0.0,
         }
-        recompensa = float(sum(r.values()))
-        if cayo:
-            recompensa -= 10.0
-        self.accion_prev = accion
-        obs = self._obs()
-        truncado = self.paso >= self.max_pasos
-        info = {'recompensas': r, 'cayo': cayo, 'v_x': float(v_local[0]), 'choques_propios': propios}
-        return obs, recompensa, bool(cayo), bool(truncado), info
+        return r, False
+
+    def _recompensa_levantarse(self, arriba, z, accion, torque, propios, q_rel, apoyo):
+        # Enderezarse y subir pagan siempre; la postura de parado solo cuando ya está casi derecho.
+        # Medio segundo de pie termina el episodio con un bono grande: cuanto antes, mejor.
+        logrado = self.pasos_de_pie >= CONTROL_HZ // 2
+        r = {
+            'derecho': 1.0 * arriba,
+            'altura': 2.0 * float(np.clip(z / Z_TRONCO_PARADO, 0, 1)),
+            'postura': 1.0 * float(np.exp(-np.sum(q_rel ** 2) / 2.0)) if arriba > 0.8 else 0.0,
+            'pies': 0.3 * sum(apoyo) if arriba > 0.8 else 0.0,
+            'tiempo': -0.1,
+            'accion': -0.02 * float(np.sum((accion - self.accion_prev) ** 2)),
+            'torque': -0.02 * float(np.sum(torque ** 2)),
+            'choque_propio': -0.2 * propios,
+            'logrado': 20.0 if logrado else 0.0,
+        }
+        return r, logrado
 
     def render(self):
         if self.renderer is None:

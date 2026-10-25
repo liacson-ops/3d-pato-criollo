@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""Corre una política entrenada en el simulador y muestra qué tan bien camina.
+"""Corre las políticas entrenadas en el simulador, con el supervisor que usa el robot:
+camina con la política de marcha, hace gestos con la cabeza y, si se cae, pasa a la política de
+levantarse hasta quedar de pie y vuelve a caminar.
 
-  python3 rl/jugar.py                           # última corrida, ventana de MuJoCo
-  python3 rl/jugar.py rl/corridas/<fecha> --sin-ventana --segundos 20
-  python3 rl/jugar.py --onnx rl/corridas/ultimo/pato_marcha.onnx   # prueba el ONNX exportado
+  mjpython rl/jugar.py                       # ventana de MuJoCo (en Mac mjpython; en Linux python3)
+  python3 rl/jugar.py --sin-ventana --segundos 20
+  python3 rl/jugar.py --demo                 # cuac mirando arriba, camina, lo tiran, se levanta, sigue
+  python3 rl/jugar.py --caido                # arranca en el piso: prueba solo levantarse
+  python3 rl/jugar.py --gesto mirar_arriba_y_abrir --comando 0 0 0
+  python3 rl/jugar.py --onnx rl/corridas/ultimo_caminar/pato_caminar.onnx
+
+Por defecto usa rl/corridas/ultimo_caminar y rl/corridas/ultimo_levantarse (si existe).
 """
 import argparse
+import json
 import sys
 import time
 from pathlib import Path
@@ -13,35 +21,105 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from entorno import PatoEnv  # noqa: E402
+from entorno import PatoEnv, CONTROL_HZ, ESCALA_ACCION  # noqa: E402
+from cabeza import Cabeza, GESTOS  # noqa: E402
+
+RAIZ = Path(__file__).resolve().parent.parent
 
 
-def cargar(args):
-    if args.onnx:
+def cargar_politica(corrida=None, onnx=None):
+    """Devuelve (politica(obs) -> accion, escala_accion) o None si no hay nada que cargar."""
+    if onnx:
         import onnxruntime as ort
-        s = ort.InferenceSession(args.onnx, providers=['CPUExecutionProvider'])
-        return lambda obs: s.run(None, {'obs': obs[None].astype(np.float32)})[0][0]
+        s = ort.InferenceSession(str(onnx), providers=['CPUExecutionProvider'])
+        config = Path(onnx).parent / 'config.json'
+        escala = json.loads(config.read_text()).get('escala_accion', 0.5) if config.exists() else 0.5
+        return (lambda obs: s.run(None, {'obs': obs[None].astype(np.float32)})[0][0]), escala
+    corrida = Path(corrida)
+    if not (corrida / 'modelo.zip').exists():
+        return None
     from stable_baselines3 import PPO
     from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
-    corrida = Path(args.corrida).resolve()
     modelo = PPO.load(str(corrida / 'modelo.zip'), device='cpu')
     venv = VecNormalize.load(str(corrida / 'normalizacion.pkl'), DummyVecEnv([lambda: PatoEnv(aleatorizar=False)]))
     venv.training = False
-    return lambda obs: modelo.predict(venv.normalize_obs(obs), deterministic=True)[0]
+    config = corrida / 'config.json'
+    escala = json.loads(config.read_text()).get('escala_accion', 0.5) if config.exists() else 0.5
+    return (lambda obs: modelo.predict(venv.normalize_obs(obs), deterministic=True)[0]), escala
+
+
+class Supervisor:
+    """Elige qué política manda en cada ciclo: caminar, o levantarse si se cayó.
+    Es la misma lógica que va a correr en la Pi."""
+
+    def __init__(self, caminar, levantarse=None):
+        self.caminar, self.levantarse = caminar, levantarse
+        self.modo = 'caminar'
+        self.de_pie_desde = 0
+        self.caidas = self.levantadas = 0
+
+    def accion(self, env, obs):
+        arriba, z = env.estado_cuerpo()
+        if self.modo == 'caminar' and (arriba < 0.6 or z < 0.12):
+            self.caidas += 1
+            self.modo = 'levantarse'
+            self.de_pie_desde = 0
+        if self.modo == 'levantarse':
+            if arriba > 0.9 and z > 0.16:
+                self.de_pie_desde += 1
+                if self.de_pie_desde >= CONTROL_HZ // 2:      # medio segundo de pie: vuelve a caminar
+                    self.levantadas += 1
+                    self.modo = 'caminar'
+            else:
+                self.de_pie_desde = 0
+        if self.modo == 'levantarse':
+            if self.levantarse is None:
+                env.escala_accion = ESCALA_ACCION['caminar']
+                return np.zeros(10)                      # sin política de levantarse: se queda quieto
+            politica, escala = self.levantarse
+        else:
+            politica, escala = self.caminar
+        env.escala_accion = escala
+        return politica(obs)
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('corrida', nargs='?', default='rl/corridas/ultimo')
-    ap.add_argument('--onnx', default=None)
+    ap.add_argument('corrida', nargs='?', default=None, help='corrida de caminar (por defecto ultimo_caminar)')
+    ap.add_argument('--levantarse', default=None, help='corrida de levantarse (por defecto ultimo_levantarse)')
+    ap.add_argument('--onnx', default=None, help='ONNX de caminar en vez de la corrida')
+    ap.add_argument('--onnx-levantarse', default=None)
     ap.add_argument('--segundos', type=float, default=15.0)
     ap.add_argument('--comando', type=float, nargs=3, default=[0.2, 0.0, 0.0], metavar=('VX', 'VY', 'GIRO'))
+    ap.add_argument('--gesto', choices=sorted(GESTOS), default=None, help='gesto de la cabeza al arrancar')
+    ap.add_argument('--demo', action='store_true', help='cuac mirando arriba, camina, empujón, se levanta, sigue')
+    ap.add_argument('--caido', action='store_true', help='arranca tirado en el piso')
     ap.add_argument('--sin-ventana', action='store_true')
-    ap.add_argument('--semilla', type=int, default=0, help='cambia la pose inicial (±0,05 rad en cada servo)')
+    ap.add_argument('--semilla', type=int, default=0, help='cambia la pose inicial')
     args = ap.parse_args()
-    politica = cargar(args)
-    env = PatoEnv(aleatorizar=False, empujones=False, comando_fijo=args.comando, max_segundos=args.segundos)
-    obs, _ = env.reset(seed=args.semilla)
+
+    corridas = RAIZ / 'rl' / 'corridas'
+    caminar = cargar_politica(args.corrida or corridas / 'ultimo_caminar', args.onnx)
+    if caminar is None and not args.onnx:
+        caminar = cargar_politica(corridas / 'ultimo')
+    if caminar is None:
+        sys.exit('no hay política de caminar: entrená con python3 rl/entrenar.py')
+    levantarse = cargar_politica(args.levantarse or corridas / 'ultimo_levantarse', args.onnx_levantarse)
+    if levantarse is None:
+        print('sin política de levantarse (python3 rl/entrenar.py --modo levantarse): si se cae, se queda')
+    sup = Supervisor(caminar, levantarse)
+    cabeza = Cabeza()
+    if args.gesto:
+        cabeza.hacer(args.gesto)
+    if args.demo:
+        cabeza.hacer('mirar_arriba_y_abrir', 'mirar_alrededor')
+        args.segundos = max(args.segundos, 25.0)
+
+    env = PatoEnv(aleatorizar=False, empujones=False, comando_fijo=args.comando, max_segundos=args.segundos,
+                  cabeza_aleatoria=False)
+    obs, _ = env.reset(seed=args.semilla, options={'caido': args.caido})
+    if args.caido:
+        sup.modo, sup.caidas = 'levantarse', 1
     x0 = env.data.xpos[env.tronco][0]
     visor = None
     if not args.sin_ventana:
@@ -53,16 +131,32 @@ def main():
     choques = 0
     t0 = time.time()
     while True:
-        obs, r, fin, trunc, info = env.step(politica(obs))
+        t = env.paso / CONTROL_HZ
+        comando = list(args.comando)
+        if args.demo:
+            if t < 6.0 or sup.modo == 'levantarse':
+                comando = [0.0, 0.0, 0.0]           # quieto mientras hace el gesto y mientras se levanta
+            if 12.0 <= t < 12.2:
+                env.data.xfrc_applied[env.tronco, :3] = [25.0, 0.0, 0.0]   # lo tiran
+            elif t >= 12.2:
+                env.data.xfrc_applied[env.tronco] = 0
+        env.comando[:] = comando
+        if sup.modo == 'caminar' and not args.caido:
+            env.fijar_cabeza(*cabeza.objetivo(t))
+        else:
+            env.fijar_cabeza(0.0, 0.0, 0.0)
+        obs, r, fin, trunc, info = env.step(sup.accion(env, obs))
         choques += info['choques_propios']
         if visor is not None:
             visor.sync()
-            time.sleep(max(0, env.paso / 50 - (time.time() - t0)))
-        if fin or trunc:
+            time.sleep(max(0, env.paso / CONTROL_HZ - (time.time() - t0)))
+        if trunc or (fin and env.modo == 'caminar' and sup.levantarse is None):
             break
     avance = env.data.xpos[env.tronco][0] - x0
-    print(f"{'SE CAYÓ' if info['cayo'] else 'terminó de pie'} a los {env.paso / 50:.1f} s; "
-          f'avanzó {avance * 100:.0f} cm ({avance / (env.paso / 50) * 100:.1f} cm/s); '
+    arriba, z = env.estado_cuerpo()
+    estado = 'de pie' if arriba > 0.6 and z > 0.12 else 'EN EL PISO'
+    print(f'terminó {estado} a los {env.paso / CONTROL_HZ:.1f} s; avanzó {avance * 100:.0f} cm '
+          f'({avance / (env.paso / CONTROL_HZ) * 100:.1f} cm/s); caídas: {sup.caidas}, se levantó: {sup.levantadas}; '
           f'contactos consigo mismo: {choques}')
     if visor is not None:
         visor.close()

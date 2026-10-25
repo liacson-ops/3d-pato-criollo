@@ -107,7 +107,7 @@ cad/pato.py               el robot completo: piezas, eslabones, articulaciones, 
 cad/choques.py            prueba de que ninguna pieza se cruza con otra en 72 poses (reposo, marcha, topes)
 sim/torques.py            torques estáticos en MuJoCo contra el torque máximo de cada servo
 sim/marcha.py             marcha programada a mano y barrido de parámetros (MuJoCo, Python)
-rl/                       entrenamiento por refuerzo en la Mac (PPO sobre MuJoCo) y exportación a ONNX, ver rl/README.md
+rl/                       entrenamiento en la Mac: caminar y levantarse (PPO sobre MuJoCo), gestos de la cabeza, supervisor, ONNX; ver rl/README.md
 visor/                    visor 3D y simulador (three.js + MuJoCo WASM), capturas y pruebas automáticas
 salida/simulador.html     simulador físico autocontenido (16 MB, se abre con doble clic)
 salida/pato.html          visor autocontenido (se abre con doble clic)
@@ -142,7 +142,7 @@ Todo sale de `cad/pato.py`. Si cambiás una medida, como el largo del muslo o el
 - [x] Modelo 3D v0 con componentes reales, sin choques entre piezas (verificado por intersección de mallas)
 - [x] Simulación de torques estáticos
 - [x] Simulador en el navegador: se para, camina con marcha a mano, aguanta empujones
-- [x] Entorno de entrenamiento para la Mac ([`rl/`](rl/README.md)): choques consigo mismo, variaciones aleatorias, PPO en CPU, exportación a ONNX
+- [x] Entorno de entrenamiento para la Mac ([`rl/`](rl/README.md)): caminar y levantarse del piso (dos políticas PPO en CPU), gestos de la cabeza programados, supervisor que las junta, exportación a ONNX
 - [ ] **Fase 0:** banco de pruebas de servos (soporte imprimible y scripts de medición para la Pi 4), [lista de compras](COMPRAS-FASE0.md)
 - [ ] v1: piezas para imprimir con las medidas reales de los servos: agujeros, tornillería M3, tolerancias
 - [ ] Entrenar la primera política de marcha en la Mac y probarla en el simulador; después reentrenar con el modelo identificado del servo

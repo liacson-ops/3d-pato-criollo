@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """Exporta la política entrenada a ONNX, con la normalización de observaciones adentro.
 
-  python3 rl/exportar_onnx.py rl/corridas/ultimo        # escribe rl/corridas/<corrida>/pato_marcha.onnx
+  python3 rl/exportar_onnx.py rl/corridas/ultimo_caminar      # escribe pato_caminar.onnx en la corrida
+  python3 rl/exportar_onnx.py rl/corridas/ultimo_levantarse   # escribe pato_levantarse.onnx
 
 Entrada:  obs [1, 39] (sin normalizar; ver rl/entorno.py)
-Salida:   accion [1, 10] en [-1, 1]; objetivo = parado + 0,5 rad × accion
+Salida:   accion [1, 10] en [-1, 1]; objetivo = parado + escala × accion, con la escala de config.json
+          (0,5 rad caminando, 0,8 levantándose)
 El archivo corre en la Raspberry Pi Zero 2 W con onnxruntime, como las políticas del XGO-Duck.
 """
+import json
 import sys
 from pathlib import Path
 
@@ -44,7 +47,9 @@ def main():
     venv = VecNormalize.load(str(corrida / 'normalizacion.pkl'), DummyVecEnv([lambda: PatoEnv(aleatorizar=False)]))
     red = PoliticaDeterminista(modelo.policy, venv.obs_rms.mean, venv.obs_rms.var, venv.clip_obs).eval()
     ejemplo = torch.zeros(1, OBS_DIM)
-    salida = corrida / 'pato_marcha.onnx'
+    config = corrida / 'config.json'
+    modo = json.loads(config.read_text()).get('modo', 'caminar') if config.exists() else 'caminar'
+    salida = corrida / f'pato_{modo}.onnx'
     comun = dict(input_names=['obs'], output_names=['accion'], opset_version=17,
                  dynamic_axes={'obs': {0: 'lote'}, 'accion': {0: 'lote'}})
     try:
