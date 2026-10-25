@@ -45,9 +45,10 @@ def main():
     visor = None
     if not args.sin_ventana:
         import mujoco.viewer
-        if sys.platform == 'darwin' and not sys.executable.endswith('mjpython'):
-            sys.exit('En macOS la ventana de MuJoCo necesita mjpython: mjpython rl/jugar.py ... (o usá --sin-ventana)')
-        visor = mujoco.viewer.launch_passive(env.model, env.data)
+        try:
+            visor = mujoco.viewer.launch_passive(env.model, env.data)
+        except RuntimeError as e:   # en macOS la ventana solo abre bajo mjpython
+            sys.exit(f'{e}\nEn macOS: mjpython rl/jugar.py ... (o usá --sin-ventana)')
     choques = 0
     t0 = time.time()
     while True:
