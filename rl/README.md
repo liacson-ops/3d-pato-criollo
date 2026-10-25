@@ -32,7 +32,7 @@ python3 rl/entrenar.py                           # 10 M pasos, 8 entornos: unas 
 tensorboard --logdir rl/corridas                 # curvas de recompensa (rollout/ep_rew_mean)
 ```
 
-Cada corrida queda en `rl/corridas/<fecha>/` y `rl/corridas/ultimo` apunta a la última. Se puede cortar con Ctrl+C: guarda igual. Para seguir una corrida: `python3 rl/entrenar.py --continuar rl/corridas/ultimo --pasos 5e6`.
+Cada corrida queda en `rl/corridas/<fecha>/` y `rl/corridas/ultimo` apunta a la última. El entrenamiento no muestra nada: imprime una tabla por tanda (`ep_rew_mean`, `ep_len_mean`, `fps`) y guarda `modelo.zip` al día cada 100 k pasos, así que **mientras entrena podés abrir otra terminal y mirar cómo va con `mjpython rl/jugar.py`**. Se puede cortar con Ctrl+C: guarda igual. Para seguir una corrida: `python3 rl/entrenar.py --continuar rl/corridas/ultimo --pasos 5e6`.
 
 Velocidad de referencia: en la máquina de prueba (4 núcleos, sin GPU) da 1.300 pasos de control por segundo con 4 entornos (cada paso de control son 10 pasos de física con choques entre mallas). En una M1 con 8 entornos esperá 2.000–4.000: 10 M pasos son de 1 a 2 horas. Lo que más cuesta es la física, no la red, así que la GPU no cambia nada acá.
 

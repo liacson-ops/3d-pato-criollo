@@ -5,7 +5,8 @@
   python3 rl/entrenar.py --pasos 2e6 --envs 4  # prueba corta
   python3 rl/entrenar.py --continuar rl/corridas/ultimo   # sigue una corrida
 
-Guarda en rl/corridas/<fecha>/: modelo.zip, normalizacion.pkl y logs para TensorBoard
+Guarda en rl/corridas/<fecha>/: modelo.zip y normalizacion.pkl (al día cada 100 k pasos), checkpoints
+cada 1 M y logs para TensorBoard
 (tensorboard --logdir rl/corridas). Después: python3 rl/exportar_onnx.py rl/corridas/<fecha>
 """
 import argparse
@@ -37,7 +38,7 @@ def main():
 
     import torch
     from stable_baselines3 import PPO
-    from stable_baselines3.common.callbacks import CheckpointCallback
+    from stable_baselines3.common.callbacks import BaseCallback, CheckpointCallback
     from stable_baselines3.common.vec_env import SubprocVecEnv, VecNormalize, VecMonitor
     from entorno import hacer_env
 
@@ -55,17 +56,34 @@ def main():
                      n_steps=1024, batch_size=4096, n_epochs=5, learning_rate=3e-4, gamma=0.99, gae_lambda=0.95,
                      ent_coef=0.005, clip_range=0.2, policy_kwargs=dict(net_arch=[256, 128, 64]),
                      tensorboard_log=str(salida) if _hay_tensorboard() else None)
-    guardar = CheckpointCallback(save_freq=max(1, 500_000 // args.envs), save_path=str(salida / 'checkpoints'),
-                                 name_prefix='ppo', save_vecnormalize=True)
-    try:
-        modelo.learn(total_timesteps=int(args.pasos), callback=guardar, reset_num_timesteps=not args.continuar)
-    finally:
+    def guardar():
         modelo.save(str(salida / 'modelo.zip'))
         venv.save(str(salida / 'normalizacion.pkl'))
-        enlace = RAIZ / 'rl' / 'corridas' / 'ultimo'
-        if enlace.is_symlink() or enlace.exists():
-            enlace.unlink()
-        enlace.symlink_to(salida.name)
+
+    class GuardarCadaTanto(BaseCallback):
+        # Cada 100 k pasos deja modelo.zip y normalizacion.pkl al día: mientras entrena se puede
+        # mirar cómo va con `mjpython rl/jugar.py` desde otra terminal.
+        def __init__(self, cada):
+            super().__init__()
+            self.cada, self.proximo = cada, cada
+
+        def _on_step(self):
+            if self.num_timesteps >= self.proximo:
+                guardar()
+                self.proximo += self.cada
+            return True
+
+    enlace = RAIZ / 'rl' / 'corridas' / 'ultimo'
+    if enlace.is_symlink() or enlace.exists():
+        enlace.unlink()
+    enlace.symlink_to(salida.name)
+    callbacks = [GuardarCadaTanto(100_000),
+                 CheckpointCallback(save_freq=max(1, 1_000_000 // args.envs), save_path=str(salida / 'checkpoints'),
+                                    name_prefix='ppo', save_vecnormalize=True)]
+    try:
+        modelo.learn(total_timesteps=int(args.pasos), callback=callbacks, reset_num_timesteps=not args.continuar)
+    finally:
+        guardar()
         print(f'guardado en {salida}')
 
 
