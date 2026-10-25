@@ -37,10 +37,11 @@ def main():
     ap.add_argument('--segundos', type=float, default=15.0)
     ap.add_argument('--comando', type=float, nargs=3, default=[0.2, 0.0, 0.0], metavar=('VX', 'VY', 'GIRO'))
     ap.add_argument('--sin-ventana', action='store_true')
+    ap.add_argument('--semilla', type=int, default=0, help='cambia la pose inicial (±0,05 rad en cada servo)')
     args = ap.parse_args()
     politica = cargar(args)
     env = PatoEnv(aleatorizar=False, empujones=False, comando_fijo=args.comando, max_segundos=args.segundos)
-    obs, _ = env.reset(seed=0)
+    obs, _ = env.reset(seed=args.semilla)
     x0 = env.data.xpos[env.tronco][0]
     visor = None
     if not args.sin_ventana:

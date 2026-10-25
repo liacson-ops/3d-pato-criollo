@@ -71,6 +71,8 @@ Lo que todavía no está: terreno con escalones y obstáculos (hay que agregar u
 
 ## Si no aprende
 
+- **Salta en el lugar en vez de caminar.** Pasó en la primera corrida: la recompensa por estar vivo, por "velocidad lateral cero" y por "giro cero" sumaban más quieto que caminando, y el premio al tiempo en el aire valía con los dos pies a la vez. La recompensa actual (`rl/entorno.py`) paga avanzar de forma lineal, solo premia el tiempo en el aire con un pie apoyado y penaliza volar y rebotar. Si vuelve a pasar, subí `avance` o bajá `vivo`.
+
 - Con 2 M pasos ya tiene que mantenerse de pie casi siempre (`rollout/ep_len_mean` cerca del máximo, 750). Si se cae siempre, revisá que el modelo se pare solo y camine con la marcha a mano: `python3 sim/marcha.py` (en el modelo de choques, `pato_sim.xml`) y `python3 rl/jugar.py --sin-ventana` con una política recién inicializada.
 - Si camina raro o "patina", subí la penalización `accion` o `torque` en `rl/entorno.py` y reentrená.
 - Si el ONNX se comporta distinto que `jugar.py` sin ONNX, es la normalización: `exportar_onnx.py` la verifica con una observación de prueba.

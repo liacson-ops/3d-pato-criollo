@@ -165,18 +165,29 @@ class PatoEnv(gym.Env):
         torque = d.actuator_force[self.act_id] / np.abs(self.model.actuator_forcerange[self.act_id, 1])
 
         # Recompensa: seguir el comando, mantenerse derecho y gastar poco.
+        # Lección de la primera corrida: con un bono por estar vivo alto, un seguimiento de velocidad
+        # muy estrecho y un premio al tiempo en el aire que valía con los dos pies a la vez, la política
+        # aprendió a saltar en el lugar. Ahora avanzar paga de forma lineal, el tiempo en el aire solo
+        # cuenta con un pie apoyado y volar o rebotar se penaliza.
+        con_comando = np.linalg.norm(self.comando) > 0.05
+        un_pie_en_aire = sum(apoyo) == 1
+        vz = float(d.cvel[self.tronco][5])
         r = {
-            'vel_x': 2.0 * np.exp(-((v_local[0] - self.comando[0]) ** 2) / 0.02),
-            'vel_y': 0.5 * np.exp(-((v_local[1] - self.comando[1]) ** 2) / 0.02),
-            'giro': 1.0 * np.exp(-((w_local[2] - self.comando[2]) ** 2) / 0.2),
-            'vivo': 0.5,
+            'vel_x': 1.5 * np.exp(-((v_local[0] - self.comando[0]) ** 2) / 0.05),
+            'avance': 2.0 * float(np.clip(v_local[0] / max(abs(self.comando[0]), 0.05), -1, 1)) * np.sign(self.comando[0])
+                      if abs(self.comando[0]) > 0.05 else -1.0 * abs(float(v_local[0])),
+            'vel_y': 0.3 * np.exp(-((v_local[1] - self.comando[1]) ** 2) / 0.05),
+            'giro': 0.5 * np.exp(-((w_local[2] - self.comando[2]) ** 2) / 0.2),
+            'vivo': 0.2,
             'derecho': 0.5 * arriba,
             'altura': -5.0 * max(0.0, 0.175 - z),
+            'rebote': -2.0 * vz ** 2,
+            'vuelo': -0.5 if not any(apoyo) else 0.0,
             'accion': -0.05 * float(np.sum((accion - self.accion_prev) ** 2)),
             'torque': -0.02 * float(np.sum(torque ** 2)),
             'balanceo': -0.05 * float(w_local[0] ** 2 + w_local[1] ** 2),
             'choque_propio': -0.5 * propios,
-            'pies_aire': 0.3 * float(np.sum(np.clip(self.tiempo_aire, 0, 0.3)) if np.linalg.norm(self.comando) > 0.05 else 0.0),
+            'pies_aire': 0.3 * float(np.sum(np.clip(self.tiempo_aire, 0, 0.3))) if (con_comando and un_pie_en_aire) else 0.0,
         }
         recompensa = float(sum(r.values()))
         if cayo:
