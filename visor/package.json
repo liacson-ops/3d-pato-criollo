@@ -1,0 +1,13 @@
+{
+  "name": "pato-criollo-visor",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "construir": "node construir.mjs",
+    "capturas": "node capturas.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.20.2",
+    "three": "0.160.0"
+  }
+}

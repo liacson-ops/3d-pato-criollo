@@ -1,0 +1,1009 @@
+{
+ "eslabones": {
+  "tronco": {
+   "padre": null,
+   "ancla_mm": [
+    0.0,
+    0.0,
+    220.0
+   ]
+  },
+  "cadera_yaw_izq": {
+   "padre": "tronco",
+   "ancla_mm": [
+    0.0,
+    38.0,
+    186.0
+   ]
+  },
+  "cadera_roll_izq": {
+   "padre": "cadera_yaw_izq",
+   "ancla_mm": [
+    0.0,
+    38.0,
+    154.0
+   ]
+  },
+  "muslo_izq": {
+   "padre": "cadera_roll_izq",
+   "ancla_mm": [
+    0.0,
+    38.0,
+    124.0
+   ]
+  },
+  "canilla_izq": {
+   "padre": "muslo_izq",
+   "ancla_mm": [
+    0.0,
+    38.0,
+    79.0
+   ]
+  },
+  "pie_izq": {
+   "padre": "canilla_izq",
+   "ancla_mm": [
+    0.0,
+    38.0,
+    34.0
+   ]
+  },
+  "cadera_yaw_der": {
+   "padre": "tronco",
+   "ancla_mm": [
+    0.0,
+    -38.0,
+    186.0
+   ]
+  },
+  "cadera_roll_der": {
+   "padre": "cadera_yaw_der",
+   "ancla_mm": [
+    0.0,
+    -38.0,
+    154.0
+   ]
+  },
+  "muslo_der": {
+   "padre": "cadera_roll_der",
+   "ancla_mm": [
+    0.0,
+    -38.0,
+    124.0
+   ]
+  },
+  "canilla_der": {
+   "padre": "muslo_der",
+   "ancla_mm": [
+    0.0,
+    -38.0,
+    79.0
+   ]
+  },
+  "pie_der": {
+   "padre": "canilla_der",
+   "ancla_mm": [
+    0.0,
+    -38.0,
+    34.0
+   ]
+  },
+  "cuello": {
+   "padre": "tronco",
+   "ancla_mm": [
+    40.0,
+    0.0,
+    272.0
+   ]
+  },
+  "cabeza": {
+   "padre": "cuello",
+   "ancla_mm": [
+    40.0,
+    0.0,
+    295.0
+   ]
+  },
+  "pico_inferior": {
+   "padre": "cabeza",
+   "ancla_mm": [
+    76.0,
+    0.0,
+    326.0
+   ]
+  }
+ },
+ "articulaciones": [
+  {
+   "nombre": "cadera_yaw_izq",
+   "padre": "tronco",
+   "hijo": "cadera_yaw_izq",
+   "ancla_mm": [
+    0.0,
+    38.0,
+    186.0
+   ],
+   "eje": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "rango": [
+    -0.4,
+    0.4
+   ],
+   "servo": "MG90S",
+   "parado": 0.0
+  },
+  {
+   "nombre": "cadera_roll_izq",
+   "padre": "cadera_yaw_izq",
+   "hijo": "cadera_roll_izq",
+   "ancla_mm": [
+    0.0,
+    38.0,
+    154.0
+   ],
+   "eje": [
+    1.0,
+    0.0,
+    0.0
+   ],
+   "rango": [
+    -0.4,
+    0.4
+   ],
+   "servo": "MG996R",
+   "parado": 0.0
+  },
+  {
+   "nombre": "cadera_pitch_izq",
+   "padre": "cadera_roll_izq",
+   "hijo": "muslo_izq",
+   "ancla_mm": [
+    0.0,
+    38.0,
+    124.0
+   ],
+   "eje": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "rango": [
+    -1.6,
+    1.0
+   ],
+   "servo": "MG996R",
+   "parado": -0.35
+  },
+  {
+   "nombre": "rodilla_izq",
+   "padre": "muslo_izq",
+   "hijo": "canilla_izq",
+   "ancla_mm": [
+    0.0,
+    38.0,
+    79.0
+   ],
+   "eje": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "rango": [
+    -0.1,
+    2.2
+   ],
+   "servo": "MG996R",
+   "parado": 0.7
+  },
+  {
+   "nombre": "tobillo_izq",
+   "padre": "canilla_izq",
+   "hijo": "pie_izq",
+   "ancla_mm": [
+    0.0,
+    38.0,
+    34.0
+   ],
+   "eje": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "rango": [
+    -1.2,
+    1.2
+   ],
+   "servo": "MG996R",
+   "parado": -0.35
+  },
+  {
+   "nombre": "cadera_yaw_der",
+   "padre": "tronco",
+   "hijo": "cadera_yaw_der",
+   "ancla_mm": [
+    0.0,
+    -38.0,
+    186.0
+   ],
+   "eje": [
+    -0.0,
+    0.0,
+    -1.0
+   ],
+   "rango": [
+    -0.4,
+    0.4
+   ],
+   "servo": "MG90S",
+   "parado": 0.0
+  },
+  {
+   "nombre": "cadera_roll_der",
+   "padre": "cadera_yaw_der",
+   "hijo": "cadera_roll_der",
+   "ancla_mm": [
+    0.0,
+    -38.0,
+    154.0
+   ],
+   "eje": [
+    -1.0,
+    0.0,
+    -0.0
+   ],
+   "rango": [
+    -0.4,
+    0.4
+   ],
+   "servo": "MG996R",
+   "parado": 0.0
+  },
+  {
+   "nombre": "cadera_pitch_der",
+   "padre": "cadera_roll_der",
+   "hijo": "muslo_der",
+   "ancla_mm": [
+    0.0,
+    -38.0,
+    124.0
+   ],
+   "eje": [
+    -0.0,
+    1.0,
+    -0.0
+   ],
+   "rango": [
+    -1.6,
+    1.0
+   ],
+   "servo": "MG996R",
+   "parado": -0.35
+  },
+  {
+   "nombre": "rodilla_der",
+   "padre": "muslo_der",
+   "hijo": "canilla_der",
+   "ancla_mm": [
+    0.0,
+    -38.0,
+    79.0
+   ],
+   "eje": [
+    -0.0,
+    1.0,
+    -0.0
+   ],
+   "rango": [
+    -0.1,
+    2.2
+   ],
+   "servo": "MG996R",
+   "parado": 0.7
+  },
+  {
+   "nombre": "tobillo_der",
+   "padre": "canilla_der",
+   "hijo": "pie_der",
+   "ancla_mm": [
+    0.0,
+    -38.0,
+    34.0
+   ],
+   "eje": [
+    -0.0,
+    1.0,
+    -0.0
+   ],
+   "rango": [
+    -1.2,
+    1.2
+   ],
+   "servo": "MG996R",
+   "parado": -0.35
+  },
+  {
+   "nombre": "cuello_yaw",
+   "padre": "tronco",
+   "hijo": "cuello",
+   "ancla_mm": [
+    40.0,
+    0.0,
+    272.0
+   ],
+   "eje": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "rango": [
+    -1.5,
+    1.5
+   ],
+   "servo": "MG90S",
+   "parado": 0.0
+  },
+  {
+   "nombre": "cuello_pitch",
+   "padre": "cuello",
+   "hijo": "cabeza",
+   "ancla_mm": [
+    40.0,
+    0.0,
+    295.0
+   ],
+   "eje": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "rango": [
+    -0.8,
+    0.8
+   ],
+   "servo": "MG90S",
+   "parado": 0.0
+  },
+  {
+   "nombre": "boca",
+   "padre": "cabeza",
+   "hijo": "pico_inferior",
+   "ancla_mm": [
+    76.0,
+    0.0,
+    326.0
+   ],
+   "eje": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "rango": [
+    -0.5,
+    0.0
+   ],
+   "servo": "MG90S",
+   "parado": 0.0
+  }
+ ],
+ "piezas": [
+  {
+   "nombre": "piso_tronco",
+   "eslabon": "tronco",
+   "tipo": "impresa",
+   "paso": 6,
+   "color": "#e9e6df",
+   "masa_g": 30.4,
+   "descripcion": "Piso del tronco con alojamientos 608"
+  },
+  {
+   "nombre": "lipo_2s_1500",
+   "eslabon": "tronco",
+   "tipo": "comprada",
+   "paso": 7,
+   "color": "#2b6cb0",
+   "masa_g": 85.0,
+   "descripcion": "LiPo 2S 1500 mAh"
+  },
+  {
+   "nombre": "tapa_bateria",
+   "eslabon": "tronco",
+   "tipo": "impresa",
+   "paso": 7,
+   "color": "#e9e6df",
+   "masa_g": 3.2,
+   "descripcion": "Tapa y traba de la batería"
+  },
+  {
+   "nombre": "imu_gy521",
+   "eslabon": "tronco",
+   "tipo": "comprada",
+   "paso": 7,
+   "color": "#1f4fa0",
+   "masa_g": 2.0,
+   "descripcion": "IMU MPU-6050 (GY-521)"
+  },
+  {
+   "nombre": "estante_a",
+   "eslabon": "tronco",
+   "tipo": "impresa",
+   "paso": 7,
+   "color": "#e9e6df",
+   "masa_g": 23.2,
+   "descripcion": "Estante A"
+  },
+  {
+   "nombre": "xl4016_izq",
+   "eslabon": "tronco",
+   "tipo": "comprada",
+   "paso": 7,
+   "color": "#1f4fa0",
+   "masa_g": 35.0,
+   "descripcion": "Regulador XL4016 6,0 V (pata izquierda)"
+  },
+  {
+   "nombre": "xl4016_der",
+   "eslabon": "tronco",
+   "tipo": "comprada",
+   "paso": 7,
+   "color": "#1f4fa0",
+   "masa_g": 35.0,
+   "descripcion": "Regulador XL4016 6,0 V (pata derecha)"
+  },
+  {
+   "nombre": "placa_mcp3008",
+   "eslabon": "tronco",
+   "tipo": "comprada",
+   "paso": 7,
+   "color": "#1f7a3a",
+   "masa_g": 12.0,
+   "descripcion": "2× MCP3008 + divisores"
+  },
+  {
+   "nombre": "estante_b",
+   "eslabon": "tronco",
+   "tipo": "impresa",
+   "paso": 8,
+   "color": "#e9e6df",
+   "masa_g": 19.2,
+   "descripcion": "Estante B"
+  },
+  {
+   "nombre": "pi_zero_2w",
+   "eslabon": "tronco",
+   "tipo": "comprada",
+   "paso": 8,
+   "color": "#1f7a3a",
+   "masa_g": 13.0,
+   "descripcion": "Raspberry Pi Zero 2 W"
+  },
+  {
+   "nombre": "pca9685",
+   "eslabon": "tronco",
+   "tipo": "comprada",
+   "paso": 8,
+   "color": "#1f4fa0",
+   "masa_g": 9.0,
+   "descripcion": "PCA9685 (16 PWM)"
+  },
+  {
+   "nombre": "mini560_5v",
+   "eslabon": "tronco",
+   "tipo": "comprada",
+   "paso": 8,
+   "color": "#5b3a8a",
+   "masa_g": 2.0,
+   "descripcion": "Mini560 5 V (Pi)"
+  },
+  {
+   "nombre": "servo_cuello_yaw",
+   "eslabon": "tronco",
+   "tipo": "comprada",
+   "paso": 9,
+   "color": "#2c5aa0",
+   "masa_g": 13.4,
+   "descripcion": "MG90S cuello yaw"
+  },
+  {
+   "nombre": "cuerpo_inferior",
+   "eslabon": "tronco",
+   "tipo": "impresa",
+   "paso": 11,
+   "color": "#fbfaf7",
+   "masa_g": 55.7,
+   "descripcion": "Carcasa del cuerpo, mitad inferior"
+  },
+  {
+   "nombre": "cuerpo_superior",
+   "eslabon": "tronco",
+   "tipo": "impresa",
+   "paso": 11,
+   "color": "#fbfaf7",
+   "masa_g": 56.8,
+   "descripcion": "Carcasa del cuerpo, mitad superior con cola"
+  },
+  {
+   "nombre": "suela_izq",
+   "eslabon": "pie_izq",
+   "tipo": "tpu",
+   "paso": 1,
+   "color": "#d9822b",
+   "masa_g": 5.0,
+   "descripcion": "Suela de TPU"
+  },
+  {
+   "nombre": "paleta_pie_izq",
+   "eslabon": "pie_izq",
+   "tipo": "impresa",
+   "paso": 1,
+   "color": "#f5a623",
+   "masa_g": 12.7,
+   "descripcion": "Pie de pato (paleta)"
+  },
+  {
+   "nombre": "orejas_tobillo_izq",
+   "eslabon": "pie_izq",
+   "tipo": "impresa",
+   "paso": 1,
+   "color": "#e9e6df",
+   "masa_g": 4.1,
+   "descripcion": "Orejas del tobillo (horn afuera, pivote adentro)"
+  },
+  {
+   "nombre": "servo_tobillo_izq",
+   "eslabon": "canilla_izq",
+   "tipo": "comprada",
+   "paso": 2,
+   "color": "#26282c",
+   "masa_g": 55.0,
+   "descripcion": "MG996R tobillo"
+  },
+  {
+   "nombre": "horn_tobillo_izq",
+   "eslabon": "pie_izq",
+   "tipo": "comprada",
+   "paso": 2,
+   "color": "#f2f2f2",
+   "masa_g": 2.0,
+   "descripcion": ""
+  },
+  {
+   "nombre": "soporte_canilla_izq",
+   "eslabon": "canilla_izq",
+   "tipo": "impresa",
+   "paso": 2,
+   "color": "#e9e6df",
+   "masa_g": 9.3,
+   "descripcion": "Canilla: aloja el servo del tobillo"
+  },
+  {
+   "nombre": "servo_rodilla_izq",
+   "eslabon": "muslo_izq",
+   "tipo": "comprada",
+   "paso": 3,
+   "color": "#26282c",
+   "masa_g": 55.0,
+   "descripcion": "MG996R rodilla"
+  },
+  {
+   "nombre": "horn_rodilla_izq",
+   "eslabon": "canilla_izq",
+   "tipo": "comprada",
+   "paso": 3,
+   "color": "#f2f2f2",
+   "masa_g": 2.0,
+   "descripcion": ""
+  },
+  {
+   "nombre": "soporte_muslo_izq",
+   "eslabon": "muslo_izq",
+   "tipo": "impresa",
+   "paso": 3,
+   "color": "#e9e6df",
+   "masa_g": 9.0,
+   "descripcion": "Muslo: aloja el servo de la rodilla"
+  },
+  {
+   "nombre": "servo_cadera_pitch_izq",
+   "eslabon": "cadera_roll_izq",
+   "tipo": "comprada",
+   "paso": 4,
+   "color": "#26282c",
+   "masa_g": 55.0,
+   "descripcion": "MG996R cadera pitch"
+  },
+  {
+   "nombre": "horn_cadera_pitch_izq",
+   "eslabon": "muslo_izq",
+   "tipo": "comprada",
+   "paso": 4,
+   "color": "#f2f2f2",
+   "masa_g": 2.0,
+   "descripcion": ""
+  },
+  {
+   "nombre": "soporte_u_izq",
+   "eslabon": "cadera_roll_izq",
+   "tipo": "impresa",
+   "paso": 4,
+   "color": "#e9e6df",
+   "masa_g": 9.5,
+   "descripcion": "Soporte U de cadera (roll → pitch)"
+  },
+  {
+   "nombre": "servo_cadera_roll_izq",
+   "eslabon": "cadera_yaw_izq",
+   "tipo": "comprada",
+   "paso": 5,
+   "color": "#26282c",
+   "masa_g": 55.0,
+   "descripcion": "MG996R cadera roll"
+  },
+  {
+   "nombre": "horn_cadera_roll_izq",
+   "eslabon": "cadera_roll_izq",
+   "tipo": "comprada",
+   "paso": 5,
+   "color": "#f2f2f2",
+   "masa_g": 2.0,
+   "descripcion": ""
+  },
+  {
+   "nombre": "placa_yaw_izq",
+   "eslabon": "cadera_yaw_izq",
+   "tipo": "impresa",
+   "paso": 5,
+   "color": "#e9e6df",
+   "masa_g": 11.2,
+   "descripcion": "Placa yaw con abrazaderas del servo roll y eje al rulemán"
+  },
+  {
+   "nombre": "servo_cadera_yaw_izq",
+   "eslabon": "tronco",
+   "tipo": "comprada",
+   "paso": 6,
+   "color": "#2c5aa0",
+   "masa_g": 13.4,
+   "descripcion": "MG90S cadera yaw"
+  },
+  {
+   "nombre": "horn_cadera_yaw_izq",
+   "eslabon": "cadera_yaw_izq",
+   "tipo": "comprada",
+   "paso": 6,
+   "color": "#f2f2f2",
+   "masa_g": 1.0,
+   "descripcion": ""
+  },
+  {
+   "nombre": "ruleman_cadera_izq",
+   "eslabon": "tronco",
+   "tipo": "comprada",
+   "paso": 6,
+   "color": "#8c939a",
+   "masa_g": 12.0,
+   "descripcion": "Rulemán 608ZZ"
+  },
+  {
+   "nombre": "suela_der",
+   "eslabon": "pie_der",
+   "tipo": "tpu",
+   "paso": 1,
+   "color": "#d9822b",
+   "masa_g": 5.0,
+   "descripcion": "Suela de TPU"
+  },
+  {
+   "nombre": "paleta_pie_der",
+   "eslabon": "pie_der",
+   "tipo": "impresa",
+   "paso": 1,
+   "color": "#f5a623",
+   "masa_g": 12.7,
+   "descripcion": "Pie de pato (paleta)"
+  },
+  {
+   "nombre": "orejas_tobillo_der",
+   "eslabon": "pie_der",
+   "tipo": "impresa",
+   "paso": 1,
+   "color": "#e9e6df",
+   "masa_g": 4.1,
+   "descripcion": "Orejas del tobillo (horn afuera, pivote adentro)"
+  },
+  {
+   "nombre": "servo_tobillo_der",
+   "eslabon": "canilla_der",
+   "tipo": "comprada",
+   "paso": 2,
+   "color": "#26282c",
+   "masa_g": 55.0,
+   "descripcion": "MG996R tobillo"
+  },
+  {
+   "nombre": "horn_tobillo_der",
+   "eslabon": "pie_der",
+   "tipo": "comprada",
+   "paso": 2,
+   "color": "#f2f2f2",
+   "masa_g": 2.0,
+   "descripcion": ""
+  },
+  {
+   "nombre": "soporte_canilla_der",
+   "eslabon": "canilla_der",
+   "tipo": "impresa",
+   "paso": 2,
+   "color": "#e9e6df",
+   "masa_g": 9.3,
+   "descripcion": "Canilla: aloja el servo del tobillo"
+  },
+  {
+   "nombre": "servo_rodilla_der",
+   "eslabon": "muslo_der",
+   "tipo": "comprada",
+   "paso": 3,
+   "color": "#26282c",
+   "masa_g": 55.0,
+   "descripcion": "MG996R rodilla"
+  },
+  {
+   "nombre": "horn_rodilla_der",
+   "eslabon": "canilla_der",
+   "tipo": "comprada",
+   "paso": 3,
+   "color": "#f2f2f2",
+   "masa_g": 2.0,
+   "descripcion": ""
+  },
+  {
+   "nombre": "soporte_muslo_der",
+   "eslabon": "muslo_der",
+   "tipo": "impresa",
+   "paso": 3,
+   "color": "#e9e6df",
+   "masa_g": 9.0,
+   "descripcion": "Muslo: aloja el servo de la rodilla"
+  },
+  {
+   "nombre": "servo_cadera_pitch_der",
+   "eslabon": "cadera_roll_der",
+   "tipo": "comprada",
+   "paso": 4,
+   "color": "#26282c",
+   "masa_g": 55.0,
+   "descripcion": "MG996R cadera pitch"
+  },
+  {
+   "nombre": "horn_cadera_pitch_der",
+   "eslabon": "muslo_der",
+   "tipo": "comprada",
+   "paso": 4,
+   "color": "#f2f2f2",
+   "masa_g": 2.0,
+   "descripcion": ""
+  },
+  {
+   "nombre": "soporte_u_der",
+   "eslabon": "cadera_roll_der",
+   "tipo": "impresa",
+   "paso": 4,
+   "color": "#e9e6df",
+   "masa_g": 9.5,
+   "descripcion": "Soporte U de cadera (roll → pitch)"
+  },
+  {
+   "nombre": "servo_cadera_roll_der",
+   "eslabon": "cadera_yaw_der",
+   "tipo": "comprada",
+   "paso": 5,
+   "color": "#26282c",
+   "masa_g": 55.0,
+   "descripcion": "MG996R cadera roll"
+  },
+  {
+   "nombre": "horn_cadera_roll_der",
+   "eslabon": "cadera_roll_der",
+   "tipo": "comprada",
+   "paso": 5,
+   "color": "#f2f2f2",
+   "masa_g": 2.0,
+   "descripcion": ""
+  },
+  {
+   "nombre": "placa_yaw_der",
+   "eslabon": "cadera_yaw_der",
+   "tipo": "impresa",
+   "paso": 5,
+   "color": "#e9e6df",
+   "masa_g": 11.2,
+   "descripcion": "Placa yaw con abrazaderas del servo roll y eje al rulemán"
+  },
+  {
+   "nombre": "servo_cadera_yaw_der",
+   "eslabon": "tronco",
+   "tipo": "comprada",
+   "paso": 6,
+   "color": "#2c5aa0",
+   "masa_g": 13.4,
+   "descripcion": "MG90S cadera yaw"
+  },
+  {
+   "nombre": "horn_cadera_yaw_der",
+   "eslabon": "cadera_yaw_der",
+   "tipo": "comprada",
+   "paso": 6,
+   "color": "#f2f2f2",
+   "masa_g": 1.0,
+   "descripcion": ""
+  },
+  {
+   "nombre": "ruleman_cadera_der",
+   "eslabon": "tronco",
+   "tipo": "comprada",
+   "paso": 6,
+   "color": "#8c939a",
+   "masa_g": 12.0,
+   "descripcion": "Rulemán 608ZZ"
+  },
+  {
+   "nombre": "horn_cuello_yaw",
+   "eslabon": "cuello",
+   "tipo": "comprada",
+   "paso": 9,
+   "color": "#f2f2f2",
+   "masa_g": 1.0,
+   "descripcion": ""
+  },
+  {
+   "nombre": "servo_cuello_pitch",
+   "eslabon": "cuello",
+   "tipo": "comprada",
+   "paso": 9,
+   "color": "#2c5aa0",
+   "masa_g": 13.4,
+   "descripcion": "MG90S cuello pitch"
+  },
+  {
+   "nombre": "soporte_cuello",
+   "eslabon": "cuello",
+   "tipo": "impresa",
+   "paso": 9,
+   "color": "#e9e6df",
+   "masa_g": 2.6,
+   "descripcion": "Soporte del cuello (yaw → pitch)"
+  },
+  {
+   "nombre": "horn_cuello_pitch",
+   "eslabon": "cabeza",
+   "tipo": "comprada",
+   "paso": 9,
+   "color": "#f2f2f2",
+   "masa_g": 1.0,
+   "descripcion": ""
+  },
+  {
+   "nombre": "cabeza_inferior",
+   "eslabon": "cabeza",
+   "tipo": "impresa",
+   "paso": 10,
+   "color": "#fbfaf7",
+   "masa_g": 13.2,
+   "descripcion": "Cabeza, mitad inferior"
+  },
+  {
+   "nombre": "cabeza_superior",
+   "eslabon": "cabeza",
+   "tipo": "impresa",
+   "paso": 10,
+   "color": "#fbfaf7",
+   "masa_g": 18.1,
+   "descripcion": "Cabeza, mitad superior"
+  },
+  {
+   "nombre": "soporte_cabeza",
+   "eslabon": "cabeza",
+   "tipo": "impresa",
+   "paso": 10,
+   "color": "#e9e6df",
+   "masa_g": 1.3,
+   "descripcion": "Soporte de la cabeza (horn del cuello pitch)"
+  },
+  {
+   "nombre": "servo_boca",
+   "eslabon": "cabeza",
+   "tipo": "comprada",
+   "paso": 10,
+   "color": "#2c5aa0",
+   "masa_g": 13.4,
+   "descripcion": "MG90S boca"
+  },
+  {
+   "nombre": "camara",
+   "eslabon": "cabeza",
+   "tipo": "comprada",
+   "paso": 10,
+   "color": "#1f7a3a",
+   "masa_g": 3.0,
+   "descripcion": "Cámara de la Pi (en la frente)"
+  },
+  {
+   "nombre": "lente",
+   "eslabon": "cabeza",
+   "tipo": "comprada",
+   "paso": 10,
+   "color": "#111111",
+   "masa_g": 1.0,
+   "descripcion": ""
+  },
+  {
+   "nombre": "soporte_camara",
+   "eslabon": "cabeza",
+   "tipo": "impresa",
+   "paso": 10,
+   "color": "#e9e6df",
+   "masa_g": 1.7,
+   "descripcion": "Soporte de la cámara"
+  },
+  {
+   "nombre": "ojos",
+   "eslabon": "cabeza",
+   "tipo": "impresa",
+   "paso": 10,
+   "color": "#ffffff",
+   "masa_g": 1.5,
+   "descripcion": ""
+  },
+  {
+   "nombre": "pupilas",
+   "eslabon": "cabeza",
+   "tipo": "impresa",
+   "paso": 10,
+   "color": "#111111",
+   "masa_g": 0.2,
+   "descripcion": ""
+  },
+  {
+   "nombre": "pico_superior",
+   "eslabon": "cabeza",
+   "tipo": "impresa",
+   "paso": 10,
+   "color": "#f5a623",
+   "masa_g": 5.2,
+   "descripcion": "Pico superior"
+  },
+  {
+   "nombre": "horn_boca",
+   "eslabon": "pico_inferior",
+   "tipo": "comprada",
+   "paso": 10,
+   "color": "#f2f2f2",
+   "masa_g": 0.5,
+   "descripcion": ""
+  },
+  {
+   "nombre": "pico_inf",
+   "eslabon": "pico_inferior",
+   "tipo": "impresa",
+   "paso": 10,
+   "color": "#f5a623",
+   "masa_g": 3.6,
+   "descripcion": "Pico inferior (lo mueve el servo de la boca)"
+  }
+ ],
+ "pasos": {
+  "1": "Pies: suela de TPU, placa y orejas del tobillo",
+  "2": "Canilla con el servo del tobillo; se une al pie",
+  "3": "Muslo con el servo de la rodilla; se une a la canilla",
+  "4": "Soporte U de cadera con el servo pitch; se une al muslo",
+  "5": "Servo roll de cadera, placa yaw y eje",
+  "6": "Piso del tronco: rulemanes 608 y servos yaw de cadera; se cuelgan las patas",
+  "7": "Batería, IMU y estante A (reguladores XL4016 y placa de los MCP3008)",
+  "8": "Estante B: Pi Zero 2 W, PCA9685 y regulador de 5 V",
+  "9": "Cuello: servo yaw y servo pitch",
+  "10": "Cabeza: servo de la boca, cámara, ojos y pico",
+  "11": "Carcasa del cuerpo (dos mitades) y cola"
+ }
+}

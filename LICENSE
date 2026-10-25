@@ -1,0 +1,7 @@
+Pato Criollo
+Copyright 2026 liacson-ops
+
+Código (cad/, sim/, visor/): Apache License 2.0 — https://www.apache.org/licenses/LICENSE-2.0
+Diseño (modelos 3D, STL, GLB e imágenes en salida/ y docs/): Creative Commons Atribución-CompartirIgual 4.0 — https://creativecommons.org/licenses/by-sa/4.0/deed.es
+
+El visor incluye three.js (MIT, © 2010-2024 three.js authors) empaquetado dentro de salida/pato.html.
