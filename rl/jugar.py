@@ -27,7 +27,7 @@ from cabeza import Cabeza, GESTOS  # noqa: E402
 RAIZ = Path(__file__).resolve().parent.parent
 
 
-def cargar_politica(corrida=None, onnx=None):
+def cargar_politica(corrida=None, onnx=None, modo_esperado=None):
     """Devuelve (politica(obs) -> accion, escala_accion) o None si no hay nada que cargar."""
     if onnx:
         import onnxruntime as ort
@@ -38,6 +38,10 @@ def cargar_politica(corrida=None, onnx=None):
     corrida = Path(corrida)
     if not (corrida / 'modelo.zip').exists():
         return None
+    config = corrida / 'config.json'
+    if modo_esperado and config.exists() and json.loads(config.read_text()).get('modo', modo_esperado) != modo_esperado:
+        return None                                   # p. ej. "ultimo" apunta a una corrida de otro modo
+    print(f'política de {modo_esperado or "?"}: {corrida.resolve().name}')
     from stable_baselines3 import PPO
     from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
     modelo = PPO.load(str(corrida / 'modelo.zip'), device='cpu')
@@ -99,12 +103,12 @@ def main():
     args = ap.parse_args()
 
     corridas = RAIZ / 'rl' / 'corridas'
-    caminar = cargar_politica(args.corrida or corridas / 'ultimo_caminar', args.onnx)
+    caminar = cargar_politica(args.corrida or corridas / 'ultimo_caminar', args.onnx, 'caminar')
     if caminar is None and not args.onnx:
-        caminar = cargar_politica(corridas / 'ultimo')
+        caminar = cargar_politica(corridas / 'ultimo', None, 'caminar')
     if caminar is None:
         sys.exit('no hay política de caminar: entrená con python3 rl/entrenar.py')
-    levantarse = cargar_politica(args.levantarse or corridas / 'ultimo_levantarse', args.onnx_levantarse)
+    levantarse = cargar_politica(args.levantarse or corridas / 'ultimo_levantarse', args.onnx_levantarse, 'levantarse')
     if levantarse is None:
         print('sin política de levantarse (python3 rl/entrenar.py --modo levantarse): si se cae, se queda')
     sup = Supervisor(caminar, levantarse)
