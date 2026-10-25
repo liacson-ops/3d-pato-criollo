@@ -24,7 +24,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 XML = RAIZ / 'salida' / 'mjcf' / 'pato_sim.xml'
 
 PARADO = dict(cadera_pitch=-0.35, rodilla=0.70, tobillo=-0.35)
-DEFECTO = dict(frecuencia=1.2, balanceo=0.07, levante=0.15, zancada=0.24, giro=0.0, rampa=1.0)
+DEFECTO = dict(frecuencia=2.0, balanceo=0.05, levante=0.15, zancada=0.24, giro=0.0, rampa=1.0)
 
 
 def objetivos(t, p, vel=1.0):

@@ -24,7 +24,7 @@ Descargá **[`salida/simulador.html`](salida/simulador.html)** (botón *Download
 - A la derecha, el **torque de cada servo en % de su máximo**, en tiempo real. Rojo = saturado.
 - *Ver cajas de choque* muestra las formas que usa la física (una caja por eslabón).
 
-Qué da hoy: se queda parado, aguanta un empujón de 4 N (0,15 s) sin dar un paso y camina derecho a unos 4 cm/s con la marcha a mano (33 cm en 8 s). Con 5 N o más se cae: para aguantar eso hay que dar un paso, y eso es lo que tiene que aprender la política RL. En el banco de pruebas con Python ([`sim/marcha.py`](sim/marcha.py)) las 108 combinaciones de marcha probadas caminan hacia adelante sin caerse, y las mejores aguantan empujones de 4 N en cualquier dirección mientras caminan.
+Qué da hoy: se queda parado, aguanta un empujón de 4 N (0,15 s) sin dar un paso y camina derecho a unos 6 cm/s con la marcha a mano (51 cm en 8 s, a 2 pasos por segundo). Más rápido que eso, algún servo satura: el techo de esta mecánica con marcha a mano son unos 7 cm/s; la política entrenada tiene que superarlo aprovechando la zancada completa. Con 5 N o más se cae: para aguantar eso hay que dar un paso, y eso es lo que tiene que aprender la política RL. En el banco de pruebas con Python ([`sim/marcha.py`](sim/marcha.py)) las 108 combinaciones de marcha probadas caminan hacia adelante sin caerse, y las mejores aguantan empujones de 4 N en cualquier dirección mientras caminan.
 
 ## Ver el modelo en 3D
 
@@ -55,12 +55,12 @@ Desde el visor podés:
 | Parado (rodillas a 40°) | tobillo, 0,7 kg·cm | 6 % |
 | Cuclillas (rodillas a 63°, el tope) | tobillo, 0,7 kg·cm | 6 % |
 | En una pata, sin desplazar el cuerpo (peor caso) | cadera roll, 5,6 kg·cm | **51 %** |
-| Caminando (marcha a mano, pico) | tobillo, 6,2 kg·cm | 56 % |
+| Caminando (marcha a mano a 6 cm/s, pico) | cadera pitch, 8,7 kg·cm | 79 % |
 | Cabeza (cualquier pose) | boca y cuello pitch, 0,23 kg·cm | 10 % (MG90S) |
 
 Al caminar, los picos suelen ser 2 a 3 veces el valor estático. **La cadera roll es el punto a vigilar.** Un paso normal desplaza el cuerpo sobre el pie de apoyo, así que exige menos que el peor caso. Tabla completa: [`salida/torques.md`](salida/torques.md).
 
-Caminando en la simulación, con MG90S en la cadera yaw esos servos saturaban (100 % del torque) porque reciben toda la torsión de la pata apoyada. Por eso **la cadera yaw usa MG996R**: parados dentro del tronco, con las orejas atornilladas al estante A y el rulemán 608 tomando la carga radial. Con ese cambio, caminando ningún servo pasa del 56 % y la cadera yaw queda por debajo del 10 %.
+Caminando en la simulación, con MG90S en la cadera yaw esos servos saturaban (100 % del torque) porque reciben toda la torsión de la pata apoyada. Por eso **la cadera yaw usa MG996R**: parados dentro del tronco, con las orejas atornilladas al estante A y el rulemán 608 tomando la carga radial. Con ese cambio, caminando ningún servo pasa del 79 % y la cadera yaw queda por debajo del 15 %.
 
 ### Que ninguna pieza choque con otra ([`cad/choques.py`](cad/choques.py))
 

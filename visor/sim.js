@@ -25,7 +25,7 @@ function b64ABytes(b64) {
 // ---------------------------------------------------------------------------
 // Marcha programada a mano (la misma de sim/marcha.py)
 // ---------------------------------------------------------------------------
-const marcha = { frecuencia: 1.2, balanceo: 0.07, levante: 0.15, zancada: 0.24, giro: 0.0, rampa: 1.0 };
+const marcha = { frecuencia: 2.0, balanceo: 0.05, levante: 0.15, zancada: 0.24, giro: 0.0, rampa: 1.0 };
 
 function objetivosMarcha(t, vel, q) {
   const fase = 2 * Math.PI * marcha.frecuencia * t;
