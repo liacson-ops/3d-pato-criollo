@@ -236,7 +236,7 @@ function comportamiento() {
     const [px, py] = comp.puntos[comp.i];
     const e = envolver(Math.atan2(py - y, px - x) - rumbo());
     // La marcha a mano no gira en el lugar: dobla mientras camina (medido: giro 0,15 = unos 24°/s).
-    marcha.giro = SIGNO_GIRO * acotar(0.4 * e, -0.15, 0.15);
+    marcha.giro = SIGNO_GIRO * acotar(0.2 * e, -0.15, 0.15);   // ganancia baja: la marcha responde con retraso
     marcha.zancada = comp.zancadaBase;
     estado.vel = 1;
     estado.modo = 'caminar';
@@ -244,18 +244,18 @@ function comportamiento() {
   }
   if (comp.nombre === 'seguir') {
     // La pelota da una vuelta lenta; la cabeza la centra, el cuerpo gira y se acerca.
-    const ang = 0.25 * (t - comp.t0);
-    comp.pelota = [0.9 * Math.cos(ang), 0.9 * Math.sin(ang), 0.03];
+    const ang = 0.08 * (t - comp.t0);                  // 6 cm/s: lo que el pato puede seguir
+    comp.pelota = [0.7 * Math.cos(ang), 0.7 * Math.sin(ang), 0.03];
     const det = pixelPelota();
     dibujarCamara(det);
     if (det) {
       comp.perdido = 0;
       const ex = Math.atan((det.u - CAM.ancho / 2) / CAM.f), ey = Math.atan((det.v - CAM.alto / 2) / CAM.f);
-      comp.cabeza.yaw = acotar(comp.cabeza.yaw - 0.6 * ex, -1.5, 1.5);
+      comp.cabeza.yaw = acotar(comp.cabeza.yaw - 0.6 * ex, -0.8, 0.8);   // la marcha a mano no aguanta la cabeza muy de costado
       comp.cabeza.pitch = acotar(comp.cabeza.pitch + 0.6 * ey, -0.5, 0.6);
       const lejos = det.dist - 0.45;
-      marcha.giro = Math.abs(comp.cabeza.yaw) > 0.35 ? SIGNO_GIRO * acotar(0.3 * comp.cabeza.yaw, -0.15, 0.15) : 0;
-      const vx = Math.abs(comp.cabeza.yaw) < 0.9 ? acotar(lejos / 0.4, 0, 1) : 0;
+      marcha.giro = Math.abs(comp.cabeza.yaw) > 0.2 ? SIGNO_GIRO * acotar(0.3 * comp.cabeza.yaw, -0.15, 0.15) : 0;
+      const vx = Math.abs(comp.cabeza.yaw) < 0.6 ? acotar(lejos / 0.4, 0, 1) : 0;
       const mover = vx > 0.1 || marcha.giro !== 0;
       marcha.zancada = comp.zancadaBase;                 // dobla caminando, como en el recorrido
       estado.vel = 1;
