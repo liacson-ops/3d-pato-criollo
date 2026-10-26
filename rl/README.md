@@ -122,6 +122,8 @@ Alternativas: soltar el torque al caer y pedir ayuda con un "cuac" (barato, es l
 
 ## Si no aprende
 
+- **Marca el paso en el lugar o deriva hacia atrás.** Pasó con el reloj de paso: se cobraba sin avanzar. Ahora el reloj y el levante pagan solo en la medida en que avanza o gira como se le pidió, y además la política **imita la marcha a mano** (`sim/marcha.py`, con la amplitud según la velocidad pedida): eso le da la fase correcta desde el arranque y el estilo de pato.
+- **A los 3 M pasos sigue sin caminar.** Pasó entrenando casi siempre a paso lento (5 a 12 cm/s): la señal para aprender a avanzar era débil. Se entrena con velocidades parejas hasta 25 cm/s y el paso tranquilo es el comando de uso. Con eso, a 3 M pasos ya camina en todos los arranques (6 a 17 cm/s) y llega a los puntos de la navegación.
 - **Gira sobre su eje y se cae de golpe.** Pasó con la segunda recompensa: el premio por seguir el giro pedido era blando (0,5, sigma² 0,2) y la política giraba sin castigo. Ahora pesa 1,0 con sigma² 0,1. Los tumbos de golpe son falta de entrenamiento: a 2,4 M pasos todavía se caía una vez por episodio; la curva seguía subiendo.
 - **Salta en el lugar en vez de caminar.** Pasó en la primera corrida: la recompensa por estar vivo, por "velocidad lateral cero" y por "giro cero" sumaban más quieto que caminando, y el premio al tiempo en el aire valía con los dos pies a la vez. La recompensa actual (`rl/entorno.py`) paga avanzar de forma lineal, solo premia el tiempo en el aire con un pie apoyado y penaliza volar y rebotar. Si vuelve a pasar, subí `avance` o bajá `vivo`.
 
