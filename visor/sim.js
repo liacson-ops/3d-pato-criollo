@@ -235,9 +235,9 @@ function comportamiento() {
     if (comp.i >= comp.puntos.length) { terminarComportamiento(`llegó a los ${comp.puntos.length} puntos`); return; }
     const [px, py] = comp.puntos[comp.i];
     const e = envolver(Math.atan2(py - y, px - x) - rumbo());
-    // La marcha a mano gira con la zancada corta y la amplitud entera: primero apunta, después avanza.
-    marcha.giro = SIGNO_GIRO * acotar(0.6 * e, -0.25, 0.25);
-    marcha.zancada = comp.zancadaBase * acotar(1 - Math.abs(e) / 0.8, 0.25, 1);
+    // La marcha a mano no gira en el lugar: dobla mientras camina (medido: giro 0,15 = unos 24°/s).
+    marcha.giro = SIGNO_GIRO * acotar(0.4 * e, -0.15, 0.15);
+    marcha.zancada = comp.zancadaBase;
     estado.vel = 1;
     estado.modo = 'caminar';
     $('comportamiento').textContent = `Va al punto ${comp.i + 1} de ${comp.puntos.length} (a ${(Math.hypot(px - x, py - y) * 100).toFixed(0)} cm).`;
@@ -254,10 +254,10 @@ function comportamiento() {
       comp.cabeza.yaw = acotar(comp.cabeza.yaw - 0.6 * ex, -1.5, 1.5);
       comp.cabeza.pitch = acotar(comp.cabeza.pitch + 0.6 * ey, -0.5, 0.6);
       const lejos = det.dist - 0.45;
-      marcha.giro = Math.abs(comp.cabeza.yaw) > 0.35 ? SIGNO_GIRO * acotar(0.5 * comp.cabeza.yaw, -0.25, 0.25) : 0;
+      marcha.giro = Math.abs(comp.cabeza.yaw) > 0.35 ? SIGNO_GIRO * acotar(0.3 * comp.cabeza.yaw, -0.15, 0.15) : 0;
       const vx = Math.abs(comp.cabeza.yaw) < 0.9 ? acotar(lejos / 0.4, 0, 1) : 0;
       const mover = vx > 0.1 || marcha.giro !== 0;
-      marcha.zancada = comp.zancadaBase * Math.max(vx, 0.25);
+      marcha.zancada = comp.zancadaBase;                 // dobla caminando, como en el recorrido
       estado.vel = 1;
       estado.modo = mover ? 'caminar' : 'parado';
       comp.cabeza.boca = lejos < 0.05 ? 0.3 : 0;
