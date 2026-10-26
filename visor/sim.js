@@ -251,8 +251,11 @@ function comportamiento() {
     if (det) {
       comp.perdido = 0;
       const ex = Math.atan((det.u - CAM.ancho / 2) / CAM.f), ey = Math.atan((det.v - CAM.alto / 2) / CAM.f);
-      comp.cabeza.yaw = acotar(comp.cabeza.yaw - 0.6 * ex, -0.8, 0.8);   // la marcha a mano no aguanta la cabeza muy de costado
-      comp.cabeza.pitch = acotar(comp.cabeza.pitch + 0.6 * ey, -0.5, 0.6);
+      // Control proporcional a 50 Hz como en la Pi: acá corre en cada paso de física (500 Hz), así que
+      // la ganancia va escalada por dt·50; sin eso la cabeza oscilaba de tope a tope y lo tiraba.
+      const k = 0.6 * dt * 50;
+      comp.cabeza.yaw = acotar(comp.cabeza.yaw - k * ex, -0.8, 0.8);   // la marcha a mano no aguanta la cabeza muy de costado
+      comp.cabeza.pitch = acotar(comp.cabeza.pitch + k * ey, -0.5, 0.6);
       const lejos = det.dist - 0.45;
       marcha.giro = Math.abs(comp.cabeza.yaw) > 0.2 ? SIGNO_GIRO * acotar(0.3 * comp.cabeza.yaw, -0.15, 0.15) : 0;
       const vx = Math.abs(comp.cabeza.yaw) < 0.6 ? acotar(lejos / 0.4, 0, 1) : 0;
