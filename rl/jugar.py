@@ -10,6 +10,8 @@ levantarse hasta quedar de pie y vuelve a caminar.
   python3 rl/jugar.py --gesto mirar_arriba_y_abrir --comando 0 0 0
   python3 rl/jugar.py --ir-a 1 0 1 1 0 1          # va de punto en punto (x y x y ...) y se queda
   python3 rl/jugar.py --seguir                     # sigue la pelota con la cabeza y el cuerpo
+  python3 rl/jugar.py --alzar                      # a los 4 s lo levantan en brazos 4 s y lo apoyan
+  python3 rl/jugar.py --terreno umbrales           # piso de casa: baldosas y alfombras (o 'rampas')
   python3 rl/jugar.py --onnx rl/corridas/ultimo_caminar/pato_caminar.onnx
 
 Por defecto usa rl/corridas/ultimo_caminar y rl/corridas/ultimo_levantarse (si existe).
@@ -56,18 +58,36 @@ def cargar_politica(corrida=None, onnx=None, modo_esperado=None):
     return (lambda obs: modelo.predict(venv.normalize_obs(obs), deterministic=True)[0]), escala
 
 
+ALZADO = np.array([0, 0, -0.6, 1.0, -0.4, 0, 0, -0.6, 1.0, -0.4])   # patas recogidas, en brazos
+
+
 class Supervisor:
-    """Elige qué política manda en cada ciclo: caminar, o levantarse si se cayó.
-    Es la misma lógica que va a correr en la Pi."""
+    """Elige qué manda en cada ciclo: la política de caminar, la de levantarse si se cayó, o la pose
+    de "en brazos" si lo alzaron (medio segundo sin ningún pie apoyado): recoge las patas, se queda
+    quieto y mira hacia arriba, a quien lo tiene. Es la misma lógica que va a correr en la Pi."""
 
     def __init__(self, caminar, levantarse=None):
         self.caminar, self.levantarse = caminar, levantarse
         self.modo = 'caminar'
         self.de_pie_desde = 0
-        self.caidas = self.levantadas = 0
+        self.caidas = self.levantadas = self.alzadas = 0
 
     def accion(self, env, obs):
         arriba, z = env.estado_cuerpo()
+        if self.modo != 'alzado' and env.alzado():
+            self.alzadas += 1
+            self.modo = 'alzado'
+            self.de_pie_desde = 0
+        if self.modo == 'alzado':
+            if any(env.pies_apoyados()) and arriba > 0.8:
+                self.de_pie_desde += 1
+                if self.de_pie_desde >= CONTROL_HZ // 2:        # lo apoyaron: vuelve a caminar
+                    self.modo = 'caminar'
+            else:
+                self.de_pie_desde = 0
+            if self.modo == 'alzado':
+                env.escala_accion = ESCALA_ACCION['caminar']
+                return (ALZADO - env.parado) / env.escala_accion
         if self.modo == 'caminar' and (arriba < 0.6 or z < 0.12):
             self.caidas += 1
             self.modo = 'levantarse'
@@ -91,6 +111,23 @@ class Supervisor:
         return politica(obs)
 
 
+def mano(env, t, t0=4.0, dur=4.0, alto=0.20):
+    """Una mano que lo levanta: fuerza sobre el tronco que lo lleva a 20 cm más arriba, lo sostiene
+    derecho y lo vuelve a apoyar. Entre t0 y t0+dur."""
+    d, b = env.data, env.tronco
+    if not (t0 <= t < t0 + dur + 1.0):
+        d.xfrc_applied[b] = 0
+        return
+    s = min(1.0, (t - t0) / 1.0) if t < t0 + dur else max(0.0, 1.0 - (t - t0 - dur) / 1.0)
+    z_obj = env.altura_piso(*d.xpos[b][:2]) + 0.19 + alto * s
+    masa = float(env.model.body_subtreemass[b])
+    vz = d.cvel[b][5]
+    fz = masa * 9.81 + 40.0 * (z_obj - d.xpos[b][2]) * masa / 1.36 * 10 - 4.0 * vz
+    d.xfrc_applied[b, :3] = [-2.0 * d.cvel[b][3], -2.0 * d.cvel[b][4], fz]
+    R = d.xmat[b].reshape(3, 3)
+    d.xfrc_applied[b, 3:] = 0.3 * np.cross(R[:, 2], [0, 0, 1]) - 0.02 * d.cvel[b][:3]   # lo mantiene derecho
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('corrida', nargs='?', default=None, help='corrida de caminar (por defecto ultimo_caminar)')
@@ -98,7 +135,9 @@ def main():
     ap.add_argument('--onnx', default=None, help='ONNX de caminar en vez de la corrida')
     ap.add_argument('--onnx-levantarse', default=None)
     ap.add_argument('--segundos', type=float, default=15.0)
-    ap.add_argument('--comando', type=float, nargs=3, default=[0.2, 0.0, 0.0], metavar=('VX', 'VY', 'GIRO'))
+    ap.add_argument('--comando', type=float, nargs=3, default=[0.1, 0.0, 0.0], metavar=('VX', 'VY', 'GIRO'))
+    ap.add_argument('--alzar', action='store_true', help='a los 4 s una mano lo levanta 20 cm durante 4 s')
+    ap.add_argument('--terreno', choices=('plano', 'umbrales', 'rampas'), default='plano')
     ap.add_argument('--gesto', choices=sorted(GESTOS), default=None, help='gesto de la cabeza al arrancar')
     ap.add_argument('--demo', action='store_true', help='cuac mirando arriba, camina, empujón, se levanta, sigue')
     ap.add_argument('--caido', action='store_true', help='arranca tirado en el piso')
@@ -135,7 +174,7 @@ def main():
         args.segundos = max(args.segundos, 30.0)
 
     env = PatoEnv(aleatorizar=False, empujones=False, comando_fijo=args.comando, max_segundos=args.segundos,
-                  cabeza_aleatoria=False)
+                  cabeza_aleatoria=False, terreno=args.terreno)
     obs, _ = env.reset(seed=args.semilla, options={'caido': args.caido})
     if args.caido:
         sup.modo, sup.caidas = 'levantarse', 1
@@ -175,8 +214,12 @@ def main():
                 env.data.xfrc_applied[env.tronco, :3] = [25.0, 0.0, 0.0]   # lo tiran
             elif t >= 12.2:
                 env.data.xfrc_applied[env.tronco] = 0
+        if args.alzar:
+            mano(env, t)
         env.comando[:] = comando
-        if sup.modo == 'caminar' and not args.caido:
+        if sup.modo == 'alzado':
+            env.fijar_cabeza(0.0, -0.4, 0.0)                # mira a quien lo tiene en brazos
+        elif sup.modo == 'caminar' and not args.caido:
             env.fijar_cabeza(*cabeza.objetivo(t))
         else:
             env.fijar_cabeza(0.0, 0.0, 0.0)
@@ -191,8 +234,8 @@ def main():
     arriba, z = env.estado_cuerpo()
     estado = 'de pie' if arriba > 0.6 and z > 0.12 else 'EN EL PISO'
     print(f'terminó {estado} a los {env.paso / CONTROL_HZ:.1f} s; avanzó {avance * 100:.0f} cm '
-          f'({avance / (env.paso / CONTROL_HZ) * 100:.1f} cm/s); caídas: {sup.caidas}, se levantó: {sup.levantadas}; '
-          f'contactos consigo mismo: {choques}')
+          f'({avance / (env.paso / CONTROL_HZ) * 100:.1f} cm/s); caídas: {sup.caidas}, se levantó: {sup.levantadas}, '
+          f'lo alzaron: {sup.alzadas}; contactos consigo mismo: {choques}')
     if navegador is not None:
         print(f'llegó a {navegador.i} de {len(navegador.puntos)} puntos; quedó a '
               f'{np.linalg.norm(navegador.puntos[-1] - env.posicion()) * 100:.0f} cm del último')

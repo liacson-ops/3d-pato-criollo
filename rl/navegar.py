@@ -27,7 +27,7 @@ def _envolver(ang):
 
 
 class Navegador:
-    def __init__(self, puntos, tolerancia=0.10, vx_max=0.2, giro_max=0.6):
+    def __init__(self, puntos, tolerancia=0.10, vx_max=0.12, giro_max=0.6):
         self.puntos = [np.asarray(p, float) for p in puntos]
         self.i = 0
         self.tolerancia, self.vx_max, self.giro_max = tolerancia, vx_max, giro_max
@@ -84,7 +84,7 @@ class Seguidor:
         dist = self.f * self.radio_objeto / max(radio_px, 1.0)
         # Cuerpo: gira hacia donde mira la cabeza si quedó muy de costado; avanza si está lejos.
         giro = _acotar(1.5 * self.yaw, -0.6, 0.6) if abs(self.yaw) > 0.35 else 0.0
-        vx = _acotar(0.5 * (dist - self.distancia), -0.05, 0.2) if abs(self.yaw) < 0.9 else 0.0
+        vx = _acotar(0.5 * (dist - self.distancia), -0.05, 0.12) if abs(self.yaw) < 0.9 else 0.0
         if abs(vx) < 0.03:
             vx = 0.0
         return (self.yaw, self.pitch, min(0.3, boca_max(self.pitch)) if dist < self.distancia + 0.05 else 0.0), \

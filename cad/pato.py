@@ -712,7 +712,10 @@ def mjcf(r: Robot, mallas, props, hijos, modo):
     parado = ' '.join(f'{a.parado:g}' for a in r.articulaciones)
     assets = ''
     if modo in ('mallas', 'cascos'):
-        assets = '  <asset>\n' + '\n'.join(f'    <mesh name="{p.nombre}" file="mallas/{p.nombre}.stl"/>' for p in r.piezas) + '\n  </asset>\n'
+        # El terreno (campo de alturas) es el piso de una casa para entrenar: umbrales, alfombras, rampas.
+        # Plano en el centro, elevación de hasta 2 cm; rl/entorno.py lo rellena al azar en cada episodio.
+        terreno = '    <hfield name="terreno" nrow="80" ncol="80" size="2 2 0.02 0.01"/>\n' if modo == 'cascos' else ''
+        assets = '  <asset>\n' + terreno + '\n'.join(f'    <mesh name="{p.nombre}" file="mallas/{p.nombre}.stl"/>' for p in r.piezas) + '\n  </asset>\n'
     return f'''<mujoco model="pato_criollo_v0">
   <compiler angle="radian" meshdir="."/>
   <option timestep="0.002" integrator="implicitfast"/>
@@ -733,8 +736,9 @@ def mjcf(r: Robot, mallas, props, hijos, modo):
   </default>
 {assets}  <worldbody>
     <light pos="0 0 2" dir="0 0 -1" directional="true"/>
-    <geom name="suelo" type="plane" size="0 0 0.05" rgba="0.75 0.78 0.8 1" contype="1" conaffinity="1" friction="0.9 0.02 0.01"/>
-{'''    <body name="pelota" mocap="true" pos="1 0 0.03">
+    <geom name="suelo" type="plane" size="0 0 0.05" rgba="0.75 0.78 0.8 1" contype="1" conaffinity="1" friction="0.9 0.02 0.01"{' pos="0 0 -0.001"' if modo == 'cascos' else ''}/>
+{'''    <geom name="terreno" type="hfield" hfield="terreno" pos="0 0 0" rgba="0.72 0.74 0.76 1" contype="1" conaffinity="1" friction="0.9 0.02 0.01"/>
+    <body name="pelota" mocap="true" pos="1 0 0.03">
       <geom type="sphere" size="0.03" rgba="0.9 0.2 0.2 1" contype="0" conaffinity="0"/>
     </body>
 ''' if modo == 'cascos' else ''}{chr(10).join(lineas)}

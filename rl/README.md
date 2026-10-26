@@ -8,6 +8,7 @@ Tres cosas, y solo dos se entrenan:
 | --- | --- | --- |
 | **Caminar** | política entrenada (`--modo caminar`), sigue un comando de velocidad y giro | `rl/entorno.py` |
 | **Levantarse si se cae** | segunda política (`--modo levantarse`), arranca tirado de espaldas, de frente o de costado. **Con la mecánica actual no lo logra** (ver abajo) | `rl/entorno.py` |
+| **Que lo alcen** | no se entrena: el supervisor detecta medio segundo sin pies apoyados, recoge las patas y mira arriba | `rl/jugar.py` |
 | **Mirar arriba y abrir la boca** (y otros gestos) | programado, no se entrena: trayectorias suaves de los tres MG90S de la cabeza, dentro de la envolvente boca/pitch | `rl/cabeza.py` |
 
 Arriba de la política de marcha van dos capas que no se entrenan (`rl/navegar.py`):
@@ -17,7 +18,17 @@ Arriba de la política de marcha van dos capas que no se entrenan (`rl/navegar.p
 | **Ir de un punto A a un punto B** | `Navegador`: lista de puntos (x, y); apunta al siguiente con el comando de giro, avanza y frena cerca. En la simulación usa la posición real; en el robot va a salir de la odometría o de un marcador visto por la cámara |
 | **Seguir un objeto con la cámara** | `Seguidor`: con la posición del objeto en la imagen (en el robot, detección por color con OpenCV; acá, la proyección exacta de la cámara de la cabeza) centra el objeto moviendo el cuello; si queda muy de costado gira el cuerpo, y si está lejos camina hacia él hasta quedar a 45 cm. Si lo pierde, barre con la cabeza |
 
-Las junta un **supervisor** (`rl/jugar.py`, clase `Supervisor`, la misma lógica que va a correr en la Pi): camina con la política de marcha; si el tronco se inclina más de 53° o baja de 12 cm, pasa a la política de levantarse; cuando lleva medio segundo de pie, vuelve a caminar. Los gestos de la cabeza corren en paralelo mientras camina. La marcha se entrena con la cabeza moviéndose al azar en la mitad de los episodios, para que seguir caminando con la cabeza girada o el pico abierto no la sorprenda.
+Las junta un **supervisor** (`rl/jugar.py`, clase `Supervisor`, la misma lógica que va a correr en la Pi): camina con la política de marcha; si el tronco se inclina más de 53° o baja de 12 cm, pasa a la política de levantarse; cuando lleva medio segundo de pie, vuelve a caminar. **Si lo alzan** (medio segundo sin ningún pie apoyado) recoge las patas, se queda quieto y mira hacia arriba, a quien lo tiene; cuando lo apoyan vuelve a caminar. Los gestos de la cabeza corren en paralelo mientras camina. La marcha se entrena con la cabeza moviéndose al azar en la mitad de los episodios, para que seguir caminando con la cabeza girada o el pico abierto no la sorprenda.
+
+## Un pato natural, no un robot apurado
+
+Es un juguete para una familia, así que la marcha se entrena para que se parezca a un pato y sea tranquila:
+
+- **Reloj de paso:** un ritmo fijo de 1,6 pasos por segundo dice qué pie apoya y cuál va en el aire; seguirlo se premia (más por levantar el pie que por apoyarlo, para que quedarse parado no cobre) y se premia que el pie en el aire suba hasta 8 mm, para no arrastrarlo por la alfombra. Con el comando en cero el reloj se detiene con los dos pies apoyados. El reloj va en la observación (seno y coseno), y el runtime de la Pi lo genera igual.
+- **Suavidad:** las penalizaciones por cambios bruscos de acción y por velocidad de los servos son tres veces más fuertes que antes.
+- **Velocidad tranquila:** el 55 % de los episodios pide entre 5 y 12 cm/s, el 20 % hasta 25 cm/s, el 15 % quieto y el 10 % marcha atrás corta. El premio por velocidad se estrecha con la velocidad pedida, así que a 10 cm/s no sirve ir a 15.
+- **Piso de casa:** en el 60 % de los episodios el piso no es plano: baldosas y alfombras con escalones de 5 a 15 mm (`umbrales`) o rampas suaves de hasta 1 cm (`rampas`). Se prueba con `mjpython rl/jugar.py --terreno umbrales`.
+- **Lo alzan:** `mjpython rl/jugar.py --alzar` lo levanta 20 cm a los 4 s con una "mano" y lo vuelve a apoyar, para ver que recoge las patas y después sigue.
 
 ## Instalación (una vez)
 
@@ -84,7 +95,7 @@ python3 rl/exportar_onnx.py rl/corridas/ultimo_levantarse   # -> pato_levantarse
 python3 rl/jugar.py --sin-ventana --onnx rl/corridas/ultimo_caminar/pato_caminar.onnx --onnx-levantarse rl/corridas/ultimo_levantarse/pato_levantarse.onnx
 ```
 
-Cada ONNX recibe la observación de 39 valores sin normalizar (la normalización va adentro) y devuelve 10 acciones en [-1, 1]; el objetivo de cada servo es `parado + escala × acción`, con la escala de `config.json` (0,5 rad caminando, 0,8 levantándose). Ese contrato, más el supervisor y los gestos, es lo que va a implementar el runtime de la Pi.
+Cada ONNX recibe la observación de 41 valores sin normalizar (la normalización va adentro): giro del tronco (3), gravedad en el tronco (3), posición de las 10 articulaciones respecto de la pose de parado, velocidad (×0,1), acción anterior, comando [vx, vy, giro] y el reloj de paso [sen, cos] a 1,6 Hz (detenido en 0 cuando el comando es cero). Devuelve 10 acciones en [-1, 1]; el objetivo de cada servo es `parado + escala × acción`, con la escala de `config.json` (0,5 rad caminando, 0,8 levantándose). Ese contrato, más el supervisor, la navegación, el seguimiento y los gestos, es lo que va a implementar el runtime de la Pi.
 
 ## Qué simula
 
