@@ -295,12 +295,14 @@ class PatoEnv(gym.Env):
     def _elegir_comando(self):
         r = self.rng
         u = r.random()
+        # Lección 6: con casi todos los episodios a paso lento (5 a 12 cm/s) la señal para aprender a
+        # avanzar era débil y a los 3 M pasos seguía sin caminar. Se entrena con velocidades parejas
+        # hasta 25 cm/s (el gradiente fuerte está en las rápidas); el paso tranquilo del juguete es
+        # el comando que se le da al usarlo, y la recompensa de seguimiento lo hace respetar.
         if u < 0.15:
             return np.zeros(3)                                        # quieto
-        if u < 0.70:
-            vx = r.uniform(0.05, 0.12)                                # lo normal: paso tranquilo
-        elif u < 0.90:
-            vx = r.uniform(0.12, 0.25)                                # a veces rápido
+        if u < 0.90:
+            vx = r.uniform(0.05, 0.25)
         else:
             vx = r.uniform(-0.05, 0.0)                                # marcha atrás corta
         giro = r.uniform(-0.6, 0.6) if r.random() < 0.6 else 0.0
@@ -499,7 +501,7 @@ class PatoEnv(gym.Env):
             levante *= progreso
         desvio_ref = float(np.sum((self.data.qpos[self.jnt_qpos] - self.q_ref) ** 2))
         r = {
-            'vel_x': 1.5 * np.exp(-((v_local[0] - cx) ** 2) / (0.004 + (0.4 * cx) ** 2)),   # ancho según la velocidad pedida
+            'vel_x': 1.5 * np.exp(-((v_local[0] - cx) ** 2) / (0.01 + (0.4 * cx) ** 2)),   # ancho según la velocidad pedida
             'avance': 1.5 * avance,
             'imitar': 1.0 * math.exp(-desvio_ref / 0.1),
             'vel_y': 0.3 * np.exp(-((v_local[1] - self.comando[1]) ** 2) / 0.05),
