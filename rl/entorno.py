@@ -445,8 +445,10 @@ class PatoEnv(gym.Env):
         cx, cy, giro = self.comando
         if np.linalg.norm(self.comando) <= 0.03:
             return self.parado.copy()
-        k = float(np.clip(max(abs(cx), 0.04) / 0.06, 0.4, 1.5))
-        p = dict(frecuencia=PASOS_POR_SEGUNDO, balanceo=0.05 * min(k, 1.0), levante=0.15 * min(k, 1.2),
+        # Amplitud de la marcha a mano como mucho (zancada 0,24): con más, la referencia salía a los
+        # tumbos (30 cm/s y caída en un segundo). Para ir más rápido que la referencia, la política se aparta.
+        k = float(np.clip(abs(cx) / 0.10, 0.4, 1.0))
+        p = dict(frecuencia=PASOS_POR_SEGUNDO, balanceo=0.05 * k, levante=0.15 * k,
                  zancada=0.24 * k * (1 if cx >= 0 else -1), giro=-0.15 * float(np.clip(giro / 0.6, -1, 1)), rampa=1e-6)
         q = marcha_a_mano(self.fase / (2 * math.pi * PASOS_POR_SEGUNDO), p)
         return np.array([q[n] for n in ARTICULACIONES])
