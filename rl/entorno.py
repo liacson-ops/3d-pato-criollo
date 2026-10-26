@@ -33,6 +33,7 @@ from __future__ import annotations
 import collections
 import json
 import math
+import sys
 from pathlib import Path
 
 import gymnasium as gym
@@ -41,6 +42,8 @@ import numpy as np
 
 RAIZ = Path(__file__).resolve().parent.parent
 XML = RAIZ / 'salida' / 'mjcf' / 'pato_rl.xml'
+sys.path.insert(0, str(RAIZ / 'sim'))
+from marcha import objetivos as marcha_a_mano  # noqa: E402  (la marcha de referencia)
 
 PATAS = ['cadera_yaw', 'cadera_roll', 'cadera_pitch', 'rodilla', 'tobillo']
 ARTICULACIONES = [f'{a}_{lado}' for lado in ('izq', 'der') for a in PATAS]
@@ -414,6 +417,7 @@ class PatoEnv(gym.Env):
         torque = d.actuator_force[self.act_id] / np.abs(self.model.actuator_forcerange[self.act_id, 1])
         qd = d.qvel[self.jnt_qvel]
         q_rel = d.qpos[self.jnt_qpos] - self.parado
+        self.q_ref = self._referencia()
         de_pie = arriba > 0.9 and z > 0.16
         self.pasos_de_pie = self.pasos_de_pie + 1 if de_pie else 0
 
@@ -432,6 +436,21 @@ class PatoEnv(gym.Env):
                 'choques_propios': propios, 'alzado': self.alzado()}
         return obs, recompensa, bool(terminado), bool(truncado), info
 
+    def _referencia(self):
+        """Pose de referencia de las patas para el reloj actual: la marcha a mano (sim/marcha.py), con la
+        amplitud proporcional a la velocidad pedida y el giro pedido. Con comando cero es la pose de parado.
+        Lección 5: sin una referencia, la política tardaba millones de pasos en descubrir la fase correcta
+        y mientras tanto derivaba hacia atrás. Imitar el bamboleo a mano le da el punto de partida y,
+        de paso, el estilo de pato."""
+        cx, cy, giro = self.comando
+        if np.linalg.norm(self.comando) <= 0.03:
+            return self.parado.copy()
+        k = float(np.clip(max(abs(cx), 0.04) / 0.06, 0.4, 1.5))
+        p = dict(frecuencia=PASOS_POR_SEGUNDO, balanceo=0.05 * min(k, 1.0), levante=0.15 * min(k, 1.2),
+                 zancada=0.24 * k * (1 if cx >= 0 else -1), giro=-0.15 * float(np.clip(giro / 0.6, -1, 1)), rampa=1e-6)
+        q = marcha_a_mano(self.fase / (2 * math.pi * PASOS_POR_SEGUNDO), p)
+        return np.array([q[n] for n in ARTICULACIONES])
+
     def _recompensa_caminar(self, v_local, w_local, arriba, z, accion, torque, qd, propios, apoyo):
         # Lecciones: (1) con un bono por estar vivo alto y un premio al tiempo en el aire que valía con
         # los dos pies, aprendió a saltar en el lugar; (2) con el premio al giro blando, giraba sobre su
@@ -445,13 +464,13 @@ class PatoEnv(gym.Env):
             avance = 2.0 * float(np.clip(v_local[0] / abs(cx), -1, 1)) * np.sign(cx)
         else:
             avance = -1.0 * abs(float(v_local[0]))
-        # Reloj: sen > 0 -> pie izquierdo apoyado y derecho en el aire; sen < 0 al revés;
-        # cerca del cruce (|sen| < 0,3) los dos apoyados (doble apoyo).
+        # Reloj, con la misma convención que la marcha a mano: sen > 0 -> pie izquierdo en el aire y
+        # derecho apoyado; sen < 0 al revés; cerca del cruce (|sen| < 0,3) los dos apoyados.
         s = math.sin(self.fase)
         if not con_comando:
             deseado = (True, True)
         else:
-            deseado = (s > -0.3, s < 0.3)
+            deseado = (s < 0.3, s > -0.3)
         # Acertar el pie en el aire vale más que acertar el apoyado: si no, quedarse parado cobraba.
         reloj = 0.0
         for apoyado, quiere_apoyo in zip(apoyo, deseado):
@@ -476,9 +495,11 @@ class PatoEnv(gym.Env):
                     float(np.clip(v_local[1] / self.comando[1], 0, 1))
             reloj *= progreso
             levante *= progreso
+        desvio_ref = float(np.sum((self.data.qpos[self.jnt_qpos] - self.q_ref) ** 2))
         r = {
             'vel_x': 1.5 * np.exp(-((v_local[0] - cx) ** 2) / (0.004 + (0.4 * cx) ** 2)),   # ancho según la velocidad pedida
             'avance': 1.5 * avance,
+            'imitar': 1.0 * math.exp(-desvio_ref / 0.1),
             'vel_y': 0.3 * np.exp(-((v_local[1] - self.comando[1]) ** 2) / 0.05),
             'giro': 1.0 * np.exp(-((w_local[2] - self.comando[2]) ** 2) / 0.1),
             'reloj': reloj,
