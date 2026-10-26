@@ -97,7 +97,7 @@ const estado = { modo: 'parado', vel: 1.0, velSim: 1.0, tMarcha: 0, empuje: 0, c
 // Comportamientos de ejemplo (arriba de la marcha a mano): recorrido A→B, seguir la pelota, gestos, alzado.
 const comp = { nombre: null, t0: 0, puntos: [], i: 0, cabeza: { yaw: 0, pitch: 0, boca: 0 }, gesto: null, tGesto: 0,
   yawSeg: 0, pitchSeg: 0, perdido: 0, pelota: [1, 0, 0.03], sinPies: 0, alzado: false, fase: 0 };
-const SIGNO_GIRO = 1;                    // signo de marcha.giro que hace girar a la izquierda (se verifica con probar_sim)
+const SIGNO_GIRO = -1;                   // marcha.giro positivo gira a la derecha (medido con Playwright): el comando "giro" positivo es a la izquierda
 const CAM = { ancho: 160, alto: 120, f: 60 / Math.tan(24.5 * Math.PI / 180) };   // cámara de la Pi, a escala
 let pelotaMalla = null, marcadores = [];
 let tSim = 0, acumulador = 0, ultimo = performance.now(), fpsReal = 1;
