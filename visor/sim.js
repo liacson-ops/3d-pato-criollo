@@ -235,8 +235,10 @@ function comportamiento() {
     if (comp.i >= comp.puntos.length) { terminarComportamiento(`llegó a los ${comp.puntos.length} puntos`); return; }
     const [px, py] = comp.puntos[comp.i];
     const e = envolver(Math.atan2(py - y, px - x) - rumbo());
+    // La marcha a mano gira con la zancada corta y la amplitud entera: primero apunta, después avanza.
     marcha.giro = SIGNO_GIRO * acotar(0.6 * e, -0.25, 0.25);
-    estado.vel = acotar(1 - Math.abs(e) / 0.8, 0.25, 1);
+    marcha.zancada = comp.zancadaBase * acotar(1 - Math.abs(e) / 0.8, 0.25, 1);
+    estado.vel = 1;
     estado.modo = 'caminar';
     $('comportamiento').textContent = `Va al punto ${comp.i + 1} de ${comp.puntos.length} (a ${(Math.hypot(px - x, py - y) * 100).toFixed(0)} cm).`;
   }
@@ -255,7 +257,8 @@ function comportamiento() {
       marcha.giro = Math.abs(comp.cabeza.yaw) > 0.35 ? SIGNO_GIRO * acotar(0.5 * comp.cabeza.yaw, -0.25, 0.25) : 0;
       const vx = Math.abs(comp.cabeza.yaw) < 0.9 ? acotar(lejos / 0.4, 0, 1) : 0;
       const mover = vx > 0.1 || marcha.giro !== 0;
-      estado.vel = mover ? Math.max(vx, 0.3) : 0;
+      marcha.zancada = comp.zancadaBase * Math.max(vx, 0.25);
+      estado.vel = 1;
       estado.modo = mover ? 'caminar' : 'parado';
       comp.cabeza.boca = lejos < 0.05 ? 0.3 : 0;
       $('comportamiento').textContent = `Pelota a ${(det.dist * 100).toFixed(0)} cm, ${Math.abs(det.u - 80) < 24 ? 'centrada' : 'buscándola con la cabeza'}.`;
@@ -284,7 +287,7 @@ function mano(t, dur = 4.0, alto = 0.2) {
 }
 
 function terminarComportamiento(msg) {
-  if (comp.nombre === 'recorrido' || comp.nombre === 'seguir') { estado.modo = 'parado'; estado.vel = 1; marcha.giro = 0; }
+  if (comp.nombre === 'recorrido' || comp.nombre === 'seguir') { estado.modo = 'parado'; estado.vel = 1; marcha.giro = 0; marcha.zancada = comp.zancadaBase; $('zancada').value = marcha.zancada; }
   if (comp.nombre === 'seguir') { pelotaMalla.visible = false; dibujarCamara(null); }
   if (comp.nombre === 'recorrido') for (const m of marcadores) m.visible = false;
   if (comp.nombre === 'alzar') { const f = data.xfrc_applied; for (let k = 0; k < 6; k++) f[6 * idTronco + k] = 0; }
@@ -296,7 +299,7 @@ function terminarComportamiento(msg) {
 function iniciarComportamiento(nombre) {
   if (comp.nombre) terminarComportamiento();
   $('aviso').textContent = '';
-  comp.nombre = nombre; comp.t0 = tSim; comp.tApoyo = -1;
+  comp.nombre = nombre; comp.t0 = tSim; comp.tApoyo = -1; comp.zancadaBase = marcha.zancada;
   if (nombre === 'cuac' || nombre === 'mirar') { comp.gesto = nombre; comp.tGesto = tSim; }
   if (nombre === 'recorrido') {
     const [x, y] = posicion(), r = rumbo();
