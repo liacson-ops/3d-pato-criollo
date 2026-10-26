@@ -466,9 +466,19 @@ class PatoEnv(gym.Env):
                 if not quiere_apoyo:
                     zp = self.data.xpos[self.pies[i]][2] - self.z_pie_parado
                     levante += 0.2 * float(np.clip(zp / 0.008, 0, 1))
+        # Lección 4: el reloj y el levante se cobraban marcando el paso en el lugar (y derivando hacia
+        # atrás). Ahora solo pagan en la medida en que avanza o gira como se le pidió.
+        if con_comando:
+            if abs(cx) > 0.03:
+                progreso = float(np.clip(v_local[0] / cx, 0, 1))
+            else:
+                progreso = float(np.clip(w_local[2] / self.comando[2], 0, 1)) if abs(self.comando[2]) > 0.05 else \
+                    float(np.clip(v_local[1] / self.comando[1], 0, 1))
+            reloj *= progreso
+            levante *= progreso
         r = {
             'vel_x': 1.5 * np.exp(-((v_local[0] - cx) ** 2) / (0.004 + (0.4 * cx) ** 2)),   # ancho según la velocidad pedida
-            'avance': avance,
+            'avance': 1.5 * avance,
             'vel_y': 0.3 * np.exp(-((v_local[1] - self.comando[1]) ** 2) / 0.05),
             'giro': 1.0 * np.exp(-((w_local[2] - self.comando[2]) ** 2) / 0.1),
             'reloj': reloj,
