@@ -183,6 +183,12 @@ const GESTOS = {
   mirar: { duracion: 3.0, f: (t) => ({ yaw: Math.sin(2 * Math.PI * t / 3), pitch: t < 2.5 ? rampa(t, 0, 0.5, 0, 0.25) : rampa(t, 2.5, 3, 0.25, 0), boca: 0 }) },
 };
 
+function qposDe(nombre) {
+  // Índice en qpos de una articulación: 7 (junta libre) + su posición entre los cuerpos del árbol.
+  const a = ART.find((x) => x.nombre === nombre);
+  return 7 + ROBOT.orden_mjcf.indexOf(a.hijo) - 1;
+}
+
 function pixelPelota() {
   // Proyección de la pelota en la cámara de la cabeza (detrás del lente, mirando +x de la cabeza).
   const b = ROBOT.orden_mjcf.indexOf('cabeza') + 1;
@@ -251,11 +257,13 @@ function comportamiento() {
     if (det) {
       comp.perdido = 0;
       const ex = Math.atan((det.u - CAM.ancho / 2) / CAM.f), ey = Math.atan((det.v - CAM.alto / 2) / CAM.f);
-      // Control proporcional a 50 Hz como en la Pi: acá corre en cada paso de física (500 Hz), así que
-      // la ganancia va escalada por dt·50; sin eso la cabeza oscilaba de tope a tope y lo tiraba.
-      const k = 0.6 * dt * 50;
-      comp.cabeza.yaw = acotar(comp.cabeza.yaw - k * ex, -0.8, 0.8);   // la marcha a mano no aguanta la cabeza muy de costado
-      comp.cabeza.pitch = acotar(comp.cabeza.pitch + k * ey, -0.5, 0.6);
+      // Control proporcional sobre el ángulo medido del servo (como en rl/navegar.py): el objetivo es
+      // "donde está la cabeza ahora" más una fracción del error. Si se acumulara sobre el objetivo
+      // anterior, el retraso del servo lo hacía oscilar de tope a tope y tiraba al pato.
+      const yawA = data.qpos[qposDe('cuello_yaw')], pitchA = data.qpos[qposDe('cuello_pitch')];
+      comp.cabeza.yaw = acotar(yawA - 0.6 * ex, -0.8, 0.8);   // la marcha a mano no aguanta la cabeza muy de costado
+      comp.cabeza.pitch = acotar(pitchA + 0.6 * ey, -0.5, 0.6);
+      comp.ultimoYaw = comp.cabeza.yaw;
       const lejos = det.dist - 0.45;
       marcha.giro = Math.abs(comp.cabeza.yaw) > 0.2 ? SIGNO_GIRO * acotar(0.3 * comp.cabeza.yaw, -0.15, 0.15) : 0;
       const vx = Math.abs(comp.cabeza.yaw) < 0.6 ? acotar(lejos / 0.4, 0, 1) : 0;
@@ -269,10 +277,16 @@ function comportamiento() {
       $('comportamiento').textContent = `Pelota a ${(det.dist * 100).toFixed(0)} cm, ${Math.abs(det.u - 80) < 24 ? 'centrada' : 'buscándola con la cabeza'}.`;
     } else {
       comp.perdido += dt;
-      if (comp.perdido > 0.5) { comp.cabeza.yaw = acotar(comp.cabeza.yaw + (Math.floor(comp.perdido / 1.5) % 2 === 0 ? 0.6 : -0.6) * dt, -1.2, 1.2); comp.cabeza.pitch = 0.1; }
-      estado.vel = acotar(estado.vel - 2 * dt, 0, 1);
+      const hacia = (comp.ultimoYaw ?? 0) >= 0 ? 1 : -1;      // la busca hacia donde la vio por última vez
+      if (comp.perdido > 0.5) { comp.cabeza.yaw = acotar(comp.cabeza.yaw + hacia * (Math.floor(comp.perdido / 1.5) % 2 === 0 ? 0.6 : -0.6) * dt, -0.8, 0.8); comp.cabeza.pitch = 0.2; }
+      if (comp.perdido > 1.5) {                                // y si no aparece, gira el cuerpo caminando en círculo
+        marcha.giro = SIGNO_GIRO * 0.15 * hacia;
+        estado.vel = acotar(estado.vel + 2 * dt, 0, 1);
+      } else {
+        estado.vel = acotar(estado.vel - 2 * dt, 0, 1);
+      }
       estado.modo = 'caminar';
-      $('comportamiento').textContent = 'No ve la pelota: barre con la cabeza.';
+      $('comportamiento').textContent = comp.perdido > 1.5 ? 'No ve la pelota: la busca girando.' : 'No ve la pelota: barre con la cabeza.';
     }
   }
 }
