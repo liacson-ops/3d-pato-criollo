@@ -38,6 +38,9 @@
   #cargando { position: fixed; inset: 0; display: grid; place-items: center; color: var(--suave); background: var(--fondo); z-index: 9; }
   .ayuda { font-size: 12px; color: var(--suave); margin-top: 10px; }
   label.check { display: flex; gap: 6px; align-items: center; font-size: 13px; margin-top: 8px; }
+  .camara { margin-top: 8px; }
+  .camara > span { display: block; font-size: 11px; color: var(--suave); margin-bottom: 3px; }
+  .camara canvas { display: block; width: 160px; height: 120px; border: 1px solid var(--borde); border-radius: 6px; background: #d8d4cb; }
   @media (max-width: 760px) {
     .panel { top: auto; bottom: 12px; left: 12px; right: 12px; width: auto; max-height: 48vh; }
     .lecturas { top: 12px; right: 12px; left: 12px; width: auto; }
@@ -60,6 +63,17 @@
     </div>
     <div id="aviso" role="status"></div>
   </div>
+  <div class="grupo"><span>Ejemplos</span>
+    <div class="botones">
+      <button data-comp="recorrido">Ir de A a B</button>
+      <button data-comp="seguir">Seguir la pelota</button>
+      <button data-comp="cuac">Cuac mirando arriba</button>
+      <button data-comp="mirar">Mirar alrededor</button>
+      <button data-comp="alzar">Levantarlo</button>
+    </div>
+    <div id="comportamiento" class="ayuda" role="status"></div>
+    <div class="camara"><span>Lo que ve la cámara</span><canvas id="camara" width="160" height="120" aria-label="Imagen simulada de la cámara"></canvas></div>
+  </div>
   <div class="grupo"><span>Probar</span>
     <div class="botones">
       <button id="reiniciar">Reiniciar</button>
@@ -80,7 +94,7 @@
     <div class="desl"><label for="velsim">Velocidad</label><input id="velsim" type="range" min="0.1" max="2" step="0.1" value="1"><output>1×</output></div>
     <label class="check"><input id="cajas" type="checkbox"> Ver cajas de choque</label>
   </div>
-  <div class="ayuda">Teclas: ↑ caminar, ↓ parar, ← → girar, espacio = empujón. Arrastrá para girar la cámara.</div>
+  <div class="ayuda">Teclas: ↑ caminar, ↓ parar, ← → girar, espacio = empujón. Arrastrá para girar la cámara. Los ejemplos usan la marcha a mano; la política entrenada se prueba en MuJoCo con <code>rl/jugar.py</code>.</div>
 </div>
 <div class="lecturas" role="region" aria-label="Lecturas">
   <div id="estado">t = 0 s</div>
