@@ -258,14 +258,17 @@ function comportamiento() {
       const vx = Math.abs(comp.cabeza.yaw) < 0.6 ? acotar(lejos / 0.4, 0, 1) : 0;
       const mover = vx > 0.1 || marcha.giro !== 0;
       marcha.zancada = comp.zancadaBase;                 // dobla caminando, como en el recorrido
-      estado.vel = 1;
-      estado.modo = mover ? 'caminar' : 'parado';
+      // Arranca y frena en suave: la amplitud de la marcha sube y baja a 2 por segundo, sin saltar
+      // a la pose de parado en seco (eso lo tiraba).
+      estado.vel = acotar(estado.vel + acotar((mover ? 1 : 0) - estado.vel, -2 * dt, 2 * dt), 0, 1);
+      estado.modo = 'caminar';
       comp.cabeza.boca = lejos < 0.05 ? 0.3 : 0;
       $('comportamiento').textContent = `Pelota a ${(det.dist * 100).toFixed(0)} cm, ${Math.abs(det.u - 80) < 24 ? 'centrada' : 'buscándola con la cabeza'}.`;
     } else {
       comp.perdido += dt;
       if (comp.perdido > 0.5) { comp.cabeza.yaw = acotar(comp.cabeza.yaw + (Math.floor(comp.perdido / 1.5) % 2 === 0 ? 0.6 : -0.6) * dt, -1.2, 1.2); comp.cabeza.pitch = 0.1; }
-      estado.modo = 'parado';
+      estado.vel = acotar(estado.vel - 2 * dt, 0, 1);
+      estado.modo = 'caminar';
       $('comportamiento').textContent = 'No ve la pelota: barre con la cabeza.';
     }
   }
@@ -308,7 +311,7 @@ function iniciarComportamiento(nombre) {
     comp.i = 0;
     comp.puntos.forEach(([px, py], i) => { marcadores[i].position.set(px, py, 0.001); marcadores[i].visible = true; });
   }
-  if (nombre === 'seguir') { pelotaMalla.visible = true; comp.perdido = 0; comp.cabeza = { yaw: 0, pitch: 0.15, boca: 0 }; }
+  if (nombre === 'seguir') { pelotaMalla.visible = true; comp.perdido = 0; comp.cabeza = { yaw: 0, pitch: 0.15, boca: 0 }; estado.vel = 0; estado.tMarcha = 0; }
   if (nombre === 'alzar') { estado.modo = 'parado'; }
   actualizarBotones();
 }
